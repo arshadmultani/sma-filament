@@ -1,0 +1,64 @@
+<?php
+
+namespace App\Filament\Imports;
+
+use App\Models\Product;
+use Filament\Actions\Imports\ImportColumn;
+use Filament\Actions\Imports\Importer;
+use Filament\Actions\Imports\Models\Import;
+use Illuminate\Support\Facades\Log;
+use Filament\Forms\Components\Checkbox;
+
+class ProductImporter extends Importer
+{
+    protected static ?string $model = Product::class;
+
+    public static function getColumns(): array
+    {
+        return [
+            ImportColumn::make('name')
+                ->requiredMapping()
+                ->rules(['required']),
+            ImportColumn::make('price')
+                ->requiredMapping()
+                ->numeric()
+                ->rules(['required', 'decimal:0,2']),
+            ImportColumn::make('division')
+                ->requiredMapping()
+                ->numeric()
+                // ->relationship(resolveUsing:'name')
+                ->rules(['required']),
+                
+        ];
+    }
+    //update existing records checkbox
+    public static function getOptionsFormComponents(): array 
+    {
+        return [
+            Checkbox::make('updateExisting')
+                ->label('Update existing records'),
+        ];
+    }
+    public function resolveRecord(): ?Product
+    {
+        // return Product::firstOrNew([
+        //     // Update existing records, matching them by `$this->data['column_name']`
+        //     'name' => $this->data['name'],
+        // ]);
+
+        return new Product();
+    }
+
+
+
+    public static function getCompletedNotificationBody(Import $import): string
+    {
+        $body = 'Your product import has completed and ' . number_format($import->successful_rows) . ' ' . str('row')->plural($import->successful_rows) . ' imported.';
+
+        if ($failedRowsCount = $import->getFailedRowsCount()) {
+            $body .= ' ' . number_format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to import.';
+        }
+
+        return $body;
+    }
+}

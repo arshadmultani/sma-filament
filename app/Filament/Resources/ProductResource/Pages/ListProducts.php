@@ -5,6 +5,7 @@ namespace App\Filament\Resources\ProductResource\Pages;
 use App\Filament\Resources\ProductResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use App\Filament\Imports\ProductImporter;
 
 class ListProducts extends ListRecords
 {
@@ -14,6 +15,7 @@ class ListProducts extends ListRecords
     {
         return [
             Actions\CreateAction::make(),
+            // Actions\ImportAction::make()->importer(importer: ProductImporter::class),
         ];
     }
 }
