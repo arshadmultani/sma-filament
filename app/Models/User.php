@@ -39,8 +39,7 @@ class User extends Authenticatable implements FilamentUser
 
     public function canAccessPanel(Panel $panel): bool
     {
-        // Adjust the condition to suit your needs
-        return str_ends_with($this->email, 'arshadrmultani@gmail.com') &&  $this->hasVerifiedEmail();
+        return $this->email === 'arshadrmultani@gmail.com';
     }
     /**
      * Get the attributes that should be cast.
