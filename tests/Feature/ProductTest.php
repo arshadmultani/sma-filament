@@ -1,10 +1,11 @@
 <?php
 
+use Tests\TestCase;
 use App\Models\Product;
 use App\Models\Division;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-uses(RefreshDatabase::class);
+uses(TestCase::class, RefreshDatabase::class);
 
 it('can create a product', function () {
     $division = Division::factory()->create();
