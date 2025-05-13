@@ -8,9 +8,8 @@ class Chemist extends Model
 {
     protected $fillable = ['name', 'phone', 'email', 'address'];
 
-    public function customerType()
-    {
-        return $this->morphOne(CustomerType::class, 'typeable');
+    public function headquarter(){
+        return $this->belongsTo(Headquarter::class);
     }
 
     

@@ -12,6 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('doctors', function (Blueprint $table) {
+            
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
@@ -19,6 +20,7 @@ return new class extends Migration
             $table->enum('degree', ['MBBS', 'BAHM', 'BAMS', 'MD']);
             $table->string('profile_photo')->nullable();
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('headquarter_id')->constrained();
             $table->timestamps();
         });
     }
