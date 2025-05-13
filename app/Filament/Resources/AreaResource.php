@@ -23,7 +23,14 @@ class AreaResource extends Resource
     {
         return $form
             ->schema([
-                //
+                Forms\Components\Select::make('region_id')
+                    ->label('Region')
+                    ->options(\App\Models\Region::all()->pluck('name', 'id')->toArray())
+                    ->reactive()
+                    ->required(),
+                Forms\Components\TextInput::make('name')
+                    ->label('Area Name')
+                    ->required(),
             ]);
     }
 
@@ -31,7 +38,8 @@ class AreaResource extends Resource
     {
         return $table
             ->columns([
-                //
+                Tables\Columns\TextColumn::make('name')->searchable(),
+                Tables\Columns\TextColumn::make('region.name')->searchable(),
             ])
             ->filters([
                 //
