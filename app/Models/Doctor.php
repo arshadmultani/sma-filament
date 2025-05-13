@@ -11,4 +11,11 @@ class Doctor extends Model
     public function user(){
         return $this->belongsTo(User::class);
     }
+
+    public function customerType()
+    {
+        return $this->morphOne(CustomerType::class, 'typeable');
+    }
+
+
 }
