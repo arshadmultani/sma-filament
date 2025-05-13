@@ -19,6 +19,11 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use App\Filament\Pages\Settings;
 use Filament\Navigation\MenuItem;
+use Filament\Enums\ThemeMode;
+use Filament\Navigation\NavigationGroup;
+
+
+
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
@@ -28,14 +33,27 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->darkMode(false)
+            ->defaultThemeMode(ThemeMode::Light)
             ->passwordReset()
-            ->profile(isSimple:false)
+            ->profile(isSimple: false)
+            ->brandName('Charak SMA')
+            // ->brandLogo(fn () => view('filament.admin.logo'))
+
             ->colors([
                 'primary' => Color::Emerald,
             ])
             ->userMenuItems([
                 'profile' => MenuItem::make()->label('Edit profile'),
                 // ...
+            ])
+            ->navigationGroups([
+                NavigationGroup::make()
+                    ->label('Customer')
+                    ->icon('heroicon-o-currency-dollar'),
+                NavigationGroup::make()
+                    ->label('Territory')
+                    ->icon('heroicon-o-map-pin'),
             ])
             ->sidebarWidth('15rem')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
