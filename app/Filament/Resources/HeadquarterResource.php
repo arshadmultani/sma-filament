@@ -70,6 +70,11 @@ class HeadquarterResource extends Resource
             ->actions([
                 // Tables\Actions\EditAction::make(),
             ])
+            ->deferLoading()
+            // ->striped()
+            ->paginated([5, 10, 15, 'all'])
+            
+            ->defaultPaginationPageOption(5)
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
