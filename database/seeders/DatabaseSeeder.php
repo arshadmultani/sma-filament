@@ -24,6 +24,8 @@ class DatabaseSeeder extends Seeder
             RegionSeeder::class,
             AreaSeeder::class,
             HeadquarterSeeder::class,
+            DoctorSeeder::class,
+            ChemistSeeder::class,
         ]);
     }
 }
