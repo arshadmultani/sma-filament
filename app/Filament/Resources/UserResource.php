@@ -23,7 +23,25 @@ class UserResource extends Resource
     {
         return $form
             ->schema([
-            
+                Forms\Components\TextInput::make('name')
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('email')
+                    ->email()
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('phone_number')
+                    ->required()
+                    ->tel(),
+                Forms\Components\Select::make('division_id')
+                    ->relationship('division', 'name')
+                    ->required(),   
+                Forms\Components\TextInput::make('password')
+                    ->password()
+                    ->required()
+                    ->revealable()
+                    ->maxLength(255),
+                    
             ]);
     }
 
