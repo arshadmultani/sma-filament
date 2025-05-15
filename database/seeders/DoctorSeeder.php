@@ -13,10 +13,18 @@ class DoctorSeeder extends Seeder
     public function run(): void
     {
         $headquarterIds = Headquarter::pluck('id')->toArray();
+        $divisionIds = \App\Models\Division::pluck('id')->toArray();
+        $regionIds = \App\Models\Region::pluck('id')->toArray();
+        $areaIds = \App\Models\Area::pluck('id')->toArray();
         $degrees = ['MBBS', 'BAHM', 'BAMS', 'MD'];
 
         for ($i = 0; $i < 100; $i++) {
-            $user = User::factory()->create();
+            $user = User::factory()->create([
+                'division_id' => fake()->randomElement($divisionIds),
+                'headquarter_id' => fake()->randomElement($headquarterIds),
+                'region_id' => fake()->randomElement($regionIds),
+                'area_id' => fake()->randomElement($areaIds),
+            ]);
             Doctor::create([
                 'name' => fake()->name(),
                 'email' => fake()->unique()->safeEmail(),

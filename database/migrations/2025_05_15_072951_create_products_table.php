@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string('image')->nullable();
             $table->decimal('price', 10, 2);
             $table->foreignId('division_id')->constrained();
-            $table->string('image')->nullable();
             $table->timestamps();
         });
     }

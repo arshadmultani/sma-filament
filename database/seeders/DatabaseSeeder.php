@@ -16,18 +16,28 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'admin@gmail.com',
-            'password' => Hash::make('admin'),
-        ]);
+        
 
         $this->call([
+            DivisionSeeder::class,
             RegionSeeder::class,
             AreaSeeder::class,
             HeadquarterSeeder::class,
             DoctorSeeder::class,
             ChemistSeeder::class,
+            
+            ProductSeeder::class,
+        ]);
+
+        User::factory()->create([
+            'name' => 'Test User',
+            'email' => 'admin@gmail.com',
+            'phone_number' => '1234567899',
+            'password' => Hash::make('admin'),
+            'division_id' => 1,
+            'headquarter_id' => 1,
+            'region_id' => 1,
+            'area_id' => 1,
         ]);
     }
 }

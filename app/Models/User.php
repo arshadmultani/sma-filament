@@ -23,6 +23,11 @@ class User extends Authenticatable implements FilamentUser
         'name',
         'email',
         'password',
+        'phone_number',
+        'division_id',
+        'headquarter_id',
+        'region_id',
+        'area_id',
     ];
     public function canAccessPanel(Panel $panel): bool
     {
@@ -51,4 +56,21 @@ class User extends Authenticatable implements FilamentUser
             'password' => 'hashed',
         ];
     }
+    public function division()
+    {
+        return $this->belongsTo(Division::class);
+    }
+    public function headquarter()
+    {
+        return $this->belongsTo(Headquarter::class);
+    }
+    public function region()
+    {
+        return $this->belongsTo(Region::class);
+    }
+    public function area()
+    {
+        return $this->belongsTo(Area::class);
+    }
+    
 }

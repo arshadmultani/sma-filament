@@ -20,8 +20,8 @@ class ProductSeeder extends Seeder
                 'name' => fake()->word(),
                 'description' => fake()->sentence(),
                 'price' => fake()->randomFloat(2, 10, 1000),
-                'division_id' => fake()->randomElement(Division::whereIn('name', ['Pharma', 'Phytonova'])->pluck('id')->toArray()),
                 'image' => 'https://picsum.photos/200/300?random=' . $i,
+                'division_id' => fake()->randomElement(Division::pluck('id')->toArray()),
             ]);
         }
     }
