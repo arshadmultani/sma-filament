@@ -7,12 +7,15 @@ use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Components\Section;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+
 
 
 class UserResource extends Resource
@@ -25,26 +28,41 @@ class UserResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('email')
-                    ->email()
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('phone_number')
-                    ->required()
-                    ->tel(),
-                Forms\Components\Select::make('division_id')
-                    ->relationship('division', 'name')
-                    ->required(),
-                Forms\Components\TextInput::make('password')
-                    ->password()
-                    ->revealable()
-                    ->maxLength(255)
-                    ->dehydrateStateUsing(fn($state) => Hash::make($state))
-                    ->dehydrated(fn($state) => filled($state))
-                    ->required(fn(string $context): bool => $context === 'create'),
+                Section::make()
+                ->columns(2)
+                ->schema([
+                    Forms\Components\Select::make('roles')
+                        ->relationship('roles', 'name')
+                        ->preload()
+                        ->required(),
+                ]),
+                Section::make()
+                    ->columns(2)
+                    ->schema([
+                        Forms\Components\TextInput::make('name')
+                            ->required()
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('email')
+                            ->email()
+                            ->required()
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('phone_number')
+                            ->required()
+                            ->tel(),
+                        Forms\Components\Select::make('division_id')
+                            ->relationship('division', 'name')
+                            ->required(),
+                        Forms\Components\TextInput::make('password')
+                            ->password()
+                            ->revealable()
+                            ->default(fn () => Str::random(8)) 
+                            ->placeholder(fn ($context) => $context === 'edit' ? 'Enter a new password to change' : null)
+                            ->maxLength(255)
+                            ->dehydrateStateUsing(fn($state) => Hash::make($state))
+                            ->dehydrated(fn($state) => filled($state))
+                            ->required(fn(string $context): bool => $context === 'create'),
+                    ])
+
 
             ]);
     }
