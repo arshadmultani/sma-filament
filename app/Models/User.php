@@ -60,17 +60,5 @@ class User extends Authenticatable implements FilamentUser
     {
         return $this->belongsTo(Division::class);
     }
-    public function headquarter()
-    {
-        return $this->belongsTo(Headquarter::class);
-    }
-    public function region()
-    {
-        return $this->belongsTo(Region::class);
-    }
-    public function area()
-    {
-        return $this->belongsTo(Area::class);
-    }
     
 }
