@@ -15,8 +15,11 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-
-
+use Illuminate\Support\Facades\Mail;
+use App\Mail\GenericMail;
+use Filament\Tables\Actions\Action;
+use Filament\Notifications\Notification;
+use App\Filament\Actions\SendMailAction;
 
 class UserResource extends Resource
 {
@@ -24,18 +27,20 @@ class UserResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    protected ?string $plainPassword = null; //Temporary password
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Section::make()
-                ->columns(2)
-                ->schema([
-                    Forms\Components\Select::make('roles')
-                        ->relationship('roles', 'name')
-                        ->preload()
-                        ->required(),
-                ]),
+                    ->columns(2)
+                    ->schema([
+                        Forms\Components\Select::make('roles')
+                            ->relationship('roles', 'name')
+                            ->preload()
+                            ->required(),
+                    ]),
                 Section::make()
                     ->columns(2)
                     ->schema([
@@ -53,12 +58,18 @@ class UserResource extends Resource
                             ->relationship('division', 'name')
                             ->required(),
                         Forms\Components\TextInput::make('password')
+                            ->hidden(fn(string $context): bool => $context === 'edit')
                             ->password()
                             ->revealable()
-                            ->default(fn () => Str::random(8)) 
-                            ->placeholder(fn ($context) => $context === 'edit' ? 'Enter a new password to change' : null)
+                            ->default(fn() => Str::random(8))
+                            ->placeholder(fn($context) => $context === 'edit' ? 'Enter a new password to change' : null)
                             ->maxLength(255)
-                            ->dehydrateStateUsing(fn($state) => Hash::make($state))
+                            ->dehydrateStateUsing(function ($state, $livewire) {
+                                // Store plain password in temporary variable
+                                $livewire->plainPassword = $state;
+                                // Return hashed password to be stored in DB
+                                return Hash::make($state);
+                            })
                             ->dehydrated(fn($state) => filled($state))
                             ->required(fn(string $context): bool => $context === 'create'),
                     ])
@@ -72,23 +83,20 @@ class UserResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name'),
+                Tables\Columns\TextColumn::make('roles.name')->badge()->label('Desgn.'),
                 Tables\Columns\TextColumn::make('email'),
                 Tables\Columns\TextColumn::make('phone_number'),
                 Tables\Columns\TextColumn::make('division.name'),
-                Tables\Columns\TextColumn::make('headquarter.name'),
-                Tables\Columns\TextColumn::make('region.name'),
-                Tables\Columns\TextColumn::make('area.name'),
+                
             ])
-            ->filters([
-                //
-            ])
+            ->filters([])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                SendMailAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                SendMailAction::makeBulk(),
+                Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
 
