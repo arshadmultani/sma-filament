@@ -26,9 +26,8 @@ class User extends Authenticatable implements FilamentUser
         'password',
         'phone_number',
         'division_id',
-        'headquarter_id',
-        'region_id',
-        'area_id',
+        'location_type',
+        'location_id',
     ];
     public function canAccessPanel(Panel $panel): bool
     {
@@ -60,6 +59,10 @@ class User extends Authenticatable implements FilamentUser
     public function division()
     {
         return $this->belongsTo(Division::class);
+    }
+    public function location()
+    {
+        return $this->morphTo();
     }
     
 }

@@ -14,4 +14,7 @@ class Area extends Model
     public function headquarters(){
         return $this->hasMany(Headquarter::class);
     }
+    public function users(){
+        return $this->morphMany(User::class, 'location');
+    }
 }

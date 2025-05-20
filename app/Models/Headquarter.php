@@ -11,4 +11,8 @@ class Headquarter extends Model
     public function area(){
         return $this->belongsTo(Area::class);
     }
+
+    public function users(){
+        return $this->morphMany(User::class, 'location');
+    }
 }

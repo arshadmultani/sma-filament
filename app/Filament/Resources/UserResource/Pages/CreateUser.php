@@ -7,6 +7,7 @@ use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 use App\Mail\SendUserCredentials;
 use Illuminate\Support\Facades\Mail;
+use Spatie\Permission\Models\Role;
 class CreateUser extends CreateRecord
 {
     protected static string $resource = UserResource::class;
@@ -15,6 +16,25 @@ class CreateUser extends CreateRecord
     protected function handleRecordCreation(array $data): \Illuminate\Database\Eloquent\Model
 {
     $plainPassword = $this->plainPassword;
+    $roleID = $data['roles'];   
+    $roleName=Role::find($roleID)->name;
+    
+    if ($roleName === 'RSM') {
+        $data['location_type'] = \App\Models\Region::class;
+        $data['location_id'] = $data['region_id'] ?? null;
+    } elseif ($roleName === 'ASM') {
+        $data['location_type'] = \App\Models\Area::class;
+        $data['location_id'] = $data['area_id'] ?? null;
+    } elseif ($roleName === 'DSA') {
+        $data['location_type'] = \App\Models\Headquarter::class;
+        $data['location_id'] = $data['headquarter_id'] ?? null;
+    } else {
+        $data['location_type'] = null;
+        $data['location_id'] = null;
+    }
+
+    // Remove these keys so they are not inserted as columns
+    unset($data['region_id'], $data['area_id'], $data['headquarter_id']);
 
     $user = static::getModel()::create($data);
 

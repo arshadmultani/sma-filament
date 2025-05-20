@@ -11,4 +11,7 @@ class Region extends Model
     public function areas(){
         return $this->hasMany(Area::class);
     }
+    public function users(){
+        return $this->morphMany(User::class, 'location');
+    }
 }

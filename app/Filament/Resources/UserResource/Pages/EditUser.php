@@ -18,7 +18,7 @@ class EditUser extends EditRecord
    
     public function getTitle(): string
 {
-    return 'Edit ' . $this->record->name;
+    return $this->record->name . ' - ' . $this->record->roles[0]->name;
 }
     protected function getHeaderActions(): array
     {
