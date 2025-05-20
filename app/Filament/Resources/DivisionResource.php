@@ -63,8 +63,8 @@ class DivisionResource extends Resource
             'edit' => Pages\EditDivision::route('/{record}/edit'),
         ];
     }
-    public static function getNavigationBadge(): ?string
-{
-    return static::getModel()::count();
-}
+//     public static function getNavigationBadge(): ?string
+// {
+//     return static::getModel()::count();
+// }
 }

@@ -167,18 +167,28 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name'),
-                TextColumn::make('roles.name')->badge()->label('Desgn.')->sortable()->searchable(),
-                TextColumn::make('email'),
-                TextColumn::make('location.name')->label('Location'),
+                TextColumn::make('name')->searchable(),
+                TextColumn::make('roles.name')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'RSM' => 'danger',
+                        'ASM' => 'warning', 
+                        'DSA' => 'info',
+                        default => 'primary'
+                    })
+                    ->label('Desgn.')
+                    ->sortable()
+                    ->searchable(),
+                // TextColumn::make('email'),
+                TextColumn::make('location.name')
+                    ->label('Location')
+                    ->default('-'),
                 // TextColumn::make('phone_number'),
-                TextColumn::make('division.name'),
+                // TextColumn::make('division.name'),
 
             ])
             ->filters([
-                SelectFilter::make('roles')
-                    ->relationship('roles', 'name', fn ($query) => $query->whereIn('name', ['DSA', 'ASM', 'RSM']))
-                    ->label('Designation'),
+                
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -205,8 +215,14 @@ class UserResource extends Resource
             'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
     }
-    public static function getNavigationBadge(): ?string
+//     public static function getNavigationBadge(): ?string
+// {
+//     return static::getModel()::count();
+// }
+
+public static function getEloquentQuery(): Builder
 {
-    return static::getModel()::count();
+    return parent::getEloquentQuery()
+        ->with(['roles', 'division', 'location']);
 }
 }
