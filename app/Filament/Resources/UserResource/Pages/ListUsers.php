@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\UserResource\Pages;
 
+use App\Filament\Exports\UserExporter;
 use App\Filament\Resources\UserResource;
 use Filament\Actions;
-use Filament\Resources\Pages\ListRecords;
 use Filament\Actions\ActionGroup;
-use Filament\Actions\Action;
+use Filament\Resources\Pages\ListRecords;
 
 class ListUsers extends ListRecords
 {
@@ -16,14 +16,14 @@ class ListUsers extends ListRecords
     {
         return [
             Actions\CreateAction::make(),
-           ActionGroup::make([
-                Action::make('export')
+            ActionGroup::make([
+                Actions\ExportAction::make()
+                    ->exporter(UserExporter::class)
                     ->label('Export')
                     ->icon('heroicon-m-arrow-down-on-square')
-                    ->color('success'),
-                    // ->action(function () {
-                        // Add your export logic here
-           ])->icon('heroicon-m-bars-3-bottom-right'),                
+                    ->maxRows(2000)
+                    ->color('primary'),
+            ])->icon('heroicon-m-bars-3-bottom-right'),
         ];
     }
 }

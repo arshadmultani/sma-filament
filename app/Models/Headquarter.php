@@ -8,11 +8,13 @@ class Headquarter extends Model
 {
     protected $fillable = ['name', 'area_id'];
 
-    public function area(){
+    public function area()
+    {
         return $this->belongsTo(Area::class);
     }
 
-    public function users(){
+    public function users()
+    {
         return $this->morphMany(User::class, 'location');
     }
 }

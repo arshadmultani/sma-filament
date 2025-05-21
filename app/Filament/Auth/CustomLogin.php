@@ -2,9 +2,9 @@
 
 namespace App\Filament\Auth;
 
-use Filament\Pages\Auth\Login;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Component;
+use Filament\Forms\Components\TextInput;
+use Filament\Pages\Auth\Login;
 use Illuminate\Validation\ValidationException;
 
 class CustomLogin extends Login
@@ -18,10 +18,10 @@ class CustomLogin extends Login
                         ->schema([
                             $this->getLoginFormComponent(),
                             $this->getPasswordFormComponent(),
-                            $this->getRememberFormComponent()
+                            $this->getRememberFormComponent(),
                         ])
                         ->statePath(path: 'data'),
-                )
+                ),
             ];
     }
 
@@ -35,14 +35,17 @@ class CustomLogin extends Login
             ->autofocus()
             ->extraInputAttributes(['tabindex' => '1']);
     }
+
     protected function getCredentialsFromFormData(array $data): array
     {
         $login_type = filter_var($data['login'], FILTER_VALIDATE_EMAIL) ? 'email' : 'phone_number';
+
         return [
             $login_type => $data['login'],
-            'password' => $data['password']
+            'password' => $data['password'],
         ];
     }
+
     protected function throwFailureValidationException(): never
     {
         throw ValidationException::withMessages([
