@@ -18,34 +18,38 @@ class UserExporter extends Exporter
             ExportColumn::make('name'),
             ExportColumn::make('email'),
             ExportColumn::make('phone_number'),
-            ExportColumn::make('division_id'),
-            // ExportColumn::make('region')->label('Region')->formatStateUsing(function ($state, $record) {
-            //     if ($record->location_type === \App\Models\Region::class && $record->location) {
-            //         return $record->location->name;
-            //     }
-            //     if ($record->location_type === \App\Models\Area::class && $record->location && $record->location->region) {
-            //         return $record->location->region->name;
-            //     }
-            //     if ($record->location_type === \App\Models\Headquarter::class && $record->location && $record->location->area && $record->location->area->region) {
-            //         return $record->location->area->region->name;
-            //     }
-            //     return null;
-            // }),
-            // ExportColumn::make('area')->label('Area')->formatStateUsing(function ($state, $record) {
-            //     if ($record->location_type === \App\Models\Area::class && $record->location) {
-            //         return $record->location->name;
-            //     }
-            //     if ($record->location_type === \App\Models\Headquarter::class && $record->location && $record->location->area) {
-            //         return $record->location->area->name;
-            //     }
-            //     return null;
-            // }),
-            // ExportColumn::make('headquarter')->label('Headquarter')->formatStateUsing(function ($state, $record) {
-            //     if ($record->location_type === \App\Models\Headquarter::class && $record->location) {
-            //         return $record->location->name;
-            //     }
-            //     return null;
-            // }),
+            ExportColumn::make('division.name'),
+            ExportColumn::make('roles.name'),
+            ExportColumn::make('region')
+                ->label('Region')
+                ->formatStateUsing(function ($state, $record) {
+                    if ($record->location instanceof \App\Models\Region) {
+                        return $record->location->name;
+                    } elseif ($record->location instanceof \App\Models\Area) {
+                        return $record->location->region?->name;
+                    } elseif ($record->location instanceof \App\Models\Headquarter) {
+                        return $record->location->area?->region?->name;
+                    }
+                    return '-';
+                }),
+            ExportColumn::make('area')
+                ->label('Area')
+                ->formatStateUsing(function ($state, $record) {
+                    if ($record->location instanceof \App\Models\Area) {
+                        return $record->location->name;
+                    } elseif ($record->location instanceof \App\Models\Headquarter) {
+                        return $record->location->area?->name;
+                    }
+                    return '-';
+                }),
+            ExportColumn::make('headquarter')
+                ->label('Headquarter')
+                ->formatStateUsing(function ($state, $record) {
+                    if ($record->location instanceof \App\Models\Headquarter) {
+                        return $record->location->name;
+                    }
+                    return '-';
+                }),
         ];
     }
 

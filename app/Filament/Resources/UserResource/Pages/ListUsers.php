@@ -6,7 +6,9 @@ use App\Filament\Exports\UserExporter;
 use App\Filament\Resources\UserResource;
 use Filament\Actions;
 use Filament\Actions\ActionGroup;
+use Filament\Actions\ImportAction;
 use Filament\Resources\Pages\ListRecords;
+use App\Filament\Imports\UserImporter;
 
 class ListUsers extends ListRecords
 {
@@ -19,10 +21,14 @@ class ListUsers extends ListRecords
             ActionGroup::make([
                 Actions\ExportAction::make()
                     ->exporter(UserExporter::class)
-                    ->label('Export')
+                    ->label('Export All Users')
                     ->icon('heroicon-m-arrow-down-on-square')
                     ->maxRows(2000)
                     ->color('primary'),
+                    ImportAction::make()
+                    ->importer(UserImporter::class)
+                    
+                    
             ])->icon('heroicon-m-bars-3-bottom-right'),
         ];
     }

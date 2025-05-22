@@ -31,6 +31,8 @@ use Filament\Forms\Get;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Auth;
 use Filament\Tables\Filters\SelectFilter;
+use App\Filament\Exports\UserExporter;
+
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
@@ -167,6 +169,8 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('created_at')->sortable(),
+                TextColumn::make('id')->sortable(),
                 TextColumn::make('name')->searchable(),
                 TextColumn::make('roles.name')
                     ->badge()
@@ -180,9 +184,38 @@ class UserResource extends Resource
                     ->sortable()
                     ->searchable(),
                 // TextColumn::make('email'),
-                TextColumn::make('location.name')
-                    ->label('Location')
-                    ->default('-'),
+                
+                // Add computed columns for Region, Area, Headquarter
+                TextColumn::make('region_name')
+                    ->label('Region')
+                    ->getStateUsing(function ($record) {
+                        if ($record->location instanceof \App\Models\Region) {
+                            return $record->location->name;
+                        } elseif ($record->location instanceof \App\Models\Area) {
+                            return $record->location->region?->name;
+                        } elseif ($record->location instanceof \App\Models\Headquarter) {
+                            return $record->location->area?->region?->name;
+                        }
+                        return '-';
+                    }),
+                TextColumn::make('area_name')
+                    ->label('Area')
+                    ->getStateUsing(function ($record) {
+                        if ($record->location instanceof \App\Models\Area) {
+                            return $record->location->name;
+                        } elseif ($record->location instanceof \App\Models\Headquarter) {
+                            return $record->location->area?->name;
+                        }
+                        return '-';
+                    }),
+                TextColumn::make('headquarter_name')
+                    ->label('Headquarter')
+                    ->getStateUsing(function ($record) {
+                        if ($record->location instanceof \App\Models\Headquarter) {
+                            return $record->location->name;
+                        }
+                        return '-';
+                    }),
                 // TextColumn::make('phone_number'),
                 // TextColumn::make('division.name'),
 
@@ -197,6 +230,7 @@ class UserResource extends Resource
             ->bulkActions([
                 SendMailAction::makeBulk(),
                 Tables\Actions\DeleteBulkAction::make(),
+                Tables\Actions\ExportBulkAction::make()->exporter(UserExporter::class),
             ]);
     }
 
