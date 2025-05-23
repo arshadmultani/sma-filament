@@ -9,13 +9,18 @@ use Filament\Actions\Imports\Models\Import;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Log;
-
+use Illuminate\Support\Facades\Auth;
+use App\Notifications\ImportFailedNotification;
+use Illuminate\Support\Facades\Notification;
 
 class UserImporter extends Importer
 {
     protected static ?string $model = User::class;
 
     protected ?string $importRoleName = null;
+    protected ?string $importRegion = null;
+    protected ?string $importArea = null;
+    protected ?string $importHeadquarter = null;
 
     public static function getColumns(): array
     {
@@ -52,17 +57,26 @@ class UserImporter extends Importer
                     // Do nothing, handled in afterSave
                 }),
 
-            // ImportColumn::make('region')
-            //     ->rules(['max:255'])
-            //     ->examples(['Maharashtra', 'Gujarat', 'Karnataka']),
+            ImportColumn::make('region')
+                ->rules(['max:255'])
+                ->examples(['Maharashtra', 'Maharashtra', 'Maharashtra'])
+                ->fillRecordUsing(function () {
+                    // handled in resolveRecord
+                }),
 
-            // ImportColumn::make('area')
-            //     ->rules(['max:255'])
-            //     ->examples(['', 'Ahmedabad', 'Banglore']),
+            ImportColumn::make('area')
+                ->rules(['max:255'])
+                ->examples(['', 'Mumbai', 'Mumbai'])
+                ->fillRecordUsing(function () {
+                    // handled in resolveRecord
+                }),
 
-            // ImportColumn::make('headquarter')
-            //     ->examples(['', '', 'Whitefield'])
-            //     ->rules(['max:255']),
+            ImportColumn::make('headquarter')
+                ->examples(['', '', 'Vasai'])
+                ->rules(['max:255'])
+                ->fillRecordUsing(function () {
+                    // handled in resolveRecord
+                }),
         ];
     }
 
@@ -81,36 +95,13 @@ class UserImporter extends Importer
                 $user->division_id = $division->id;
             }
         }
-        // // Map location_type and location_id based on headquarter, area, region (priority: headquarter > area > region)
-        // if (!empty($this->data['headquarter'])) {
-        //     $headquarter = \App\Models\Headquarter::where('name', $this->data['headquarter'])->first();
-        //     if ($headquarter) {
-        //         $user->location_type = \App\Models\Headquarter::class;
-        //         $user->location_id = $headquarter->id;
-        //     }
-        // } elseif (!empty($this->data['area'])) {
-        //     $area = \App\Models\Area::where('name', $this->data['area'])->first();
-        //     if ($area) {
-        //         $user->location_type = \App\Models\Area::class;
-        //         $user->location_id = $area->id;
-        //     }
-        // } elseif (!empty($this->data['region'])) {
-        //     $region = \App\Models\Region::where('name', $this->data['region'])->first();
-        //     if ($region) {
-        //         $user->location_type = \App\Models\Region::class;
-        //         $user->location_id = $region->id;
-        //     }
-        // }
-        // Map role name to role id (store for later assignment)
-        // $user->_import_role_id = null;
-        if (!empty($this->data['roles.name'])) {
-            $role = Role::where('name', $this->data['roles.name'])->first();
-            Log::info('ROOOOLE DATA WILL COME HERE....');
-            Log::info($role);
-            if ($role) {
-                $this->importRoleName = $role->name;
-            }
-        }
+
+        // Store for afterSave
+        $this->importRoleName = $this->data['roles.name'] ?? null;
+        $this->importRegion = $this->data['region'] ?? null;
+        $this->importArea = $this->data['area'] ?? null;
+        $this->importHeadquarter = $this->data['headquarter'] ?? null;
+
         return $user;
     }
 
@@ -118,6 +109,33 @@ class UserImporter extends Importer
     {
         if ($this->importRoleName && $this->record) {
             $this->record->assignRole($this->importRoleName);
+
+            if ($this->importRoleName === 'RSM' && !empty($this->importRegion)) {
+                $region = \App\Models\Region::whereRaw('LOWER(name) = ?', [strtolower(trim($this->importRegion))])->first();
+                if ($region) {
+                    $this->record->location_type = \App\Models\Region::class;
+                    $this->record->location_id = $region->id;
+                    $this->record->save();
+                }
+            } elseif ($this->importRoleName === 'ASM' && !empty($this->importArea)) {
+                $area = \App\Models\Area::whereRaw('LOWER(name) = ?', [strtolower(trim($this->importArea))])->first();
+                if ($area) {
+                    $this->record->location_type = \App\Models\Area::class;
+                    $this->record->location_id = $area->id;
+                    $this->record->save();
+                } else {
+                    // Log::warning('Area not found for import', ['area' => $this->importArea]);
+                }
+            } elseif ($this->importRoleName === 'DSA' && !empty($this->importHeadquarter)) {
+                $hq = \App\Models\Headquarter::whereRaw('LOWER(name) = ?', [strtolower(trim($this->importHeadquarter))])->first();
+                if ($hq) {
+                    $this->record->location_type = \App\Models\Headquarter::class;
+                    $this->record->location_id = $hq->id;
+                    $this->record->save();
+                } else {
+                    // Log::warning('Headquarter not found for import', ['headquarter' => $this->importHeadquarter]);
+                }
+            }
         }
     }
 
@@ -127,6 +145,14 @@ class UserImporter extends Importer
 
         if ($failedRowsCount = $import->getFailedRowsCount()) {
             $body .= ' ' . number_format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to import.';
+        }
+
+        $userId = $import->options['user_id'] ?? null;
+        if ($userId) {
+            $user = User::find($userId);
+            if ($user) {
+                Notification::send($user, new ImportFailedNotification($import->getFailedRows()));
+            }
         }
 
         return $body;

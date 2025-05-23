@@ -3,9 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
-use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\User;
-use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Components\Section;
 use Filament\Resources\Resource;
@@ -14,13 +12,9 @@ use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\GenericMail;
-use Filament\Tables\Actions\Action;
-use Filament\Notifications\Notification;
 use App\Filament\Actions\SendMailAction;
 use Filament\Forms\Set;
 use Filament\Forms\Components\Select;
@@ -32,6 +26,7 @@ use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Auth;
 use Filament\Tables\Filters\SelectFilter;
 use App\Filament\Exports\UserExporter;
+use App\Filament\Resources\UserResource\UserFilters;
 
 class UserResource extends Resource
 {
@@ -168,15 +163,15 @@ class UserResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->deferLoading()
+            ->striped()
             ->columns([
-                TextColumn::make('created_at')->sortable(),
-                TextColumn::make('id')->sortable(),
                 TextColumn::make('name')->searchable(),
                 TextColumn::make('roles.name')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'RSM' => 'danger',
-                        'ASM' => 'warning', 
+                        'ASM' => 'warning',
                         'DSA' => 'info',
                         default => 'primary'
                     })
@@ -184,7 +179,7 @@ class UserResource extends Resource
                     ->sortable()
                     ->searchable(),
                 // TextColumn::make('email'),
-                
+
                 // Add computed columns for Region, Area, Headquarter
                 TextColumn::make('region_name')
                     ->label('Region')
@@ -220,9 +215,10 @@ class UserResource extends Resource
                 // TextColumn::make('division.name'),
 
             ])
-            ->filters([
-                
-            ])
+            ->filtersFormColumns(2)
+            ->filters(
+                UserFilters::all()
+            )
             ->actions([
                 Tables\Actions\EditAction::make(),
                 SendMailAction::make(),
@@ -233,7 +229,6 @@ class UserResource extends Resource
                 Tables\Actions\ExportBulkAction::make()->exporter(UserExporter::class),
             ]);
     }
-
     public static function getRelations(): array
     {
         return [
@@ -249,14 +244,14 @@ class UserResource extends Resource
             'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
     }
-//     public static function getNavigationBadge(): ?string
-// {
-//     return static::getModel()::count();
-// }
+    //     public static function getNavigationBadge(): ?string
+    // {
+    //     return static::getModel()::count();
+    // }
 
-public static function getEloquentQuery(): Builder
-{
-    return parent::getEloquentQuery()
-        ->with(['roles', 'division', 'location']);
-}
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->with(['roles', 'division', 'location']);
+    }
 }
