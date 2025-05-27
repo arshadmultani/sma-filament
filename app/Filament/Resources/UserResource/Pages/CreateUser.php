@@ -48,5 +48,11 @@ class CreateUser extends CreateRecord
 
     return $user;
 }
+public function saved()
+{
+    if ($this->data['roles']) {
+        $this->record->syncRoles([$this->data['roles']]);
+    }
+}
 
 }

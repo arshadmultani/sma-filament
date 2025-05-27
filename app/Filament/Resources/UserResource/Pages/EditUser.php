@@ -104,4 +104,10 @@ class EditUser extends EditRecord
         }
         return $record;
     }
+    public function saved()
+{
+    if ($this->data['roles']) {
+        $this->record->syncRoles([$this->data['roles']]);
+    }
+}
 }
