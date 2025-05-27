@@ -55,6 +55,7 @@ class UserResource extends Resource
                             })
                             ->preload()
                             ->live()
+                            ->native(false)
                             ->reactive()
                             ->required()
                             ->dehydrated(fn($state) => filled($state))
@@ -62,6 +63,9 @@ class UserResource extends Resource
 
                         Select::make('region_id')
                             ->label('Region')
+                            ->native(false)
+                            ->preload()
+                            ->searchable()
                             ->options(Region::all()->pluck('name', 'id'))
                             ->afterStateUpdated(fn(Set $set) => $set('area_id', null))
                             ->reactive()
@@ -78,6 +82,9 @@ class UserResource extends Resource
 
                         Select::make('area_id')
                             ->label('Area')
+                            ->native(false)
+                            ->preload()
+                            ->searchable()
                             ->options(function (Get $get) {
                                 $regionId = $get('region_id');
                                 if ($regionId) {
@@ -100,6 +107,9 @@ class UserResource extends Resource
 
                         Select::make('headquarter_id')
                             ->label('Headquarter')
+                            ->native(false)
+                            ->preload()
+                            ->searchable()
                             ->options(function (Get $get) {
                                 $areaId = $get('area_id');
                                 if ($areaId) {
@@ -137,6 +147,7 @@ class UserResource extends Resource
                             ->required()
                             ->tel(),
                         Select::make('division_id')
+                            ->native(false)
                             ->relationship('division', 'name')
                             ->required(),
                         TextInput::make('password')
