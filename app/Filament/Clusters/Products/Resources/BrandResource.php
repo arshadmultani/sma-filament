@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Clusters\Products\Resources;
 
-use App\Filament\Resources\DivisionResource\Pages;
-use App\Filament\Resources\DivisionResource\RelationManagers;
-use App\Models\Division;
+use App\Filament\Clusters\Products\Resources\BrandResource\Pages;
+use App\Filament\Clusters\Products;
+use App\Filament\Resources\BrandResource\RelationManagers;
+use App\Models\Brand;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -12,33 +13,36 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Filament\Clusters\Products;
-class DivisionResource extends Resource
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\TextColumn;
+class BrandResource extends Resource
 {
-    protected static ?string $model = Division::class;
-
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-group';
-    protected static ?int $navigationSort = 3;
+    protected static ?string $model = Brand::class;
     protected static ?string $cluster = Products::class;
+    protected static ?int $navigationSort = 2;
 
+
+
+
+    protected static ?string $navigationIcon = 'heroicon-o-bookmark-square';
 
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
+                TextInput::make('name')
                     ->required()
-                    ->maxLength(255),
+                    ->unique(),
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
-            ->paginated(false)
+            ->paginated(['all'])
             ->columns([
-                Tables\Columns\TextColumn::make('name'),
+                TextColumn::make('name'),
             ])
             ->filters([
                 //
@@ -63,13 +67,9 @@ class DivisionResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListDivisions::route('/'),
-            // 'create' => Pages\CreateDivision::route('/create'),
-            // 'edit' => Pages\EditDivision::route('/{record}/edit'),
+            'index' => Pages\ListBrands::route('/'),
+            // 'create' => Pages\CreateBrand::route('/create'),
+            // 'edit' => Pages\EditBrand::route('/{record}/edit'),
         ];
     }
-//     public static function getNavigationBadge(): ?string
-// {
-//     return static::getModel()::count();
-// }
 }

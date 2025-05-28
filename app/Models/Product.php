@@ -12,4 +12,12 @@ class Product extends Model
     {
         return $this->belongsTo(Division::class);
     }
+    public function brand()
+    {
+        return $this->belongsTo(Brand::class);
+    }
+    public function kofolEntries()
+    {
+        return $this->hasMany(KofolEntry::class);
+    }
 }
