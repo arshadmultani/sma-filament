@@ -37,6 +37,9 @@ class DoctorResource extends Resource
                 ])->required(),
                 Forms\Components\FileUpload::make('profile_photo')
                     ->image()->directory('doctors/profile_photos'),
+                Forms\Components\Select::make('headquarter_id')
+                    ->relationship('headquarter', 'name')
+                    ->required(),
             ]);
     }
 

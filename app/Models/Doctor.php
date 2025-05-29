@@ -16,5 +16,9 @@ class Doctor extends Model
     return $this->belongsTo(Headquarter::class);
    }
 
+ public function kofolEntries()
+    {
+        return $this->morphMany(KofolEntry::class, 'customer');
+    }
 
 }
