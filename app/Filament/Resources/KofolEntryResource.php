@@ -9,6 +9,7 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -28,6 +29,9 @@ use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Get;
 use Illuminate\Support\Collection;
 use Filament\Infolists\Components;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\RepeatableEntry;
+    
 
 
 
@@ -121,6 +125,7 @@ class KofolEntryResource extends Resource
                             ->reactive(),
                         FileUpload::make('invoice_image')
                             ->image()
+                            ->downloadable()
                             ->maxSize(2048)
                             ->imageCropAspectRatio(null)
                             ->required(),
@@ -183,6 +188,7 @@ class KofolEntryResource extends Resource
                 TextColumn::make('kofolCampaign.name'),
                 TextColumn::make('customer.name'),
                 TextColumn::make(name: 'customer_type')->formatStateUsing(fn($state) => class_basename($state)),
+                ImageColumn::make('invoice_image')->label('Invoice Image')->circular()->simpleLightbox(),
                 TextColumn::make('user.name')->label('Submitted By'),
                 TextColumn::make('status')->label('Status')->badge(),
                 TextColumn::make('invoice_amount')->label('Invoice Amount')->money('INR'),
@@ -207,21 +213,31 @@ class KofolEntryResource extends Resource
     }
 
     // // infolist on view page
-    // public static function infolist(Infolist $infolist): Infolist
-    // {
-    //     return $infolist
-    //         ->schema([
-    //             Components\Section::make()
-    //             ->columns(2)
-    //             ->schema([
-                
-    //                     TextEntry::make('kofolCampaign.name'),
-    //                     TextEntry::make('customer.name'),
-    //                     TextEntry::make('user.name'),
-    //                     TextEntry::make('status'),
-    //             ])                    
-    //         ]);
-    // }
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Components\Section::make()
+                    ->columns(2)
+                    ->schema([
+
+                        TextEntry::make('kofolCampaign.name'),
+                        TextEntry::make('customer.name'),
+                        TextEntry::make('customer_type')->formatStateUsing(fn($state) => class_basename($state)),
+                        TextEntry::make('user.name'),
+                        TextEntry::make('created_at')->label('Submission')->since(),
+                        TextEntry::make('updated_at')->label('Last Update')->since(),
+                        RepeatableEntry::make('products')->label('Products')->schema([
+                            TextEntry::make('product.name'),
+                            TextEntry::make('quantity'),
+                            TextEntry::make('price')->money('INR'),
+                        ]),
+                        TextEntry::make('invoice_amount')->label('Invoice Amount')->money('INR'),
+                        TextEntry::make('status'),
+                        ImageEntry::make('invoice_image')->label('Invoice Image')->circular()->simpleLightbox(),
+                    ])
+            ]);
+    }
 
     public static function getRelations(): array
     {
