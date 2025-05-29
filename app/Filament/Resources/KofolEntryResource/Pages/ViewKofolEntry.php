@@ -10,6 +10,11 @@ class ViewKofolEntry extends ViewRecord
 {
     protected static string $resource = KofolEntryResource::class;
 
+    public function getTitle(): string
+    {
+        return 'KSV/POB/'.$this->record->id;
+    }
+
     public function getHeaderActions(): array
     {
         return [
