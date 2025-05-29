@@ -31,10 +31,7 @@ use Illuminate\Support\Collection;
 use Filament\Infolists\Components;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\RepeatableEntry;
-    
-
-
-
+use Filament\Support\Enums\FontWeight;
 
 class KofolEntryResource extends Resource
 {
@@ -185,6 +182,7 @@ class KofolEntryResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('id')->label('ID')->sortable()->prefix('KSV/POB/')->label('Invoice #')->weight(FontWeight::Bold),
                 TextColumn::make('kofolCampaign.name'),
                 TextColumn::make('customer.name'),
                 TextColumn::make(name: 'customer_type')->formatStateUsing(fn($state) => class_basename($state)),
@@ -216,26 +214,44 @@ class KofolEntryResource extends Resource
     public static function infolist(Infolist $infolist): Infolist
     {
         return $infolist
+            ->columns(3)
             ->schema([
                 Components\Section::make()
+                ->columnSpan(2)
                     ->columns(2)
                     ->schema([
-
                         TextEntry::make('kofolCampaign.name'),
                         TextEntry::make('customer.name'),
                         TextEntry::make('customer_type')->formatStateUsing(fn($state) => class_basename($state)),
                         TextEntry::make('user.name'),
                         TextEntry::make('created_at')->label('Submission')->since(),
                         TextEntry::make('updated_at')->label('Last Update')->since(),
-                        RepeatableEntry::make('products')->label('Products')->schema([
-                            TextEntry::make('product.name'),
+                        
+                        
+                    ]),
+                Components\Section::make()
+                    ->columnSpan(1)
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('user.name')->label('Submitted By'),
+                        TextEntry::make('created_at')->label('Submission')->dateTime('d-m-y @ H:i'),
+                        TextEntry::make('updated_at')->label('Last Update')->dateTime('d-m-y @ H:i'),
+                    ]),
+                Components\Section::make()
+                    ->columnSpan(3)
+                    // ->columns(2)
+                    ->schema([
+                        RepeatableEntry::make('products')->label('Products')
+                        ->columns(3)
+                        ->schema([
+                            TextEntry::make('product'),
                             TextEntry::make('quantity'),
                             TextEntry::make('price')->money('INR'),
                         ]),
                         TextEntry::make('invoice_amount')->label('Invoice Amount')->money('INR'),
                         TextEntry::make('status'),
                         ImageEntry::make('invoice_image')->label('Invoice Image')->circular()->simpleLightbox(),
-                    ])
+                    ]),
             ]);
     }
 
