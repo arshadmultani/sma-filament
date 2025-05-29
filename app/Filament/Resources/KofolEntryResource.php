@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+
 use App\Filament\Resources\KofolEntryResource\Pages;
 use App\Filament\Resources\KofolEntryResource\RelationManagers;
 use App\Models\KofolEntry;
@@ -32,6 +33,7 @@ use Filament\Infolists\Components;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Support\Enums\FontWeight;
+use Icetalker\FilamentTableRepeatableEntry\Infolists\Components\TableRepeatableEntry;
 
 class KofolEntryResource extends Resource
 {
@@ -211,6 +213,7 @@ class KofolEntryResource extends Resource
     }
 
     // // infolist on view page
+    
     public static function infolist(Infolist $infolist): Infolist
     {
         return $infolist
@@ -240,8 +243,9 @@ class KofolEntryResource extends Resource
                 Components\Section::make()
                     ->columnSpan(3)
                     // ->columns(2)
+                    
                     ->schema([
-                        RepeatableEntry::make('products')->label('Products')
+                        TableRepeatableEntry::make('products')->label('Products')
                         ->columns(3)
                         ->schema([
                             TextEntry::make('product'),
