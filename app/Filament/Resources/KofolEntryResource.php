@@ -221,9 +221,9 @@ class KofolEntryResource extends Resource
                         default => 'secondary'
                     }),
                 TextColumn::make('invoice_amount')
-                ->label('Amount')
-                ->sortable()
-                ->money('INR'),
+                    ->label('Amount')
+                    ->sortable()
+                    ->money('INR'),
                 TextColumn::make('created_at')->label('Submission')
                     ->since()
                     ->sortable()
@@ -233,9 +233,7 @@ class KofolEntryResource extends Resource
                     ->sortable()
                     ->toggleable(),
             ])
-            ->filters([
-                
-            ])
+            ->filters([])
             ->actions([
                 Tables\Actions\ViewAction::make(),
             ])
@@ -255,7 +253,10 @@ class KofolEntryResource extends Resource
             ->columns(4)
             ->schema([
                 Components\Section::make()
-                    ->columns(3)
+                    ->columns([
+                        'sm' => 2,
+                        'md' => 3,
+                    ])
                     ->columnSpan(4)
                     ->schema([
                         TextEntry::make('kofolCampaign.name'),
@@ -270,8 +271,14 @@ class KofolEntryResource extends Resource
                             }),
                     ]),
                 Components\Section::make()
-                    ->columns(3)
-                    ->columnSpan(3)
+                    ->columns([
+                        'sm' => 1,
+                        'md' => 3,
+                    ])
+                    ->columnSpan([
+                        'sm' => 1,
+                        'md' => 3,
+                    ])
                     ->schema([
                         TextEntry::make('customer.name'),
                         TextEntry::make('customer_type')->formatStateUsing(fn($state) => class_basename($state)),
@@ -281,7 +288,10 @@ class KofolEntryResource extends Resource
                     ]),
                 Components\Section::make()
                     ->columns(1)
-                    ->columnSpan(1)
+                    ->columnSpan([
+                        'sm' => 4,
+                        'md' => 1,
+                    ])
                     ->schema([
                         TextEntry::make('user.name'),
 
@@ -318,7 +328,7 @@ class KofolEntryResource extends Resource
                     ->columnSpan(1)
                     ->schema([
                         ImageEntry::make('invoice_image')->label('Invoice')->square()->simpleLightbox()->columnSpan(2),
-                        TextEntry::make('invoice_amount')->label('Total Amount')->money('INR')->weight(FontWeight::Bold),
+                        TextEntry::make('invoice_amount')->label('Total Amount')->money('INR')->weight(FontWeight::SemiBold),
                     ]),
             ]);
     }

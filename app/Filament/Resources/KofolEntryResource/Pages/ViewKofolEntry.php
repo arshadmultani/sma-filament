@@ -6,6 +6,8 @@ use App\Filament\Resources\KofolEntryResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Actions\Action;
+use Torgodly\Html2Media\Actions\Html2MediaAction;
+
 
 class ViewKofolEntry extends ViewRecord
 {
@@ -43,6 +45,17 @@ class ViewKofolEntry extends ViewRecord
                 })
                 ->color('primary')
                 ->icon('heroicon-o-arrow-path'),
+
+            Html2MediaAction::make('print')
+                ->content(fn($record)=>view('filament.kofol-entry-invoice', ['kofolEntry' => $record]))
+                ->print()
+                ->savePdf()
+                ->margin([10, 10, 10, 10])
+                ->icon('heroicon-o-printer')
+                ->label('')
+                ->filename('KSV-POB-'.$this->record->id)
+                ->color('gray'),
+                
                 
                 Action::make('edit')
                 ->label('Edit')
