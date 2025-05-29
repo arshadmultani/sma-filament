@@ -35,8 +35,8 @@ use Filament\Infolists\Components\Split;
 use Filament\Infolists\Components\Fieldset;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
-
 use Icetalker\FilamentTableRepeatableEntry\Infolists\Components\TableRepeatableEntry;
+use App\Filament\Actions\UpdateStatusAction;
 
 class KofolEntryResource extends Resource
 {
@@ -193,7 +193,14 @@ class KofolEntryResource extends Resource
                 TextColumn::make(name: 'customer_type')->formatStateUsing(fn($state) => class_basename($state)),
                 ImageColumn::make('invoice_image')->label('Invoice Image')->circular()->simpleLightbox(),
                 TextColumn::make('user.name')->label('Submitted By'),
-                TextColumn::make('status')->label('Status')->badge(),
+                TextColumn::make('status')->label('Status')
+                    ->badge()
+                    ->color(fn(string $state): string => match ($state) {
+                        'Pending' => 'warning',
+                        'Approved' => 'primary',
+                        'Rejected' => 'danger',
+                        default => 'secondary'
+                    }),
                 TextColumn::make('invoice_amount')->label('Invoice Amount')->money('INR'),
                 TextColumn::make('created_at')->label('Submission')->since()->sortable(),
                 TextColumn::make('updated_at')->label('Last Update')->since()->sortable(),
@@ -207,6 +214,7 @@ class KofolEntryResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    UpdateStatusAction::makeBulk(),
                 ]),
             ]);
     }
@@ -219,13 +227,20 @@ class KofolEntryResource extends Resource
             ->columns(4)
             ->schema([
                 Components\Section::make()
-                ->columns(3)
-                ->columnSpan(4)
-                ->schema([
-                    TextEntry::make('kofolCampaign.name'),
-                    TextEntry::make('created_at')->label(label: 'Submission')->dateTime('d-m-y @ H:i'),
-                    TextEntry::make('status')->label('Status')->badge(),
-                ]),
+                    ->columns(3)
+                    ->columnSpan(4)
+                    ->schema([
+                        TextEntry::make('kofolCampaign.name'),
+                        TextEntry::make('created_at')->label(label: 'Submission')->dateTime('d-m-y @ H:i'),
+                        TextEntry::make('status')->label('Status')
+                        ->badge()
+                        ->color(fn (string $state): string => match ($state) {
+                            'Pending' => 'warning',
+                            'Approved' => 'primary', 
+                            'Rejected' => 'danger',
+                            default => 'secondary'
+                        }),
+                    ]),
                 Components\Section::make()
                     ->columns(3)
                     ->columnSpan(3)
@@ -241,13 +256,13 @@ class KofolEntryResource extends Resource
                     ->columnSpan(1)
                     ->schema([
                         TextEntry::make('user.name'),
-                        
+
                     ]),
 
                 Components\Section::make()
-                ->columnSpan(3)
+                    ->columnSpan(3)
                     ->schema([
-                        TableRepeatableEntry::make('products')// repeater for desktop
+                        TableRepeatableEntry::make('products') // repeater for desktop
                             ->columnSpan(2)
                             ->striped()
                             ->extraAttributes(['class' => 'hidden sm:block']) // Hidden on mobile, visible on sm and up
