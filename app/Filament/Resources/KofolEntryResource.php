@@ -187,12 +187,31 @@ class KofolEntryResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('id')->label('ID')->sortable()->prefix('KSV/POB/')->label('Invoice #')->weight(FontWeight::Bold),
-                TextColumn::make('kofolCampaign.name'),
-                TextColumn::make('customer.name'),
-                TextColumn::make(name: 'customer_type')->formatStateUsing(fn($state) => class_basename($state)),
-                ImageColumn::make('invoice_image')->label('Invoice Image')->circular()->simpleLightbox(),
-                TextColumn::make('user.name')->label('Submitted By'),
+                TextColumn::make('id')->label('ID')
+                    ->sortable()
+                    ->prefix('KSV/POB/')
+                    ->label('Invoice #')
+                    ->toggleable()
+                    ->weight(FontWeight::Bold),
+                TextColumn::make('kofolCampaign.name')
+                    ->toggleable(),
+                TextColumn::make('customer.name')
+                    ->label('Cx. Name')
+                    ->searchable()
+                    ->toggleable(),
+                TextColumn::make(name: 'customer_type')
+                    ->label('Cx. Type')
+                    ->searchable()
+                    ->formatStateUsing(fn($state) => class_basename($state))
+                    ->toggleable(),
+                ImageColumn::make('invoice_image')
+                    ->label('Invoice')
+                    ->circular()
+                    ->simpleLightbox()
+                    ->toggleable(),
+                TextColumn::make('user.name')->label('Submitted By')
+                    ->searchable()
+                    ->toggleable(),
                 TextColumn::make('status')->label('Status')
                     ->badge()
                     ->color(fn(string $state): string => match ($state) {
@@ -201,12 +220,21 @@ class KofolEntryResource extends Resource
                         'Rejected' => 'danger',
                         default => 'secondary'
                     }),
-                TextColumn::make('invoice_amount')->label('Invoice Amount')->money('INR'),
-                TextColumn::make('created_at')->label('Submission')->since()->sortable(),
-                TextColumn::make('updated_at')->label('Last Update')->since()->sortable(),
+                TextColumn::make('invoice_amount')
+                ->label('Amount')
+                ->sortable()
+                ->money('INR'),
+                TextColumn::make('created_at')->label('Submission')
+                    ->since()
+                    ->sortable()
+                    ->toggleable(),
+                TextColumn::make('updated_at')->label('Last Update')
+                    ->since()
+                    ->sortable()
+                    ->toggleable(),
             ])
             ->filters([
-                //
+                
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
@@ -233,13 +261,13 @@ class KofolEntryResource extends Resource
                         TextEntry::make('kofolCampaign.name'),
                         TextEntry::make('created_at')->label(label: 'Submission')->dateTime('d-m-y @ H:i'),
                         TextEntry::make('status')->label('Status')
-                        ->badge()
-                        ->color(fn (string $state): string => match ($state) {
-                            'Pending' => 'warning',
-                            'Approved' => 'primary', 
-                            'Rejected' => 'danger',
-                            default => 'secondary'
-                        }),
+                            ->badge()
+                            ->color(fn(string $state): string => match ($state) {
+                                'Pending' => 'warning',
+                                'Approved' => 'primary',
+                                'Rejected' => 'danger',
+                                default => 'secondary'
+                            }),
                     ]),
                 Components\Section::make()
                     ->columns(3)
