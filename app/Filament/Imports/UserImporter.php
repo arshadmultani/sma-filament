@@ -46,7 +46,7 @@ class UserImporter extends Importer
 
             ImportColumn::make('division_id')
                 ->label('Division')
-                ->relationship('division', 'name')
+                ->relationship('division', resolveUsing: 'name')
                 ->examples(['Pharma', 'Phytonova', 'Pharma']),
 
             ImportColumn::make('roles.name')

@@ -21,14 +21,16 @@ class ListUsers extends ListRecords
             ActionGroup::make([
                 Actions\ExportAction::make()
                     ->exporter(UserExporter::class)
-                    ->label('Export All Users')
-                    ->icon('heroicon-m-arrow-down-on-square')
+                    ->label('Download All Users')
+                    // ->icon('heroicon-m-arrow-long-up')
                     ->maxRows(2000)
                     ->color('primary'),
-                    ImportAction::make()
+                ImportAction::make()
                     ->importer(UserImporter::class)
-                    
-                    
+                    ->label('Import Users')
+                    // ->icon('heroicon-m-arrow-down-on-square')
+                    ->color('primary'),
+
             ])->icon('heroicon-m-bars-3-bottom-right'),
         ];
     }
