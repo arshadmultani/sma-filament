@@ -1,0 +1,246 @@
+<?php
+
+namespace App\Filament\Resources;
+
+use App\Filament\Resources\KofolEntryResource\Pages;
+use App\Filament\Resources\KofolEntryResource\RelationManagers;
+use App\Models\KofolEntry;
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Tables\Columns\TextColumn;
+use App\Models\Chemist;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\MorphToSelect;
+use App\Models\Doctor;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\TextInput;
+use Filament\Infolists\Infolist;
+use Filament\Infolists\Components\TextEntry;
+use App\Models\Product;
+use Filament\Forms\Components\Actions\Action;
+use Filament\Forms\Get;
+use Illuminate\Support\Collection;
+use Filament\Infolists\Components;
+
+
+
+
+class KofolEntryResource extends Resource
+{
+    protected static ?string $model = KofolEntry::class;
+
+    protected static ?string $navigationGroup = 'Kofol Swarna Varsha';
+    protected static ?string $modelLabel = 'Campaign Entries';
+
+    public static function form(Form $form): Form
+    {
+        return $form
+            ->columns(1)
+            ->schema([
+                // campaign name
+                Select::make('kofol_campaign_id')
+                    ->relationship('kofolCampaign', 'name', fn($query) => $query->where('is_active', true))
+                    ->native(false)
+                    ->required(),
+
+                // customer details
+                MorphToSelect::make('customer')
+                    ->types([
+                        MorphToSelect\Type::make(Doctor::class)->titleAttribute('name'),
+                        MorphToSelect\Type::make(Chemist::class)->titleAttribute('name'),
+                    ])
+                    ->native(false)
+                    ->preload()
+                    ->searchable()
+                    ->required(),
+
+
+                // products
+                Repeater::make('products')
+                    ->collapsible()
+                    ->columns(3)
+                    ->addActionLabel('Add Product')
+                    ->reorderable(false)
+                    ->itemLabel(
+                        fn(array $state): string => Product::find($state['product_id'])?->name ?? ''
+                    )
+                    ->minItems(1)
+                    ->deleteAction(fn(Action $action) => $action->requiresConfirmation())
+                    ->afterStateUpdated(fn($state, callable $set) => static::updateInvoiceTotal($state, $set))
+                    ->afterStateHydrated(fn($state, callable $set) => static::updateInvoiceTotal($state, $set))
+                    ->schema([
+                        Select::make('product_id')
+                            ->label('Kofol Products')
+                            ->native(false)
+                            ->preload()
+                            ->searchable()
+                            ->options(static::getKofolProductOptions())
+                            ->required()
+                            ->reactive()
+                            ->afterStateUpdated(
+                                fn($state, callable $set, callable $get) =>
+                                static::updateProductPrice($state, $set, $get)
+                            ),
+
+                        TextInput::make('quantity')
+                            ->numeric()
+                            ->minValue(1)
+                            ->type('number')
+                            ->default(1)
+                            ->required()
+                            ->reactive()
+                            ->afterStateUpdated(
+                                fn($state, callable $set, callable $get) =>
+                                static::updateQuantityPrice($state, $set, $get)
+                            ),
+
+                        TextInput::make('price')
+                            ->label('Price')
+                            ->numeric()
+                            ->prefix('₹')
+                            ->disabled()
+                            ->dehydrated(true),
+                    ]),
+
+
+
+                Section::make()
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('invoice_amount')
+                            ->label('Invoice Amount')
+                            ->prefix('₹')
+                            ->readOnly()
+                            ->reactive(),
+                        FileUpload::make('invoice_image')
+                            ->image()
+                            ->maxSize(2048)
+                            ->imageCropAspectRatio(null)
+                            ->required(),
+
+
+                    ]),
+            ]);
+    }
+    private static function getKofolProductOptions(): Collection
+    {
+        return Product::query()
+            ->whereHas('brand', fn($query) => $query->where('name', 'Kofol'))
+            ->pluck('name', 'id');
+    }
+
+    private static function updateInvoiceTotal($state, callable $set): void
+    {
+        $total = collect($state)
+            ->pluck('price')
+            ->map(fn($price) => (float) $price)
+            ->sum();
+
+        $set('invoice_amount', $total);
+    }
+
+    private static function updateProductPrice($state, callable $set, callable $get): void
+    {
+        $quantity = $get('quantity') ?: 1;
+        $product = $state ? Product::find($state) : null;
+        $set('price', $product ? $product->price * $quantity : '');
+
+        static::recalculateTotal($set, $get);
+    }
+
+    private static function updateQuantityPrice($state, callable $set, callable $get): void
+    {
+        $productId = $get('product_id');
+        $product = $productId ? Product::find($productId) : null;
+        $set('price', $product ? $product->price * ($state ?: 1) : '');
+
+        static::recalculateTotal($set, $get);
+    }
+
+    private static function recalculateTotal(callable $set, callable $get): void
+    {
+        $products = $get('../../products');
+        $total = collect($products)
+            ->pluck('price')
+            ->map(fn($price) => (float) $price)
+            ->sum();
+
+        $set('../../invoice_amount', $total);
+    }
+
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                TextColumn::make('kofolCampaign.name'),
+                TextColumn::make('customer.name'),
+                TextColumn::make(name: 'customer_type')->formatStateUsing(fn($state) => class_basename($state)),
+                TextColumn::make('user.name')->label('Submitted By'),
+                TextColumn::make('status')->label('Status')->badge(),
+                TextColumn::make('invoice_amount')->label('Invoice Amount')->money('INR'),
+                TextColumn::make('created_at')->label('Submission')->since()->sortable(),
+                TextColumn::make('updated_at')->label('Last Update')->since()->sortable(),
+
+
+
+
+            ])
+            ->filters([
+                //
+            ])
+            ->actions([
+                Tables\Actions\ViewAction::make(),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+
+    // // infolist on view page
+    // public static function infolist(Infolist $infolist): Infolist
+    // {
+    //     return $infolist
+    //         ->schema([
+    //             Components\Section::make()
+    //             ->columns(2)
+    //             ->schema([
+                
+    //                     TextEntry::make('kofolCampaign.name'),
+    //                     TextEntry::make('customer.name'),
+    //                     TextEntry::make('user.name'),
+    //                     TextEntry::make('status'),
+    //             ])                    
+    //         ]);
+    // }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListKofolEntries::route('/'),
+            'create' => Pages\CreateKofolEntry::route('/create'),
+            'edit' => Pages\EditKofolEntry::route('/{record}/edit'),
+            'view' => Pages\ViewKofolEntry::route('/{record}'),
+        ];
+    }
+}

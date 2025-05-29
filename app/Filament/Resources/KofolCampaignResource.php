@@ -47,7 +47,10 @@ class KofolCampaignResource extends Resource
                         Forms\Components\DatePicker::make('end_date')
                             ->required()
                             ->native(false)
-                            ->displayFormat('d F Y'),
+                            ->displayFormat('d F Y')
+                            ->minDate(fn (Forms\Get $get) => 
+                                $get('start_date') ? \Carbon\Carbon::parse($get('start_date'))->addDay() : null
+                            ),
                     ])
             ]);
     }

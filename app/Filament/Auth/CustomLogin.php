@@ -29,7 +29,6 @@ class CustomLogin extends Login
     {
         return TextInput::make(name: 'login')
             ->label(label: 'Phone or Email')
-
             ->required()
             ->autocomplete()
             ->autofocus()
