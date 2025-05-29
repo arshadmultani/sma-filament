@@ -16,10 +16,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Columns\TextColumn;
 use App\Models\Chemist;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\MorphToSelect;
 use App\Models\Doctor;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\TextInput;
@@ -33,6 +31,11 @@ use Filament\Infolists\Components;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Support\Enums\FontWeight;
+use Filament\Infolists\Components\Split;
+use Filament\Infolists\Components\Fieldset;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+
 use Icetalker\FilamentTableRepeatableEntry\Infolists\Components\TableRepeatableEntry;
 
 class KofolEntryResource extends Resource
@@ -194,10 +197,6 @@ class KofolEntryResource extends Resource
                 TextColumn::make('invoice_amount')->label('Invoice Amount')->money('INR'),
                 TextColumn::make('created_at')->label('Submission')->since()->sortable(),
                 TextColumn::make('updated_at')->label('Last Update')->since()->sortable(),
-
-
-
-
             ])
             ->filters([
                 //
@@ -213,48 +212,70 @@ class KofolEntryResource extends Resource
     }
 
     // // infolist on view page
-    
+
     public static function infolist(Infolist $infolist): Infolist
     {
         return $infolist
-            ->columns(3)
+            ->columns(4)
             ->schema([
                 Components\Section::make()
-                ->columnSpan(2)
-                    ->columns(2)
+                ->columns(3)
+                ->columnSpan(4)
+                ->schema([
+                    TextEntry::make('kofolCampaign.name'),
+                    TextEntry::make('created_at')->label(label: 'Submission')->dateTime('d-m-y @ H:i'),
+                    TextEntry::make('status')->label('Status')->badge(),
+                ]),
+                Components\Section::make()
+                    ->columns(3)
+                    ->columnSpan(3)
                     ->schema([
-                        TextEntry::make('kofolCampaign.name'),
                         TextEntry::make('customer.name'),
                         TextEntry::make('customer_type')->formatStateUsing(fn($state) => class_basename($state)),
+                        // Have to fix HQ ......
+                        TextEntry::make('user.headquarter.name')->label('Headquarter'),
+
+                    ]),
+                Components\Section::make()
+                    ->columns(1)
+                    ->columnSpan(1)
+                    ->schema([
                         TextEntry::make('user.name'),
-                        TextEntry::make('created_at')->label('Submission')->since(),
-                        TextEntry::make('updated_at')->label('Last Update')->since(),
                         
-                        
+                    ]),
+
+                Components\Section::make()
+                ->columnSpan(3)
+                    ->schema([
+                        TableRepeatableEntry::make('products')// repeater for desktop
+                            ->columnSpan(2)
+                            ->striped()
+                            ->extraAttributes(['class' => 'hidden sm:block']) // Hidden on mobile, visible on sm and up
+                            ->schema([
+                                TextEntry::make('product_id')
+                                    ->columnSpan(2)
+                                    ->label('Product')
+                                    ->formatStateUsing(fn($state) => Product::find($state)?->name ?? ''),
+                                TextEntry::make('quantity')->columnSpan(1),
+                                TextEntry::make('price')->money('INR')->columnSpan(1),
+                            ]),
+                        RepeatableEntry::make('products')  // repeater for mobile
+                            ->columns(2)
+                            ->extraAttributes(['class' => 'block sm:hidden']) // Visible only on mobile
+                            ->schema([
+                                TextEntry::make('product_id')
+                                    ->columnSpan(2)
+                                    ->label('Product')
+                                    ->formatStateUsing(fn($state) => Product::find($state)?->name ?? ''),
+                                TextEntry::make('quantity'),
+                                TextEntry::make('price')->money('INR'),
+                            ]),
                     ]),
                 Components\Section::make()
                     ->columnSpan(1)
-                    ->columns(2)
                     ->schema([
-                        TextEntry::make('user.name')->label('Submitted By'),
-                        TextEntry::make('created_at')->label('Submission')->dateTime('d-m-y @ H:i'),
-                        TextEntry::make('updated_at')->label('Last Update')->dateTime('d-m-y @ H:i'),
-                    ]),
-                Components\Section::make()
-                    ->columnSpan(3)
-                    // ->columns(2)
-                    
-                    ->schema([
-                        TableRepeatableEntry::make('products')->label('Products')
-                        ->columns(3)
-                        ->schema([
-                            TextEntry::make('product'),
-                            TextEntry::make('quantity'),
-                            TextEntry::make('price')->money('INR'),
-                        ]),
-                        TextEntry::make('invoice_amount')->label('Invoice Amount')->money('INR'),
-                        TextEntry::make('status'),
-                        ImageEntry::make('invoice_image')->label('Invoice Image')->circular()->simpleLightbox(),
+                        ImageEntry::make('invoice_image')->label('Invoice')->square()->simpleLightbox()->columnSpan(2),
+                        TextEntry::make('invoice_amount')->label('Total Amount')->money('INR')->weight(FontWeight::Bold),
                     ]),
             ]);
     }
