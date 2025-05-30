@@ -72,7 +72,7 @@ class KofolEntryResource extends Resource
                 // products
                 Repeater::make('products')
                     ->collapsible()
-                    ->columns(3)
+                    ->columns(2)
                     ->addActionLabel('Add Product')
                     ->reorderable(false)
                     ->itemLabel(
@@ -80,8 +80,8 @@ class KofolEntryResource extends Resource
                     )
                     ->minItems(1)
                     ->deleteAction(fn(Action $action) => $action->requiresConfirmation())
-                    ->afterStateUpdated(fn($state, callable $set) => static::updateInvoiceTotal($state, $set))
-                    ->afterStateHydrated(fn($state, callable $set) => static::updateInvoiceTotal($state, $set))
+                    // ->afterStateUpdated(fn($state, callable $set) => static::updateInvoiceTotal($state, $set))
+                    // ->afterStateHydrated(fn($state, callable $set) => static::updateInvoiceTotal($state, $set))
                     ->schema([
                         Select::make('product_id')
                             ->label('Kofol Products')
@@ -90,11 +90,11 @@ class KofolEntryResource extends Resource
                             ->searchable()
                             ->options(static::getKofolProductOptions())
                             ->required()
-                            ->reactive()
-                            ->afterStateUpdated(
-                                fn($state, callable $set, callable $get) =>
-                                static::updateProductPrice($state, $set, $get)
-                            ),
+                            ->reactive(),
+                        // ->afterStateUpdated(
+                        //     fn($state, callable $set, callable $get) =>
+                        //     static::updateProductPrice($state, $set, $get)
+                        // ),
 
                         TextInput::make('quantity')
                             ->numeric()
@@ -102,18 +102,11 @@ class KofolEntryResource extends Resource
                             ->type('number')
                             ->default(1)
                             ->required()
-                            ->reactive()
-                            ->afterStateUpdated(
-                                fn($state, callable $set, callable $get) =>
-                                static::updateQuantityPrice($state, $set, $get)
-                            ),
-
-                        TextInput::make('price')
-                            ->label('Price')
-                            ->numeric()
-                            ->prefix('₹')
-                            ->disabled()
-                            ->dehydrated(true),
+                            ->reactive(),
+                        // ->afterStateUpdated(
+                        //     fn($state, callable $set, callable $get) =>
+                        //     static::updateQuantityPrice($state, $set, $get)
+                        // ),
                     ]),
 
 
@@ -124,13 +117,12 @@ class KofolEntryResource extends Resource
                         TextInput::make('invoice_amount')
                             ->label('Invoice Amount')
                             ->prefix('₹')
-                            ->readOnly()
+                            ->required()
                             ->reactive(),
                         FileUpload::make('invoice_image')
                             ->image()
                             ->downloadable()
                             ->maxSize(2048)
-                            ->imageCropAspectRatio(null)
                             ->required(),
 
 
@@ -144,50 +136,50 @@ class KofolEntryResource extends Resource
             ->pluck('name', 'id');
     }
 
-    private static function updateInvoiceTotal($state, callable $set): void
-    {
-        $total = collect($state)
-            ->pluck('price')
-            ->map(fn($price) => (float) $price)
-            ->sum();
+    // private static function updateInvoiceTotal($state, callable $set): void
+    // {
+    //     $total = collect($state)
+    //         ->pluck('price')
+    //         ->map(fn($price) => (float) $price)
+    //         ->sum();
 
-        $set('invoice_amount', $total);
-    }
+    //     $set('invoice_amount', $total);
+    // }
 
-    private static function updateProductPrice($state, callable $set, callable $get): void
-    {
-        $quantity = $get('quantity') ?: 1;
-        $product = $state ? Product::find($state) : null;
-        $set('price', $product ? $product->price * $quantity : '');
+    // private static function updateProductPrice($state, callable $set, callable $get): void
+    // {
+    //     $quantity = $get('quantity') ?: 1;
+    //     $product = $state ? Product::find($state) : null;
+    //     $set('price', $product ? $product->price * $quantity : '');
 
-        static::recalculateTotal($set, $get);
-    }
+    //     static::recalculateTotal($set, $get);
+    // }
 
-    private static function updateQuantityPrice($state, callable $set, callable $get): void
-    {
-        $productId = $get('product_id');
-        $product = $productId ? Product::find($productId) : null;
-        $set('price', $product ? $product->price * ($state ?: 1) : '');
+    // private static function updateQuantityPrice($state, callable $set, callable $get): void
+    // {
+    //     $productId = $get('product_id');
+    //     $product = $productId ? Product::find($productId) : null;
+    //     $set('price', $product ? $product->price * ($state ?: 1) : '');
 
-        static::recalculateTotal($set, $get);
-    }
+    //     static::recalculateTotal($set, $get);
+    // }
 
-    private static function recalculateTotal(callable $set, callable $get): void
-    {
-        $products = $get('../../products');
-        $total = collect($products)
-            ->pluck('price')
-            ->map(fn($price) => (float) $price)
-            ->sum();
+    // private static function recalculateTotal(callable $set, callable $get): void
+    // {
+    //     $products = $get('../../products');
+    //     $total = collect($products)
+    //         ->pluck('price')
+    //         ->map(fn($price) => (float) $price)
+    //         ->sum();
 
-        $set('../../invoice_amount', $total);
-    }
+    //     $set('../../invoice_amount', $total);
+    // }
 
 
     public static function table(Table $table): Table
     {
         return $table
-            ->paginated([25, 50, 100,250])
+            ->paginated([25, 50, 100, 250])
             ->columns([
                 TextColumn::make('id')->label('ID')
                     ->sortable()
@@ -272,10 +264,10 @@ class KofolEntryResource extends Resource
                                 default => 'secondary'
                             }),
                         TextEntry::make('coupon_code')->label('Coupon Code')
-                        ->visible(fn ($state, $record) => !is_null($state) && $record->status === 'Approved')
-                        ->badge()
-                        ->color('gray'),
-                
+                            ->visible(fn($state, $record) => !is_null($state) && $record->status === 'Approved')
+                            ->badge()
+                            ->color('gray'),
+
                     ]),
                 Components\Section::make()
                     ->columns([
