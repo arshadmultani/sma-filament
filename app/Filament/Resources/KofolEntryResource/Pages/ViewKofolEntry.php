@@ -28,7 +28,6 @@ class ViewKofolEntry extends ViewRecord
             Html2MediaAction::make('print')
                 ->content(fn($record)=>view('filament.kofol-entry-invoice', ['kofolEntry' => $record]))
                 ->print()
-                ->savePdf()
                 ->margin([10, 10, 10, 10])
                 ->icon('heroicon-o-printer')
                 ->label('')

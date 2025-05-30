@@ -187,6 +187,7 @@ class KofolEntryResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->paginated([25, 50, 100,250])
             ->columns([
                 TextColumn::make('id')->label('ID')
                     ->sortable()
@@ -271,7 +272,7 @@ class KofolEntryResource extends Resource
                                 default => 'secondary'
                             }),
                         TextEntry::make('coupon_code')->label('Coupon Code')
-                        ->visible(fn ($state) => !is_null($state))
+                        ->visible(fn ($state, $record) => !is_null($state) && $record->status === 'Approved')
                         ->badge()
                         ->color('gray'),
                 
