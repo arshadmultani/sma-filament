@@ -17,10 +17,12 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('phone');
-            $table->enum('degree', ['MBBS', 'BAHM', 'BAMS', 'MD']);
+            $table->foreignId('qualification_id')->nullable()->constrained()->nullOnDelete();
             $table->string('profile_photo')->nullable();
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('headquarter_id')->constrained();
+            $table->foreignId('headquarter_id')->constrained()->nullOnDelete();
+            $table->string('attachment')->nullable();
+            $table->string('address')->nullable();
             $table->timestamps();
         });
     }

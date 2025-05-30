@@ -13,7 +13,13 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-
+use App\Models\Qualification;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\FileUpload;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Support\Enums\FontWeight;
 class DoctorResource extends Resource
 {
     protected static ?string $model = Doctor::class;
@@ -26,20 +32,33 @@ class DoctorResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')->required(),
-                Forms\Components\TextInput::make('email')->email()->required(),
-                Forms\Components\TextInput::make('phone')->required(),
-                Forms\Components\Select::make('degree')->options([
-                    'MBBS' => 'MBBS',
-                    'BAHM' => 'BAHM',
-                    'BAMS' => 'BAMS',
-                    'MD' => 'MD',
-                ])->required(),
-                Forms\Components\FileUpload::make('profile_photo')
-                    ->image()->directory('doctors/profile_photos'),
-                Forms\Components\Select::make('headquarter_id')
-                    ->relationship('headquarter', 'name')
+                TextInput::make('name')->required()->prefix('Dr. '),
+                Select::make('qualification_id')
+                    ->native(false)
+                    ->label('Qualification')
+                    ->options(Qualification::where('category', 'Doctor')->pluck('name', 'id'))
                     ->required(),
+                TextInput::make('email')->email()->required(),
+                TextInput::make('phone')->required(),
+                TextInput::make('address')->required(),
+                Select::make('headquarter_id')
+                    ->native(false)
+                    ->relationship('headquarter', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->native(false)
+                    ->required(),
+                FileUpload::make('profile_photo')
+                    ->image()->directory('doctors/profile_photos'),
+                FileUpload::make('attachment')
+                    ->directory('doctors/attachments')
+                    ->placeholder('Upload Both or Any One')
+                    ->image()
+                    ->multiple()
+                    ->maxFiles(2)
+                    ->panelLayout('grid')
+                    ->maxSize(1024)
+                    ->label('Visiting Card/Rx. Pad'),
             ]);
     }
 
@@ -47,19 +66,23 @@ class DoctorResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\ImageColumn::make('profile_photo')
+                ImageColumn::make('profile_photo')
                     ->circular()
+                    ->toggleable()
                     ->label('Photo')
                     ->defaultImageUrl('https://www.charak.com/wp-content/uploads/2021/03/charak-logo.svg'),
-                
-                Tables\Columns\TextColumn::make('name'),
-                Tables\Columns\TextColumn::make('headquarter.area.name')
-                    ->label('Area')
+
+                TextColumn::make('name')->weight(FontWeight::Bold),
+                TextColumn::make('headquarter.area.name')
+                    ->toggleable()
+                    ->label('Location')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('email'),
-                Tables\Columns\TextColumn::make('degree'),
-                Tables\Columns\TextColumn::make('phone'),
-                Tables\Columns\TextColumn::make('user.name')->label('Created By'),
+                TextColumn::make('email')->toggleable(),
+                TextColumn::make('qualification.name')->toggleable(),
+                TextColumn::make('phone'),
+                TextColumn::make('user.name')->label('Created By'),
+                TextColumn::make('created_at')->since()->toggleable()->sortable(),
+                TextColumn::make('updated_at')->since()->toggleable()->sortable(),
             ])
             ->filters([
                 //

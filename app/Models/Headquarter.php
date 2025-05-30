@@ -17,4 +17,13 @@ class Headquarter extends Model
     {
         return $this->morphMany(User::class, 'location');
     }
+
+    public function chemists()
+    {
+        return $this->hasMany(Chemist::class);
+    }
+    public function doctors()
+    {
+        return $this->hasMany(Doctor::class);
+    }
 }

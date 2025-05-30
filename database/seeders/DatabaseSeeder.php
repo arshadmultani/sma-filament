@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             RegionSeeder::class,
             AreaSeeder::class,
             HeadquarterSeeder::class,
+            // UserSeeder::class,
             // DoctorSeeder::class,
             // ChemistSeeder::class,
             

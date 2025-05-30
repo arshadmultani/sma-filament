@@ -6,7 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Doctor extends Model
 {
-    protected $fillable = ['name', 'email', 'phone', 'degree', 'profile_photo', 'user_id'];
+        protected $fillable = ['name', 'email', 'phone', 'qualification_id', 'profile_photo', 'user_id', 'headquarter_id', 'attachment', 'address'];
+
+    protected $casts = [
+        'attachment' => 'array',
+    ];
 
     public function user(){
         return $this->belongsTo(User::class);
@@ -21,4 +25,8 @@ class Doctor extends Model
         return $this->morphMany(KofolEntry::class, 'customer');
     }
 
+    public function qualification()
+    {
+        return $this->belongsTo(Qualification::class);
+    }
 }

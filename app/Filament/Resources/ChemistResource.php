@@ -12,6 +12,10 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
+use Filament\Tables\Columns\TextColumn;
+
 
 class ChemistResource extends Resource
 {
@@ -24,12 +28,15 @@ class ChemistResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')->required(),
-                Forms\Components\TextInput::make('phone')->required()->tel(),
-                Forms\Components\TextInput::make('email')->email()->unique(),
-                Forms\Components\TextInput::make('address'),
-                Forms\Components\Select::make('headquarter_id')
+                TextInput::make('name')->required(),
+                TextInput::make('phone')->required()->tel(),
+                TextInput::make('email')->email()->unique(),
+                TextInput::make('address'),
+                Select::make('headquarter_id')
                     ->relationship('headquarter', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->native(false)
                     ->required(),
             ]);
     }
@@ -38,11 +45,17 @@ class ChemistResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name'),
-                Tables\Columns\TextColumn::make('phone'),
-                Tables\Columns\TextColumn::make('email'),
-                Tables\Columns\TextColumn::make('address'),
-                Tables\Columns\TextColumn::make('headquarter.name'),
+                TextColumn::make('name'),
+                TextColumn::make('headquarter.name')
+                    ->toggleable()
+                    ->label('Location')
+                    ->searchable(),
+                TextColumn::make('address'),
+                TextColumn::make('phone')->toggleable(),
+                TextColumn::make('email')->toggleable(),
+                TextColumn::make('user.name')->label('Created By'),
+                TextColumn::make('created_at')->since()->toggleable(),
+                TextColumn::make('updated_at')->since()->toggleable(),
             ])
             ->filters([
                 //
@@ -72,7 +85,7 @@ class ChemistResource extends Resource
             'edit' => Pages\EditChemist::route('/{record}/edit'),
         ];
     }
-//     public static function getNavigationBadge(): ?string
+    //     public static function getNavigationBadge(): ?string
 // {
 //     return static::getModel()::count();
 // }
