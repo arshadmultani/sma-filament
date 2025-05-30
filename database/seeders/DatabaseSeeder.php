@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             
             ProductSeeder::class,
             KofolCampaignSeeder::class,
+            KofolEntrySeeder::class,
         ]);
         $role=Role::create(['name' => 'super_admin']);
 
