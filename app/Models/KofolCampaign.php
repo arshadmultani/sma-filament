@@ -17,4 +17,9 @@ class KofolCampaign extends Model
         'is_active' => 'boolean',
     ];
 
+    public function kofolEntries()
+    {
+        return $this->hasMany(KofolEntry::class);
+    }
+
 }
