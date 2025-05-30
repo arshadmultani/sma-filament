@@ -30,6 +30,7 @@ use Illuminate\Support\Collection;
 use Filament\Infolists\Components;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\RepeatableEntry;
+use Filament\Support\Enums\FontFamily;
 use Filament\Support\Enums\FontWeight;
 use Filament\Infolists\Components\Split;
 use Filament\Infolists\Components\Fieldset;
@@ -255,7 +256,7 @@ class KofolEntryResource extends Resource
                 Components\Section::make()
                     ->columns([
                         'sm' => 2,
-                        'md' => 3,
+                        'md' => 4,
                     ])
                     ->columnSpan(4)
                     ->schema([
@@ -269,6 +270,11 @@ class KofolEntryResource extends Resource
                                 'Rejected' => 'danger',
                                 default => 'secondary'
                             }),
+                        TextEntry::make('coupon_code')->label('Coupon Code')
+                        ->visible(fn ($state) => !is_null($state))
+                        ->badge()
+                        ->color('gray'),
+                
                     ]),
                 Components\Section::make()
                     ->columns([

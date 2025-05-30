@@ -7,7 +7,9 @@ use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Actions\Action;
 use Torgodly\Html2Media\Actions\Html2MediaAction;
-
+use Illuminate\Support\Str;
+use App\Models\KofolEntry;
+use App\Filament\Actions\UpdateStatusAction;
 
 class ViewKofolEntry extends ViewRecord
 {
@@ -22,30 +24,7 @@ class ViewKofolEntry extends ViewRecord
     {
         return [
 
-            Action::make('update_status')
-                ->label('Update Status')
-                ->form([
-                    \Filament\Forms\Components\Select::make('status')
-                        ->label('Status')
-                        ->options([
-                            'Approved' => 'Approved',
-                            'Rejected' => 'Rejected',
-                        ])
-                        ->required(),
-                ])
-                ->action(function (array $data) {
-                    $this->record->status = $data['status'];
-                    $this->record->save();
-
-                    \Filament\Notifications\Notification::make()
-                        ->title('Status updated')
-                        ->body('Status updated to ' . $data['status'])
-                        ->success()
-                        ->send();
-                })
-                ->color('primary')
-                ->icon('heroicon-o-arrow-path'),
-
+            UpdateStatusAction::make(),
             Html2MediaAction::make('print')
                 ->content(fn($record)=>view('filament.kofol-entry-invoice', ['kofolEntry' => $record]))
                 ->print()
