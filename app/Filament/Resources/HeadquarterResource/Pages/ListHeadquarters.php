@@ -19,8 +19,8 @@ class ListHeadquarters extends ListRecords
         ];
     }
     
-    protected function paginateTableQuery(Builder $query): CursorPaginator
-    {
-        return $query->cursorPaginate($this->getTableRecordsPerPage());
-    }
+    // protected function paginateTableQuery(Builder $query): CursorPaginator
+    // {
+    //     return $query->cursorPaginate($this->getTableRecordsPerPage());
+    // }
 }

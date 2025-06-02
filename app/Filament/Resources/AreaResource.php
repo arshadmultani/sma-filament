@@ -18,6 +18,8 @@ class AreaResource extends Resource
     protected static ?string $model = Area::class;
 
     protected static ?string $navigationGroup = 'Territory';
+    protected static ?int $navigationSort = 2;
+
 
     // protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -40,8 +42,9 @@ class AreaResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')->searchable(),
-                Tables\Columns\TextColumn::make('region.name')->searchable(),
+                Tables\Columns\TextColumn::make('name')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('region.name')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('region.zone.name')->searchable()->sortable(),
             ])
             ->filters([
                 //

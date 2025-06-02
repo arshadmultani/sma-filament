@@ -20,6 +20,8 @@ class HeadquarterResource extends Resource
 {
     protected static ?string $model = Headquarter::class;
     protected static ?string $navigationGroup = 'Territory';
+    protected static ?int $navigationSort = 1;
+
 
     // protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -55,6 +57,7 @@ class HeadquarterResource extends Resource
                 Tables\Columns\TextColumn::make('name')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('area.name')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('area.region.name')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('area.region.zone.name')->searchable()->sortable(),
             ])
             ->filters([
                 SelectFilter::make('area.region')

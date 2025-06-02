@@ -12,11 +12,13 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-
+use Filament\Forms\Components\Select;
+use App\Models\Zone;
 class RegionResource extends Resource
 {
     protected static ?string $model = Region::class;
     protected static ?string $navigationGroup = 'Territory';
+    protected static ?int $navigationSort = 3;
 
     // protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -27,6 +29,10 @@ class RegionResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
+                Select::make('zone_id')
+                    ->label('Zone')
+                    ->options(Zone::all()->pluck('name', 'id'))
+                    ->required(),
             ]);
     }
 
@@ -35,6 +41,7 @@ class RegionResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')->searchable(),
+                Tables\Columns\TextColumn::make('zone.name')->searchable()->sortable(),
             ])
             ->filters([
                 //
@@ -60,8 +67,8 @@ class RegionResource extends Resource
     {
         return [
             'index' => Pages\ListRegions::route('/'),
-            'create' => Pages\CreateRegion::route('/create'),
-            'edit' => Pages\EditRegion::route('/{record}/edit'),
+            // 'create' => Pages\CreateRegion::route('/create'),
+            // 'edit' => Pages\EditRegion::route('/{record}/edit'),
         ];
     }
 //     public static function getNavigationBadge(): ?string
