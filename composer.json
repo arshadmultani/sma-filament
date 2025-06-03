@@ -8,6 +8,7 @@
     "require": {
         "php": "^8.2",
         "bezhansalleh/filament-shield": "^3.3",
+        "eightynine/filament-approvals": "3.x-dev",
         "filament/filament": "^3.3",
         "icetalker/filament-table-repeatable-entry": "^1.1",
         "laravel/framework": "^12.0",
