@@ -32,6 +32,11 @@ class ChemistResource extends Resource
                 TextInput::make('phone')->required()->tel(),
                 TextInput::make('email')->email()->unique(),
                 TextInput::make('address'),
+                TextInput::make('town'),
+                Select::make('type')
+                    ->native(false)
+                    ->options(['Ayurvedic' => 'Ayurvedic', 'Allopathic' => 'Allopathic'])
+                    ->required(),
                 Select::make('headquarter_id')
                     ->relationship('headquarter', 'name')
                     ->searchable()
@@ -50,6 +55,8 @@ class ChemistResource extends Resource
                     ->toggleable()
                     ->label('Location')
                     ->searchable(),
+                TextColumn::make('town')->toggleable(),
+                TextColumn::make('type')->toggleable(),
                 TextColumn::make('address'),
                 TextColumn::make('phone')->toggleable(),
                 TextColumn::make('email')->toggleable(),

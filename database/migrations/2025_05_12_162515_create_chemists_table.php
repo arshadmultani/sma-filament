@@ -18,7 +18,8 @@ return new class extends Migration
             $table->string('email');
             $table->string('address');
             $table->foreignId('headquarter_id')->constrained()->nullOnDelete();
-            $table->foreignId('user_id')->constrained()->nullOnDelete();
+            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $table->string('type')->nullable();
             $table->timestamps();
         });
     }

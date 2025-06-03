@@ -22,6 +22,9 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('headquarter_id')->constrained()->nullOnDelete();
             $table->string('attachment')->nullable();
+            $table->string('town')->nullable();
+            $table->string('type')->nullable();
+            $table->string('support_type')->nullable();
             $table->string('address')->nullable();
             $table->timestamps();
         });

@@ -33,14 +33,25 @@ class DoctorResource extends Resource
         return $form
             ->schema([
                 TextInput::make('name')->required()->prefix('Dr. '),
+                Select::make('type')
+                    ->native(false)
+                    ->options(['Ayurvedic' => 'Ayurvedic', 'Allopathic' => 'Allopathic'])
+                    ->required(),
                 Select::make('qualification_id')
                     ->native(false)
                     ->label('Qualification')
                     ->options(Qualification::where('category', 'Doctor')->pluck('name', 'id'))
                     ->required(),
+                Select::make('support_type')
+                    ->native(false)
+                    ->options(['Prescribing' => 'Prescribing', 'Dispensing' => 'Dispensing'])
+                    ->required(),
                 TextInput::make('email')->email()->required(),
                 TextInput::make('phone')->required(),
-                TextInput::make('address')->required(),
+                TextInput::make('address'),
+                TextInput::make('town'),
+
+
                 Select::make('headquarter_id')
                     ->native(false)
                     ->relationship('headquarter', 'name')
@@ -48,9 +59,7 @@ class DoctorResource extends Resource
                     ->preload()
                     ->native(false)
                     ->required(),
-                FileUpload::make('profile_photo')
-                    ->image()->directory('doctors/profile_photos'),
-                FileUpload::make('attachment')
+                    FileUpload::make('attachment')
                     ->directory('doctors/attachments')
                     ->placeholder('Upload Both or Any One')
                     ->image()
@@ -59,6 +68,10 @@ class DoctorResource extends Resource
                     ->panelLayout('grid')
                     ->maxSize(1024)
                     ->label('Visiting Card/Rx. Pad'),
+                FileUpload::make('profile_photo')
+                    ->image()->directory('doctors/profile_photos'),
+                
+
             ]);
     }
 
@@ -72,11 +85,15 @@ class DoctorResource extends Resource
                     ->label('Photo')
                     ->defaultImageUrl('https://www.charak.com/wp-content/uploads/2021/03/charak-logo.svg'),
 
-                TextColumn::make('name')->weight(FontWeight::Bold),
+                TextColumn::make('name')->weight(FontWeight::Bold)->label('Dr.')->searchable(),
                 TextColumn::make('headquarter.area.name')
                     ->toggleable()
-                    ->label('Location')
+                    ->label('HQ')
                     ->searchable(),
+                    TextColumn::make('town')->toggleable(),
+
+                TextColumn::make('type')->toggleable(),
+                TextColumn::make('support_type')->toggleable()->label('Support'),
                 TextColumn::make('email')->toggleable(),
                 TextColumn::make('qualification.name')->toggleable(),
                 TextColumn::make('phone'),

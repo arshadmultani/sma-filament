@@ -11,7 +11,7 @@ class ChemistSeeder extends Seeder
     public function run(): void
     {
         $headquarterIds = Headquarter::pluck('id')->toArray();
-
+        $types = ['Ayurvedic', 'Allopathic'];
         for ($i = 0; $i < 100; $i++) {
             Chemist::create([
                 'name' => fake()->name(),
@@ -19,6 +19,8 @@ class ChemistSeeder extends Seeder
                 'email' => fake()->unique()->safeEmail(),
                 'address' => fake()->address(),
                 'headquarter_id' => fake()->randomElement($headquarterIds),
+                'type' => fake()->randomElement($types),
+                'user_id' => null,
             ]);
         }
     }

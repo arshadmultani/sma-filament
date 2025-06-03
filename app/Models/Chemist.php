@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Chemist extends Model
 {
-    protected $fillable = ['name', 'phone', 'email', 'address', 'headquarter_id'];
+    protected $fillable = ['name', 'phone', 'email', 'address', 'headquarter_id','type'];
 
     public function headquarter(){
         return $this->belongsTo(Headquarter::class);
