@@ -80,6 +80,7 @@ class AdminPanelProvider extends PanelProvider
             ->plugins([
                 FilamentShieldPlugin::make(),
                 SimpleLightBoxPlugin::make(),
+                \RickDBCN\FilamentEmail\FilamentEmail::make()
             ])
             ->discoverClusters(in: app_path('Filament/Clusters'), for: 'App\\Filament\\Clusters')
             ->databaseNotifications()
