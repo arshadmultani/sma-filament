@@ -24,7 +24,7 @@ return [
         ],
         'has_title_case_model_label' => false,
     ],
-
+    
     'keep_email_for_days' => 150,
 
     'label' => null,
@@ -38,7 +38,7 @@ return [
     ],
 
     'pagination_page_options' => [
-        10, 25, 50, 'all',
+        50, 100, 250, 500, 
     ],
 
     'attachments_disk' => 'local',
