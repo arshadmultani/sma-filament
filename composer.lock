@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0c3304b0bfe1f3e6c2b8ad8c22fcf661",
+    "content-hash": "01a5980626684b84f32c4654aa4c4c8b",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -1071,77 +1071,6 @@
                 }
             ],
             "time": "2025-03-06T22:45:56+00:00"
-        },
-        {
-            "name": "eightynine/filament-approvals",
-            "version": "3.x-dev",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/eighty9nine/filament-approvals.git",
-                "reference": "3071be5b3c071391c5be4a78520b80f971977f25"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/eighty9nine/filament-approvals/zipball/3071be5b3c071391c5be4a78520b80f971977f25",
-                "reference": "3071be5b3c071391c5be4a78520b80f971977f25",
-                "shasum": ""
-            },
-            "require": {
-                "filament/filament": "^3.0",
-                "illuminate/contracts": "^10.0|^11.0|^12.0",
-                "php": "^8.2",
-                "ringlesoft/laravel-process-approval": "^1.0",
-                "spatie/laravel-package-tools": "^1.15.0",
-                "spatie/laravel-permission": "^6.1"
-            },
-            "require-dev": {
-                "nunomaduro/collision": "^8.0",
-                "orchestra/testbench": "^9.0",
-                "pestphp/pest": "^2.0",
-                "pestphp/pest-plugin-arch": "^2.0",
-                "pestphp/pest-plugin-laravel": "^2.0"
-            },
-            "default-branch": true,
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "aliases": {
-                        "Approval": "EightyNine\\Approvals\\Facades\\Approval"
-                    },
-                    "providers": [
-                        "EightyNine\\Approvals\\ApprovalServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "EightyNine\\Approvals\\": "src/",
-                    "EightyNine\\Approvals\\Database\\Factories\\": "database/factories/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Eighty Nine",
-                    "email": "eighty9nine@gmail.com",
-                    "role": "Developer"
-                }
-            ],
-            "description": "Manage approval processes in your filament application",
-            "homepage": "https://github.com/eightynine/filament-approvals",
-            "keywords": [
-                "eightynine",
-                "filament-approvals",
-                "laravel"
-            ],
-            "support": {
-                "issues": "https://github.com/eightynine/filament-approvals/issues",
-                "source": "https://github.com/eightynine/filament-approvals"
-            },
-            "time": "2025-05-25T12:28:33+00:00"
         },
         {
             "name": "filament/actions",
@@ -5139,75 +5068,6 @@
                 "source": "https://github.com/RickDBCN/filament-email/tree/v1.10.0"
             },
             "time": "2025-05-25T15:54:37+00:00"
-        },
-        {
-            "name": "ringlesoft/laravel-process-approval",
-            "version": "1.1.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/ringlesoft/laravel-process-approval.git",
-                "reference": "4ad29a8aaf232fff29ee8d635cbf8bcbd3e3c8d9"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/ringlesoft/laravel-process-approval/zipball/4ad29a8aaf232fff29ee8d635cbf8bcbd3e3c8d9",
-                "reference": "4ad29a8aaf232fff29ee8d635cbf8bcbd3e3c8d9",
-                "shasum": ""
-            },
-            "require": {
-                "illuminate/auth": "^10|^11|^12",
-                "illuminate/broadcasting": "^10|^11|^12",
-                "illuminate/database": "^10|^11|^12",
-                "illuminate/routing": "^10|^11|^12",
-                "php": ">=8.1"
-            },
-            "require-dev": {
-                "roave/security-advisories": "dev-latest"
-            },
-            "type": "laravel-package",
-            "extra": {
-                "laravel": {
-                    "aliases": {
-                        "ProcessApproval": "RingleSoft\\LaravelProcessApproval\\Facade"
-                    },
-                    "providers": [
-                        "RingleSoft\\LaravelProcessApproval\\LaravelProcessApprovalServiceProvider"
-                    ],
-                    "dont-discover": []
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "RingleSoft\\LaravelProcessApproval\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "David Ringle",
-                    "email": "ringunger@gmail.com",
-                    "homepage": "https://ringlesoft.com",
-                    "role": "Developer"
-                }
-            ],
-            "description": "A package to handle process approval flow in a laravel application.",
-            "homepage": "https://ringlesoft.com/packages/laravel-process-approval",
-            "keywords": [
-                "approval",
-                "approve",
-                "flow",
-                "laravel",
-                "procedure",
-                "ringlesoft"
-            ],
-            "support": {
-                "issues": "https://github.com/ringlesoft/laravel-process-approval/issues",
-                "source": "https://github.com/ringlesoft/laravel-process-approval/tree/1.1.1"
-            },
-            "time": "2025-04-03T09:30:16+00:00"
         },
         {
             "name": "ryangjchandler/blade-capture-directive",
@@ -11002,9 +10862,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "eightynine/filament-approvals": 20
-    },
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
