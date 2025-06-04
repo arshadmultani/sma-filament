@@ -3,8 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use EightyNine\Approvals\Models\ApprovableModel;
 
-class Doctor extends Model
+
+class Doctor extends ApprovableModel
 {
         protected $fillable = ['name', 'email', 'phone', 'qualification_id', 'profile_photo', 'user_id', 'headquarter_id', 'attachment', 'address','type','support_type','town'];
 

@@ -17,9 +17,16 @@ use App\Models\Qualification;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\FileUpload;
+use Filament\Infolists\Components\Fieldset;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Support\Enums\FontWeight;
+use Filament\Tables\Actions\Action;
+use Filament\Infolists\Infolist;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\Section;
+
 class DoctorResource extends Resource
 {
     protected static ?string $model = Doctor::class;
@@ -59,7 +66,7 @@ class DoctorResource extends Resource
                     ->preload()
                     ->native(false)
                     ->required(),
-                    FileUpload::make('attachment')
+                FileUpload::make('attachment')
                     ->directory('doctors/attachments')
                     ->placeholder('Upload Both or Any One')
                     ->image()
@@ -70,7 +77,7 @@ class DoctorResource extends Resource
                     ->label('Visiting Card/Rx. Pad'),
                 FileUpload::make('profile_photo')
                     ->image()->directory('doctors/profile_photos'),
-                
+
 
             ]);
     }
@@ -82,15 +89,24 @@ class DoctorResource extends Resource
                 ImageColumn::make('profile_photo')
                     ->circular()
                     ->toggleable()
-                    ->label('Photo')
-                    ->defaultImageUrl('https://www.charak.com/wp-content/uploads/2021/03/charak-logo.svg'),
+                    ->label('Photo'),
 
                 TextColumn::make('name')->weight(FontWeight::Bold)->label('Dr.')->searchable(),
-                TextColumn::make('headquarter.area.name')
+                TextColumn::make('town')->toggleable(),
+                TextColumn::make('headquarter.name')
                     ->toggleable()
                     ->label('HQ')
                     ->searchable(),
-                    TextColumn::make('town')->toggleable(),
+
+                TextColumn::make('headquarter.area.name')
+                    ->toggleable()
+                    ->label('Area')
+                    ->searchable(),
+                TextColumn::make('headquarter.area.region.name')
+                    ->toggleable()
+                    ->label('Region')
+                    ->searchable(),
+
 
                 TextColumn::make('type')->toggleable(),
                 TextColumn::make('support_type')->toggleable()->label('Support'),
@@ -100,12 +116,14 @@ class DoctorResource extends Resource
                 TextColumn::make('user.name')->label('Created By'),
                 TextColumn::make('created_at')->since()->toggleable()->sortable(),
                 TextColumn::make('updated_at')->since()->toggleable()->sortable(),
+
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+
+                Tables\Actions\ViewAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -113,6 +131,62 @@ class DoctorResource extends Resource
                 ]),
             ]);
     }
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+
+            ->schema([
+
+                Section::make()
+                    ->columns(3)
+                    ->schema([
+                        ImageEntry::make('profile_photo')
+                            ->simpleLightbox()
+
+                            ->visible(fn($state) => !is_null($state))
+                            ->label('Photo')->circular(),
+
+                        Section::make()
+                            ->columns(2)
+                            ->columnSpan(2)
+                            ->schema([
+                                TextEntry::make('type'),
+                                TextEntry::make('support_type'),
+                                TextEntry::make('qualification.name'),
+                                TextEntry::make('town'),
+                            ]),
+
+                    ]),
+
+                Section::make('')
+                    ->columns(3)
+                    ->schema([
+
+                        TextEntry::make('address'),
+                        TextEntry::make('email'),
+                        TextEntry::make('phone'),
+                        TextEntry::make('headquarter.name'),
+                        TextEntry::make('headquarter.area.name'),
+                        TextEntry::make('headquarter.area.region.name'),
+
+
+
+                        // TextEntry::make('created_at')->since()->label('Created'),
+                        // TextEntry::make('user.name'),
+                    ]),
+                Section::make()
+                    ->columns(3)
+                    ->schema([
+                        ImageEntry::make('attachment')
+                            ->simpleLightbox()
+                            ->label('Visiting Card/Rx. Pad'),
+                        
+                    ]),
+
+            ]);
+    }
+
+
 
     public static function getRelations(): array
     {
@@ -127,6 +201,7 @@ class DoctorResource extends Resource
             'index' => Pages\ListDoctors::route('/'),
             'create' => Pages\CreateDoctor::route('/create'),
             'edit' => Pages\EditDoctor::route('/{record}/edit'),
+            'view' => Pages\ViewDoctor::route('/{record}'),
         ];
     }
     // public static function getNavigationBadge(): ?string

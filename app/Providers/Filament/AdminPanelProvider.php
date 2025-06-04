@@ -77,6 +77,7 @@ class AdminPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
+            ->breadcrumbs(false)
             ->plugins([
                 FilamentShieldPlugin::make()->gridColumns([
                     'default' => 1,
@@ -93,6 +94,7 @@ class AdminPanelProvider extends PanelProvider
                     'default' => 1,
                     'sm' => 2,
                 ]),
+                
                 SimpleLightBoxPlugin::make(),
                 \RickDBCN\FilamentEmail\FilamentEmail::make(),
                 \EightyNine\Approvals\ApprovalPlugin::make(),
