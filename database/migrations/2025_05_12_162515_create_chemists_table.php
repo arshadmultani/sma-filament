@@ -21,6 +21,7 @@ return new class extends Migration
             $table->foreignId('headquarter_id')->constrained()->nullOnDelete();
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
             $table->string('type')->nullable();
+            $table->string('status')->default('pending');
             $table->timestamps();
         });
     }

@@ -37,7 +37,7 @@ use Filament\Infolists\Components\Fieldset;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Icetalker\FilamentTableRepeatableEntry\Infolists\Components\TableRepeatableEntry;
-use App\Filament\Actions\UpdateStatusAction;
+use App\Filament\Actions\UpdateKofolStatusAction;
 
 class KofolEntryResource extends Resource
 {
@@ -60,8 +60,12 @@ class KofolEntryResource extends Resource
                 // customer details
                 MorphToSelect::make('customer')
                     ->types([
-                        MorphToSelect\Type::make(Doctor::class)->titleAttribute('name'),
-                        MorphToSelect\Type::make(Chemist::class)->titleAttribute('name'),
+                        MorphToSelect\Type::make(Doctor::class)
+                            ->titleAttribute('name')
+                            ->modifyOptionsQueryUsing(fn ($query) => $query->where('status', 'Approved')),
+                        MorphToSelect\Type::make(Chemist::class)
+                            ->titleAttribute('name')
+                            ->modifyOptionsQueryUsing(fn ($query) => $query->where('status', 'Approved')),
                     ])
                     ->native(false)
                     ->preload()
@@ -234,7 +238,7 @@ class KofolEntryResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
-                    UpdateStatusAction::makeBulk(),
+                    UpdateKofolStatusAction::makeBulk(),
                 ]),
             ]);
     }

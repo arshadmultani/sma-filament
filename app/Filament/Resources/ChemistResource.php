@@ -15,17 +15,33 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Infolists\Infolist;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\Section;
+use App\Filament\Actions\UpdateStatusAction;
+use Filament\Tables\Filters\SelectFilter;
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 
 
-class ChemistResource extends Resource
+class ChemistResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = Chemist::class;
     protected static ?string $navigationGroup = 'Customer';
 
+    public static function getPermissionPrefixes(): array
+    {
+        return [
+            'view',
+            'view_any',
+            'create',
+            'update',
+            'delete',
+            'delete_any',
+            'update_status'
+        ];
+    }
     // protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Form $form): Form
@@ -56,6 +72,19 @@ class ChemistResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name'),
+                IconColumn::make('status')
+                    ->icon(fn (string $state): string => match ($state) {
+                        'Pending' => 'heroicon-o-clock',
+                        'Approved' => 'heroicon-o-check-circle',
+                        'Rejected' => 'heroicon-o-x-circle',
+                        default => 'heroicon-o-question-mark-circle',
+                    })
+                    ->color(fn (string $state): string => match ($state) {
+                        'Pending' => 'warning',
+                        'Approved' => 'success',
+                        'Rejected' => 'danger',
+                        default => 'secondary',
+                    }),
                 TextColumn::make('headquarter.name')
                     ->toggleable()
                     ->label('Location')
@@ -70,14 +99,20 @@ class ChemistResource extends Resource
                 TextColumn::make('updated_at')->since()->toggleable(),
             ])
             ->filters([
-                //
+                SelectFilter::make('status')
+                    ->options([
+                        'Pending' => 'Pending',
+                        'Approved' => 'Approved',
+                        'Rejected' => 'Rejected',
+                    ]),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    UpdateStatusAction::makeBulk(),
+                    // Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }

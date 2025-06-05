@@ -26,9 +26,25 @@ use Filament\Infolists\Infolist;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\Section;
+use Filament\Tables\Columns\IconColumn;
+use App\Filament\Actions\UpdateStatusAction;
+use Filament\Tables\Filters\SelectFilter;
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 
-class DoctorResource extends Resource
+class DoctorResource extends Resource implements HasShieldPermissions
 {
+
+    public static function getPermissionPrefixes(): array{
+        return [
+            'view',
+            'view_any',
+            'create',
+            'update',
+            'delete',
+            'delete_any',
+            'update_status'
+        ];
+    }
     protected static ?string $model = Doctor::class;
 
     protected static ?string $navigationGroup = 'Customer';
@@ -57,7 +73,7 @@ class DoctorResource extends Resource
                 TextInput::make('phone')->required(),
                 TextInput::make('address'),
                 TextInput::make('town'),
-
+                
 
                 Select::make('headquarter_id')
                     ->native(false)
@@ -92,6 +108,20 @@ class DoctorResource extends Resource
                     ->label('Photo'),
 
                 TextColumn::make('name')->weight(FontWeight::Bold)->label('Dr.')->searchable(),
+
+                IconColumn::make('status')
+                    ->icon(fn (string $state): string => match ($state) {
+                        'Pending' => 'heroicon-o-clock',
+                        'Approved' => 'heroicon-o-check-circle',
+                        'Rejected' => 'heroicon-o-x-circle',
+                        default => 'heroicon-o-question-mark-circle',
+                    })
+                    ->color(fn (string $state): string => match ($state) {
+                        'Pending' => 'warning',
+                        'Approved' => 'success',
+                        'Rejected' => 'danger',
+                        default => 'secondary',
+                    }),
                 TextColumn::make('town')->toggleable(),
                 TextColumn::make('headquarter.name')
                     ->toggleable()
@@ -119,7 +149,12 @@ class DoctorResource extends Resource
 
             ])
             ->filters([
-                //
+                SelectFilter::make('status')
+                    ->options([
+                        'Pending' => 'Pending',
+                        'Approved' => 'Approved',
+                        'Rejected' => 'Rejected',
+                    ]),
             ])
             ->actions([
 
@@ -127,7 +162,8 @@ class DoctorResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    UpdateStatusAction::makeBulk(),
+                    // Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }

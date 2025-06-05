@@ -5,14 +5,20 @@ namespace App\Filament\Actions;
 use Filament\Forms;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\GenericMail;
 use Filament\Forms\Components\Select;
 use Filament\Actions\Action;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
+use Filament\Support\Enums\Alignment;
 
-class UpdateStatusAction
+
+class UpdateKofolStatusAction
 {
+
+    private static int $maxCouponAttempts = 100;
     private static int $bulkProcessLimit = 500; // Prevent memory issues
     
     public static function make(): Action
@@ -24,6 +30,7 @@ class UpdateStatusAction
                 Select::make('status')
                     ->native(false)
                     ->label('Status')
+                    ->native(false)
                     ->options(fn($record) => collect([
                         'Pending' => 'Pending',
                         'Approved' => 'Approved',
@@ -36,23 +43,59 @@ class UpdateStatusAction
                     DB::beginTransaction();
                     
                     $record->status = $data['status'];
+                    $couponGenerated = false;
+                    $generatedCouponCode = null;
+                    
+                    if ($data['status'] === 'Approved' && empty($record->coupon_code)) {
+                        $couponCode = self::generateUniqueCouponCode(get_class($record));
+                        
+                        if ($couponCode === null) {
+                            DB::rollBack();
+                            Notification::make()
+                                ->title('Error')
+                                ->body('Unable to generate unique coupon code after multiple attempts')
+                                ->danger()
+                                ->send();
+                            return;
+                        }
+                        
+                        $record->coupon_code = $couponCode;
+                        $couponGenerated = true;
+                        $generatedCouponCode = $couponCode;
+                    }
+                    
                     $record->save();
                     DB::commit();
 
+                    // Dynamic success message
+                    $message = 'Status updated to ' . $data['status'];
+                    if ($couponGenerated) {
+                        $message .= '. Coupon code generated: ' . $generatedCouponCode;
+                    }
+
                     Notification::make()
                         ->title('Status updated successfully')
-                        ->body('Status updated to ' . $data['status'])
+                        ->body($message)
                         ->success()
                         ->send();
                         
                 } catch (QueryException $e) {
                     DB::rollBack();
                     
-                    Notification::make()
-                        ->title('Database Error')
-                        ->body('Failed to update record. Please try again.')
-                        ->danger()
-                        ->send();
+                    // Handle duplicate coupon code constraint violation
+                    if (str_contains($e->getMessage(), 'coupon_code')) {
+                        Notification::make()
+                            ->title('Error')
+                            ->body('Coupon code conflict detected. Please try again.')
+                            ->danger()
+                            ->send();
+                    } else {
+                        Notification::make()
+                            ->title('Database Error')
+                            ->body('Failed to update record. Please try again.')
+                            ->danger()
+                            ->send();
+                    }
                 } catch (\Exception $e) {
                     DB::rollBack();
                     
@@ -106,7 +149,10 @@ class UpdateStatusAction
                     return;
                 }
                 
+                $couponsGenerated = 0;
+                $failedCoupons = 0;
                 $failedUpdates = 0;
+                $modelClass = $recordsCollection->first() ? get_class($recordsCollection->first()) : null;
                 
                 try {
                     DB::beginTransaction();
@@ -114,6 +160,18 @@ class UpdateStatusAction
                     foreach ($recordsCollection as $record) {
                         try {
                             $record->status = $data['status'];
+                            
+                            if ($data['status'] === 'Approved' && empty($record->coupon_code)) {
+                                $couponCode = self::generateUniqueCouponCode($modelClass);
+                                
+                                if ($couponCode !== null) {
+                                    $record->coupon_code = $couponCode;
+                                    $couponsGenerated++;
+                                } else {
+                                    $failedCoupons++;
+                                }
+                            }
+                            
                             $record->save();
                             
                         } catch (\Exception $e) {
@@ -137,15 +195,23 @@ class UpdateStatusAction
                     return;
                 }
 
-                // Build success message
+                // Build comprehensive success message
                 $message = "Status updated to {$data['status']} for " . ($totalRecords - $failedUpdates) . " of {$totalRecords} records.";
+                
+                if ($couponsGenerated > 0) {
+                    $message .= " {$couponsGenerated} coupon codes generated.";
+                }
+                
+                if ($failedCoupons > 0) {
+                    $message .= " {$failedCoupons} coupon codes failed to generate.";
+                }
                 
                 if ($failedUpdates > 0) {
                     $message .= " {$failedUpdates} records failed to update.";
                 }
 
-                $notificationType = $failedUpdates > 0 ? 'warning' : 'success';
-                $notificationTitle = $failedUpdates > 0 ? 'Bulk update completed with issues' : 'Bulk update successful';
+                $notificationType = ($failedCoupons > 0 || $failedUpdates > 0) ? 'warning' : 'success';
+                $notificationTitle = ($failedCoupons > 0 || $failedUpdates > 0) ? 'Bulk update completed with issues' : 'Bulk update successful';
 
                 Notification::make()
                     ->title($notificationTitle)
@@ -156,4 +222,31 @@ class UpdateStatusAction
             ->color('primary')
             ->icon('heroicon-o-arrow-path');
     }
-} 
+
+    /**
+     * Generate a unique coupon code with proper model handling
+     */
+    private static function generateUniqueCouponCode(?string $modelClass = null): ?int
+    {
+        if (!$modelClass) {
+            return null;
+        }
+        
+        $attempts = 0;
+        
+        do {
+            $couponCode = random_int(100000, 999999);
+            $attempts++;
+            
+            try {
+                $exists = $modelClass::where('coupon_code', $couponCode)->exists();
+            } catch (\Exception $e) {
+                // If query fails, assume it exists to be safe
+                $exists = true;
+            }
+            
+        } while ($exists && $attempts < self::$maxCouponAttempts);
+        
+        return $attempts >= self::$maxCouponAttempts ? null : $couponCode;
+    }
+}

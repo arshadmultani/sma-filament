@@ -105,4 +105,12 @@ class ChemistPolicy
     {
         return $user->can('reorder_chemist');
     }
+
+    //Determine whether the user can update the status of the chemist to be viewable in campaigns
+    //This is a special permission that is not related to the other permissions
+    public function updateStatus(User $user, Chemist $chemist): bool
+    {
+        return $user->can('update_status_chemist');
+    }
+
 }

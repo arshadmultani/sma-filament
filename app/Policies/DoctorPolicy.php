@@ -105,4 +105,11 @@ class DoctorPolicy
     {
         return $user->can('reorder_doctor');
     }
+
+    //Determine whether the user can update the status of the doctor to be viewable in campaigns
+    //This is a special permission that is not related to the other permissions
+    public function updateStatus(User $user, Doctor $doctor): bool
+    {
+        return $user->can('update_status_doctor');
+    }
 }

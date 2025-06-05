@@ -9,7 +9,7 @@ use Filament\Actions\Action;
 use Torgodly\Html2Media\Actions\Html2MediaAction;
 use Illuminate\Support\Str;
 use App\Models\KofolEntry;
-use App\Filament\Actions\UpdateStatusAction;
+use App\Filament\Actions\UpdateKofolStatusAction;
 
 class ViewKofolEntry extends ViewRecord
 {
@@ -24,7 +24,7 @@ class ViewKofolEntry extends ViewRecord
     {
         return [
 
-            UpdateStatusAction::make(),
+            UpdateKofolStatusAction::make(),
             Html2MediaAction::make('print')
                 ->content(fn($record)=>view('filament.kofol-entry-invoice', ['kofolEntry' => $record]))
                 ->print()

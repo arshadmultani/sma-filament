@@ -26,6 +26,7 @@ return new class extends Migration
             $table->string('type')->nullable();
             $table->string('support_type')->nullable();
             $table->string('address')->nullable();
+            $table->string('status')->default('pending');
             $table->timestamps();
         });
     }
