@@ -63,7 +63,7 @@ class DoctorPolicy
      */
     public function forceDelete(User $user, Doctor $doctor): bool
     {
-        return $user->can('force_delete_doctor');
+        return $user->can('{{ ForceDelete }}');
     }
 
     /**
@@ -71,7 +71,7 @@ class DoctorPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any_doctor');
+        return $user->can('{{ ForceDeleteAny }}');
     }
 
     /**
@@ -79,7 +79,7 @@ class DoctorPolicy
      */
     public function restore(User $user, Doctor $doctor): bool
     {
-        return $user->can('restore_doctor');
+        return $user->can('{{ Restore }}');
     }
 
     /**
@@ -87,7 +87,7 @@ class DoctorPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_doctor');
+        return $user->can('{{ RestoreAny }}');
     }
 
     /**
@@ -95,7 +95,7 @@ class DoctorPolicy
      */
     public function replicate(User $user, Doctor $doctor): bool
     {
-        return $user->can('replicate_doctor');
+        return $user->can('{{ Replicate }}');
     }
 
     /**
@@ -103,13 +103,6 @@ class DoctorPolicy
      */
     public function reorder(User $user): bool
     {
-        return $user->can('reorder_doctor');
-    }
-
-    //Determine whether the user can update the status of the doctor to be viewable in campaigns
-    //This is a special permission that is not related to the other permissions
-    public function updateStatus(User $user, Doctor $doctor): bool
-    {
-        return $user->can('update_status_doctor');
+        return $user->can('{{ Reorder }}');
     }
 }

@@ -3,10 +3,10 @@
 namespace App\Policies;
 
 use App\Models\User;
-use App\Models\Chemist;
+use App\Models\Zone;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class ChemistPolicy
+class ZonePolicy
 {
     use HandlesAuthorization;
 
@@ -15,15 +15,15 @@ class ChemistPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_chemist');
+        return $user->can('view_any_zone');
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Chemist $chemist): bool
+    public function view(User $user, Zone $zone): bool
     {
-        return $user->can('view_chemist');
+        return $user->can('view_zone');
     }
 
     /**
@@ -31,23 +31,23 @@ class ChemistPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create_chemist');
+        return $user->can('create_zone');
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Chemist $chemist): bool
+    public function update(User $user, Zone $zone): bool
     {
-        return $user->can('update_chemist');
+        return $user->can('update_zone');
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Chemist $chemist): bool
+    public function delete(User $user, Zone $zone): bool
     {
-        return $user->can('delete_chemist');
+        return $user->can('delete_zone');
     }
 
     /**
@@ -55,15 +55,15 @@ class ChemistPolicy
      */
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any_chemist');
+        return $user->can('delete_any_zone');
     }
 
     /**
      * Determine whether the user can permanently delete.
      */
-    public function forceDelete(User $user, Chemist $chemist): bool
+    public function forceDelete(User $user, Zone $zone): bool
     {
-        return $user->can('{{ ForceDelete }}');
+        return $user->can('force_delete_zone');
     }
 
     /**
@@ -71,15 +71,15 @@ class ChemistPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('{{ ForceDeleteAny }}');
+        return $user->can('force_delete_any_zone');
     }
 
     /**
      * Determine whether the user can restore.
      */
-    public function restore(User $user, Chemist $chemist): bool
+    public function restore(User $user, Zone $zone): bool
     {
-        return $user->can('{{ Restore }}');
+        return $user->can('restore_zone');
     }
 
     /**
@@ -87,15 +87,15 @@ class ChemistPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('{{ RestoreAny }}');
+        return $user->can('restore_any_zone');
     }
 
     /**
      * Determine whether the user can replicate.
      */
-    public function replicate(User $user, Chemist $chemist): bool
+    public function replicate(User $user, Zone $zone): bool
     {
-        return $user->can('{{ Replicate }}');
+        return $user->can('replicate_zone');
     }
 
     /**
@@ -103,6 +103,6 @@ class ChemistPolicy
      */
     public function reorder(User $user): bool
     {
-        return $user->can('{{ Reorder }}');
+        return $user->can('reorder_zone');
     }
 }

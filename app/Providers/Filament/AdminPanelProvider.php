@@ -96,7 +96,7 @@ class AdminPanelProvider extends PanelProvider
                 ]),
                 
                 SimpleLightBoxPlugin::make(),
-                \RickDBCN\FilamentEmail\FilamentEmail::make(),
+                // \RickDBCN\FilamentEmail\FilamentEmail::make(),
             ])
             ->discoverClusters(in: app_path('Filament/Clusters'), for: 'App\\Filament\\Clusters')
             ->databaseNotifications()

@@ -3,10 +3,10 @@
 namespace App\Policies;
 
 use App\Models\User;
-use App\Models\Chemist;
+use App\Models\KofolCampaign;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class ChemistPolicy
+class KofolCampaignPolicy
 {
     use HandlesAuthorization;
 
@@ -15,15 +15,15 @@ class ChemistPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_chemist');
+        return $user->can('view_any_kofol::campaign');
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Chemist $chemist): bool
+    public function view(User $user, KofolCampaign $kofolCampaign): bool
     {
-        return $user->can('view_chemist');
+        return $user->can('view_kofol::campaign');
     }
 
     /**
@@ -31,23 +31,23 @@ class ChemistPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create_chemist');
+        return $user->can('create_kofol::campaign');
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Chemist $chemist): bool
+    public function update(User $user, KofolCampaign $kofolCampaign): bool
     {
-        return $user->can('update_chemist');
+        return $user->can('update_kofol::campaign');
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Chemist $chemist): bool
+    public function delete(User $user, KofolCampaign $kofolCampaign): bool
     {
-        return $user->can('delete_chemist');
+        return $user->can('delete_kofol::campaign');
     }
 
     /**
@@ -55,13 +55,13 @@ class ChemistPolicy
      */
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any_chemist');
+        return $user->can('delete_any_kofol::campaign');
     }
 
     /**
      * Determine whether the user can permanently delete.
      */
-    public function forceDelete(User $user, Chemist $chemist): bool
+    public function forceDelete(User $user, KofolCampaign $kofolCampaign): bool
     {
         return $user->can('{{ ForceDelete }}');
     }
@@ -77,7 +77,7 @@ class ChemistPolicy
     /**
      * Determine whether the user can restore.
      */
-    public function restore(User $user, Chemist $chemist): bool
+    public function restore(User $user, KofolCampaign $kofolCampaign): bool
     {
         return $user->can('{{ Restore }}');
     }
@@ -93,7 +93,7 @@ class ChemistPolicy
     /**
      * Determine whether the user can replicate.
      */
-    public function replicate(User $user, Chemist $chemist): bool
+    public function replicate(User $user, KofolCampaign $kofolCampaign): bool
     {
         return $user->can('{{ Replicate }}');
     }

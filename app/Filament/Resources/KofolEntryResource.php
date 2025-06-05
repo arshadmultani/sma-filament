@@ -38,9 +38,21 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Icetalker\FilamentTableRepeatableEntry\Infolists\Components\TableRepeatableEntry;
 use App\Filament\Actions\UpdateKofolStatusAction;
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 
-class KofolEntryResource extends Resource
+class KofolEntryResource extends Resource implements HasShieldPermissions
 {
+    public static function getPermissionPrefixes(): array{
+        return [
+            'view',
+            'view_any',
+            'create',
+            'update',
+            'delete',
+            'delete_any',
+            'update_status'
+        ];
+    }
     protected static ?string $model = KofolEntry::class;
 
     protected static ?string $navigationGroup = 'Kofol Swarna Varsha';
