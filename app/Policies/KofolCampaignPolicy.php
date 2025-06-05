@@ -63,7 +63,7 @@ class KofolCampaignPolicy
      */
     public function forceDelete(User $user, KofolCampaign $kofolCampaign): bool
     {
-        return $user->can('{{ ForceDelete }}');
+        return $user->can('force_delete_kofol::campaign');
     }
 
     /**
@@ -71,7 +71,7 @@ class KofolCampaignPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('{{ ForceDeleteAny }}');
+        return $user->can('force_delete_any_kofol::campaign');
     }
 
     /**
@@ -79,7 +79,7 @@ class KofolCampaignPolicy
      */
     public function restore(User $user, KofolCampaign $kofolCampaign): bool
     {
-        return $user->can('{{ Restore }}');
+        return $user->can('restore_kofol::campaign');
     }
 
     /**
@@ -87,7 +87,7 @@ class KofolCampaignPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('{{ RestoreAny }}');
+        return $user->can('restore_any_kofol::campaign');
     }
 
     /**
@@ -95,7 +95,7 @@ class KofolCampaignPolicy
      */
     public function replicate(User $user, KofolCampaign $kofolCampaign): bool
     {
-        return $user->can('{{ Replicate }}');
+        return $user->can('replicate_kofol::campaign');
     }
 
     /**
@@ -103,6 +103,6 @@ class KofolCampaignPolicy
      */
     public function reorder(User $user): bool
     {
-        return $user->can('{{ Reorder }}');
+        return $user->can('reorder_kofol::campaign');
     }
 }

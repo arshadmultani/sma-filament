@@ -39,7 +39,7 @@ class ChemistPolicy
      */
     public function update(User $user, Chemist $chemist): bool
     {
-        return $user->can('update_chemist');
+        return $user->can('update_chemist') && ($user->id === $chemist->user_id || $user->hasRole(['admin', 'super_admin']));
     }
 
     /**
@@ -104,5 +104,9 @@ class ChemistPolicy
     public function reorder(User $user): bool
     {
         return $user->can('{{ Reorder }}');
+    }
+    public function updateStatus(User $user, Chemist $chemist): bool
+    {
+        return $user->can('update_status_chemist');
     }
 }

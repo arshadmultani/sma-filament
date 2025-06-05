@@ -18,12 +18,12 @@ class ViewChemist extends ViewRecord
     public function getHeaderActions(): array
     {
         $actions = [];
-        if (Gate::allows('updateStatus', $this->getRecord())) {
-            $actions[] = UpdateStatusAction::make();
-        }
+        $actions[] = UpdateStatusAction::make()
+            ->visible(fn() => Gate::allows('updateStatus', $this->getRecord()));
         $actions[] = Action::make('edit')
             ->label('Edit')
             ->url(route('filament.admin.resources.chemists.edit', $this->record))
+            ->visible(fn() => Gate::allows('update', $this->getRecord()))
             ->color('gray');
 
         return $actions;
