@@ -13,6 +13,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
 use Filament\Support\Enums\Alignment;
+use Illuminate\Support\Facades\Gate;
+use App\Models\KofolEntry;
+
 
 
 class UpdateKofolStatusAction
@@ -121,6 +124,7 @@ class UpdateKofolStatusAction
         return BulkAction::make('update_status')
             ->modalWidth('sm')
             ->label('Update Status')
+            ->visible(fn () => Gate::allows('update_status_kofol::entry'))
             ->form([
                 Select::make('status')
                     ->label('Status')

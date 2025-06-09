@@ -105,4 +105,8 @@ class KofolEntryPolicy
     {
         return $user->can('{{ Reorder }}');
     }
+    public function updateStatus(User $user): bool
+    {
+        return $user->can('update_status_kofol::entry');
+    }
 }

@@ -13,7 +13,7 @@ class CreateKofolEntry extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['user_id'] = Auth::user()->id;
-        $data['status'] = 'pending';
+        $data['status'] = 'Pending';
 
         return $data;
     }

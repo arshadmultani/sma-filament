@@ -39,6 +39,10 @@ use Filament\Forms\Components\Select;
 use Icetalker\FilamentTableRepeatableEntry\Infolists\Components\TableRepeatableEntry;
 use App\Filament\Actions\UpdateKofolStatusAction;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
+use App\Filament\Actions\SendKofolCouponAction;
+use Illuminate\Support\Facades\Gate;
+
+
 
 class KofolEntryResource extends Resource implements HasShieldPermissions
 {
@@ -50,7 +54,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
             'update',
             'delete',
             'delete_any',
-            'update_status'
+            'update_status',
         ];
     }
     protected static ?string $model = KofolEntry::class;
@@ -251,6 +255,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                     UpdateKofolStatusAction::makeBulk(),
+                    SendKofolCouponAction::makeBulk(),
                 ]),
             ]);
     }

@@ -8,6 +8,7 @@ use Filament\Resources\Pages\ListRecords;
 use Filament\Resources\Components\Tab;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\KofolEntry;
+use Filament\Tables\Columns\TextColumn;
 
 class ListKofolEntries extends ListRecords
 {
