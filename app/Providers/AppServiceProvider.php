@@ -9,6 +9,8 @@ use Spatie\Health\Facades\Health;
 use Spatie\Health\Checks\Checks\OptimizedAppCheck;
 use Spatie\Health\Checks\Checks\DebugModeCheck;
 use Spatie\Health\Checks\Checks\EnvironmentCheck;
+use Illuminate\Support\Facades\Gate;
+use App\Models\User;
 
 
 
@@ -39,6 +41,8 @@ class AppServiceProvider extends ServiceProvider
             DebugModeCheck::new(),
             EnvironmentCheck::new(),
         ]);
-
+        Gate::define('viewPulse', function (User $user) {
+            return $user->hasRole('super_admin');
+        });
     }
 }
