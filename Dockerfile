@@ -9,30 +9,36 @@ RUN apt update && apt install -y \
     && pecl install redis \
     && docker-php-ext-enable redis
 
+# Install Node.js
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs
 
 RUN echo "opcache.enable=1" > /usr/local/etc/php/conf.d/custom.ini \
     && echo "opcache.jit=tracing" >> /usr/local/etc/php/conf.d/custom.ini \
     && echo "opcache.jit_buffer_size=256M" >> /usr/local/etc/php/conf.d/custom.ini \
-    && echo "memory_limit=512M" > /usr/local/etc/php/conf.d/custom.ini \        
+    && echo "memory_limit=512M" >> /usr/local/etc/php/conf.d/custom.ini \        
     && echo "upload_max_filesize=64M" >> /usr/local/etc/php/conf.d/custom.ini \
     && echo "post_max_size=64M" >> /usr/local/etc/php/conf.d/custom.ini
 
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
 WORKDIR /var/www/html
-
 RUN mkdir -p /var/www/html/storage /var/www/html/bootstrap/cache
-
 RUN chown -R unit:unit /var/www/html/storage bootstrap/cache && chmod -R 775 /var/www/html/storage
 
 COPY . .
-
 RUN chown -R unit:unit storage bootstrap/cache && chmod -R 775 storage bootstrap/cache
 
 RUN composer install --prefer-dist --optimize-autoloader --no-interaction
 
+# Build assets
+RUN npm install && npm run build
+
+# Laravel/Filament setup
+RUN php artisan storage:link
+RUN php artisan filament:install --panels
+
 COPY unit.json /docker-entrypoint.d/unit.json
 
 EXPOSE 8000
-
 CMD ["unitd", "--no-daemon"]

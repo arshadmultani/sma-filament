@@ -17,11 +17,15 @@
                     "*.gif",
                     "*.webp",
                     "*.svg",
+                    "*.woff",
+                    "*.woff2",
+                    "*.ttf",
                     "/favicon.ico",
                     "/robots.txt",
                     "/storage/*",
                     "/build/*",
-                    "/vendor/*"
+                    "/vendor/*",
+                    "/livewire/*"
                 ]
             },
             "action": {
