@@ -4,21 +4,39 @@
             "pass": "routes"
         }
     },
-
     "routes": [
         {
             "match": {
-                "uri": "!/index.php"
+                "uri": [
+                    "*.css",
+                    "*.js",
+                    "*.ico",
+                    "*.jpg",
+                    "*.jpeg",
+                    "*.png",
+                    "*.gif",
+                    "*.webp",
+                    "*.svg",
+                    "/favicon.ico",
+                    "/robots.txt",
+                    "/storage/*",
+                    "/build/*",
+                    "/vendor/*"
+                ]
             },
             "action": {
-                "share": "/var/www/html/public$uri",
-                "fallback": {
-                    "pass": "applications/laravel"
-                }
+                "share": "/var/www/html/public$uri"
+            }
+        },
+        {
+            "match": {
+                "uri": "*"
+            },
+            "action": {
+                "pass": "applications/laravel"
             }
         }
     ],
-
     "applications": {
         "laravel": {
             "type": "php",
