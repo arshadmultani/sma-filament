@@ -1,6 +1,19 @@
 {
   "name": "Charak SMA",
   "short_name": "SMA",
+  "description": "Sales and Marketing App for Charak Pharma",
+  "lang": "en-US",
+  "id": "/1",
+  "scope": "/",
+  "display_override": ["window-controls-overlay"],
+  "categories": ["sales", "marketing", "charak", "pharma"],
+  "screenshots": [
+    {
+      "src": "/images/icons/icon.png",
+      "sizes": "640x1136",
+      "type": "image/png"
+    }
+  ],
   "start_url": "https://sma.exponit.in/",
   "display": "standalone",
   "theme_color": "#000000",
@@ -15,6 +28,12 @@
       "src": "/images/icons/icon.png",
       "type": "image/png",
       "sizes": "72x72",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/icons/icon.png",
+      "type": "image/png",
+      "sizes": "512x512",
       "purpose": "any"
     }
   ]
