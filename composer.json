@@ -20,6 +20,7 @@
         "rickdbcn/filament-email": "^1.10",
         "shuvroroy/filament-spatie-laravel-health": "^2.3",
         "solution-forest/filament-simplelightbox": "^0.0.11",
+        "tomatophp/filament-pwa": "^1.0",
         "torgodly/html2media": "^1.1"
     },
     "require-dev": {
