@@ -25,6 +25,11 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use SolutionForest\FilamentSimpleLightBox\SimpleLightBoxPlugin;
 use ShuvroRoy\FilamentSpatieLaravelHealth\FilamentSpatieLaravelHealthPlugin;
 use Illuminate\Support\Facades\Auth;
+use Agencetwogether\HooksHelper\HooksHelperPlugin;
+use Filament\Support\Facades\FilamentView;
+use Filament\View\PanelsRenderHook;
+use Illuminate\Support\Facades\Blade;
+
 
 
 class AdminPanelProvider extends PanelProvider
@@ -41,6 +46,7 @@ class AdminPanelProvider extends PanelProvider
             ->passwordReset()
             ->profile(isSimple: false)
             ->brandName('Charak SMA')
+            ->sidebarCollapsibleOnDesktop()
             // ->brandLogo(fn () => view('filament.admin.logo'))
 
             ->colors([
@@ -104,13 +110,23 @@ class AdminPanelProvider extends PanelProvider
                     $user = Auth::user();
                     return $user !== null && $user->hasRole('super_admin');
                 }),
+                // HooksHelperPlugin::make(),
 
                 // \RickDBCN\FilamentEmail\FilamentEmail::make(),
             ])
             ->discoverClusters(in: app_path('Filament/Clusters'), for: 'App\\Filament\\Clusters')
             ->databaseNotifications()
+
             ->authMiddleware([
                 Authenticate::class,
             ]);
+    }
+
+    public function boot(): void
+    {
+        FilamentView::registerRenderHook(
+            'panels::body.end',
+            fn (): string => Blade::render('filament.admin.mobile-bottom-nav')
+        );
     }
 }

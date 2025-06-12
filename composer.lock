@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "718f806cfed0aac71e09d48356929c20",
+    "content-hash": "11d0fc112a3d512a72df521893ea2a99",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -8903,6 +8903,79 @@
         }
     ],
     "packages-dev": [
+        {
+            "name": "agencetwogether/hookshelper",
+            "version": "0.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/agencetwogether/hooksHelper.git",
+                "reference": "5ae5afcdaeaef42822c723323b9dac321c3d2b15"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/agencetwogether/hooksHelper/zipball/5ae5afcdaeaef42822c723323b9dac321c3d2b15",
+                "reference": "5ae5afcdaeaef42822c723323b9dac321c3d2b15",
+                "shasum": ""
+            },
+            "require": {
+                "filament/filament": "^3.0",
+                "php": "^8.1",
+                "spatie/laravel-package-tools": "^1.15.0"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.0",
+                "nunomaduro/collision": "^7.9",
+                "orchestra/testbench": "^8.0",
+                "pestphp/pest": "^2.1",
+                "pestphp/pest-plugin-arch": "^2.0",
+                "pestphp/pest-plugin-laravel": "^2.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Agencetwogether\\HooksHelper\\HooksHelperServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Agencetwogether\\HooksHelper\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Max",
+                    "email": "contact@agencetwogether.fr",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Simple plugin to toggle display hooks available in current page.",
+            "homepage": "https://github.com/agencetwogether/hookshelper",
+            "keywords": [
+                "agencetwogether",
+                "filament",
+                "filamentphp",
+                "helper",
+                "hooks",
+                "laravel"
+            ],
+            "support": {
+                "issues": "https://github.com/agencetwogether/hookshelper/issues",
+                "source": "https://github.com/agencetwogether/hookshelper"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/agencetwogether",
+                    "type": "github"
+                }
+            ],
+            "time": "2024-11-22T22:33:48+00:00"
+        },
         {
             "name": "barryvdh/laravel-debugbar",
             "version": "v3.15.4",
