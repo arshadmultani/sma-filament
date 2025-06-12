@@ -110,7 +110,6 @@ class AdminPanelProvider extends PanelProvider
                     $user = Auth::user();
                     return $user !== null && $user->hasRole('super_admin');
                 }),
-                \TomatoPHP\FilamentPWA\FilamentPWAPlugin::make(),
                 // HooksHelperPlugin::make(),
 
                 // \RickDBCN\FilamentEmail\FilamentEmail::make(),

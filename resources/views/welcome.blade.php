@@ -6,6 +6,22 @@
 
         <title>Laravel</title>
 
+        <!-- PWA Manifest -->
+        <link rel="manifest" href="/manifest.json">
+        <meta name="theme-color" content="#000000">
+        <meta name="background-color" content="#ffffff">
+        <!-- PWA Icons (optional, for iOS support) -->
+        <link rel="apple-touch-icon" sizes="72x72" href="/images/icons/icon.png">
+
+        <!-- Register Service Worker -->
+        <script>
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                    navigator.serviceWorker.register('/pwabuilder-sw.js');
+                });
+            }
+        </script>
+
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
@@ -112,8 +128,8 @@
                     </ul>
                     <ul class="flex gap-3 text-sm leading-normal">
                         <li>
-                            <a href="https://cloud.laravel.com" target="_blank" class="inline-block dark:bg-[#eeeeec] dark:border-[#eeeeec] dark:text-[#1C1C1A] dark:hover:bg-white dark:hover:border-white hover:bg-black hover:border-black px-5 py-1.5 bg-[#1b1b18] rounded-sm border border-black text-white text-sm leading-normal">
-                                Deploy now
+                            <a href="{{ route('filament.admin.auth.login') }}" class="inline-block dark:bg-[#eeeeec] dark:border-[#eeeeec] dark:text-[#1C1C1A] dark:hover:bg-white dark:hover:border-white hover:bg-black hover:border-black px-5 py-1.5 bg-[#1b1b18] rounded-sm border border-black text-white text-sm leading-normal">
+                                Login
                             </a>
                         </li>
                     </ul>
@@ -270,8 +286,10 @@
             </main>
         </div>
 
-        @if (Route::has('login'))
-            <div class="h-14.5 hidden lg:block"></div>
-        @endif
+        <!-- @if (Route::has('login')) -->
+            <div class="h-14.5 hidden lg:block">
+                <a href="/admin" class="text-sm text-gray-700 dark:text-gray-500 underline">Admin Login</a>
+            </div>
+        <!-- @endif -->
     </body>
 </html>
