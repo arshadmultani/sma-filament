@@ -22,7 +22,7 @@ class FilamentPwaServiceProvider extends ServiceProvider
     {
         Filament::registerRenderHook(
             'head.start',
-            fn () => view('filament-pwa::head')
+            fn () => '<link rel="manifest" href="/manifest.json">'
         );
     }
 }
