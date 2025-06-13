@@ -32,11 +32,19 @@ use Illuminate\Support\Facades\Blade;
 use App\Filament\Widgets\CustomerOverviewWidget;
 use Illuminate\Support\Str;
 
-
-
-
 class AdminPanelProvider extends PanelProvider
 {
+    /**
+     * Manually specify the Filament Page classes to show as tabs in the header.
+     * Add/remove page classes here as needed.
+     */
+    protected array $tabPages = [
+        \App\Filament\Pages\Dashboard::class,
+        \App\Filament\Pages\Customers::class,
+        \App\Filament\Pages\Campaigns::class,
+        // Add more custom pages here
+    ];
+
     public function panel(Panel $panel): Panel
     {
         return $panel
@@ -132,20 +140,11 @@ class AdminPanelProvider extends PanelProvider
         FilamentView::registerRenderHook(
             'panels::topbar.after',
             function (): string {
-                // Exclude login/auth pages
                 if (request()->routeIs('filament.admin.auth.*')) {
                     return '';
                 }
-                // Gather all custom pages
-                $pages = [
-                    \App\Filament\Pages\Dashboard::class,
-                    ...array_filter(
-                        array_map(function ($file) {
-                            $class = 'App\\Filament\\Pages\\' . pathinfo($file, PATHINFO_FILENAME);
-                            return $class !== 'App\\Filament\\Pages\\Dashboard' ? $class : null;
-                        }, glob(app_path('Filament/Pages/*.php')))
-                    ),
-                ];
+                // Use manually specified pages for tabs
+                $pages = $this->tabPages;
                 $tabs = [];
                 foreach ($pages as $pageClass) {
                     if (!class_exists($pageClass) || !is_subclass_of($pageClass, \Filament\Pages\Page::class)) continue;
