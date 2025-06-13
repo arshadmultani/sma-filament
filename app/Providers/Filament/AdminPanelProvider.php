@@ -29,7 +29,7 @@ use Agencetwogether\HooksHelper\HooksHelperPlugin;
 use Filament\Support\Facades\FilamentView;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Support\Facades\Blade;
-use App\Filament\Widgets\CustomersOverviewWidget;
+use App\Filament\Widgets\CustomerOverviewWidget;
 
 
 
@@ -77,9 +77,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                CustomersOverviewWidget::class,
-                // Widgets\AccountWidget::class,
-                // Widgets\FilamentInfoWidget::class,
+                CustomerOverviewWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
