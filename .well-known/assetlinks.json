@@ -1,10 +1,11 @@
-[{
-    "relation": ["delegate_permission/common.handle_all_urls"],
-    "target": {
-      "namespace": "android_app",
-      "package_name": "in.exponit.sma.twa",
-      "sha256_cert_fingerprints": [
-        "77:38:7A:38:4A:98:7D:90:CF:02:A3:BB:B2:3F:69:C9:27:48:89:55:4A:91:20:A4:7F:C4:13:65:62:5F:63:72",
-        "DB:68:8C:0B:C4:90:A0:E1:8C:A3:03:70:65:64:7B:04:B2:6A:C1:98:57:22:49:BE:08:AA:F7:9F:C0:21:CA:A1"]
+[
+    {
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "in.exponit.sma.twa",
+        "sha256_cert_fingerprints":
+          ["DB:68:8C:0B:C4:90:A0:E1:8C:A3:03:70:65:64:7B:04:B2:6A:C1:98:57:22:49:BE:08:AA:F7:9F:C0:21:CA:A1"]
+      }
     }
-  }]
+  ]
