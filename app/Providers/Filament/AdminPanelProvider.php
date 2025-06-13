@@ -39,7 +39,7 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('admin')
-            ->path('admin')
+            ->path('')
             ->login(CustomLogin::class)
             ->darkMode(false)
             ->defaultThemeMode(ThemeMode::Light)
@@ -127,6 +127,10 @@ class AdminPanelProvider extends PanelProvider
         FilamentView::registerRenderHook(
             'panels::body.end',
             fn (): string => Blade::render('filament.admin.mobile-bottom-nav')
+        );
+        FilamentView::registerRenderHook(
+            'panels::head.end',
+            fn (): string => Blade::render('pwa-head')
         );
     }
 }
