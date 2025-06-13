@@ -44,7 +44,7 @@ class CreateUser extends CreateRecord
     }
 
     // Send notification with the plain password
-    Mail::to($user->email)->send(mailable: new SendUserCredentials($user->email, $data['password']));
+    // Mail::to($user->email)->send(mailable: new SendUserCredentials($user->email, $data['password']));
 
     return $user;
 }

@@ -126,7 +126,13 @@ class AdminPanelProvider extends PanelProvider
     {
         FilamentView::registerRenderHook(
             'panels::body.end',
-            fn (): string => Blade::render('filament.admin.mobile-bottom-nav')
+            function (): string {
+                // Only show the mobile nav on dashboard and resource pages, not on auth pages
+                if (request()->routeIs('filament.admin.pages.dashboard') || request()->routeIs('filament.admin.resources.*')) {
+                    return Blade::render('filament.admin.mobile-bottom-nav');
+                }
+                return '';
+            }
         );
         FilamentView::registerRenderHook(
             'panels::head.end',
