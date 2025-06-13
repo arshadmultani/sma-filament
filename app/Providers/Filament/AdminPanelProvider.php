@@ -29,6 +29,8 @@ use Agencetwogether\HooksHelper\HooksHelperPlugin;
 use Filament\Support\Facades\FilamentView;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Support\Facades\Blade;
+use App\Filament\Widgets\CustomersOverviewWidget;
+
 
 
 
@@ -44,8 +46,11 @@ class AdminPanelProvider extends PanelProvider
             ->darkMode(false)
             ->defaultThemeMode(ThemeMode::Light)
             ->passwordReset()
+            ->spa()
+            ->unsavedChangesAlerts()
             ->profile(isSimple: false)
             ->brandName('Charak SMA')
+            ->favicon(asset('public/logo.svg'))
             ->sidebarCollapsibleOnDesktop()
             // ->brandLogo(fn () => view('filament.admin.logo'))
 
@@ -68,12 +73,13 @@ class AdminPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
+                CustomersOverviewWidget::class,
+                // Widgets\AccountWidget::class,
+                // Widgets\FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -105,7 +111,7 @@ class AdminPanelProvider extends PanelProvider
                     ]),
 
                 SimpleLightBoxPlugin::make(),
-                FilamentSpatieLaravelHealthPlugin::make()->authorize(function(): bool {
+                FilamentSpatieLaravelHealthPlugin::make()->authorize(function (): bool {
                     /** @var \App\Models\User|null $user */
                     $user = Auth::user();
                     return $user !== null && $user->hasRole('super_admin');
@@ -136,7 +142,7 @@ class AdminPanelProvider extends PanelProvider
         );
         FilamentView::registerRenderHook(
             'panels::head.end',
-            fn (): string => Blade::render('pwa-head')
+            fn(): string => Blade::render('pwa-head')
         );
     }
 }
