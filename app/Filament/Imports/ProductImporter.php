@@ -16,40 +16,24 @@ class ProductImporter extends Importer
         return [
             ImportColumn::make('name')
                 ->requiredMapping()
-                ->rules(['required', 'max:255']),
-
+                ->rules(['required']),
             ImportColumn::make('price')
                 ->requiredMapping()
-                ->numeric(decimalPlaces: 2),
-
-            ImportColumn::make('division_id')
-                ->label('Division')
-                ->requiredMapping()
-                ->castStateUsing(fn($state) => trim($state))
-                ->relationship('division', 'name'),
-            ImportColumn::make('brand_id')
-                ->label('Brand')
-                ->requiredMapping()
-                ->castStateUsing(fn($state) => trim($state))
-                ->relationship('brand', 'name'),
+                ->numeric()
+                ->rules(['required', 'decimal:0,2']),
+            // ImportColumn::make('division_id')
+            //     ->requiredMapping()
+            //     ->numeric()
+            //     ->rules(['required', 'integer']),
         ];
     }
 
     public function resolveRecord(): ?Product
     {
-        // if(!empty($this->data['division_id'])){
-        //     $division = \App\Models\Division::whereRaw('LOWER(name) = ?', [strtolower($this->data['division_id'])])->first();
-        //     if($division){
-        //         $this->data['division_id'] = $division->id;
-        //     }
-        // }
-        // if(!empty($this->data['brand_id'])){
-        //     $brand = \App\Models\Brand::whereRaw('LOWER(name) = ?', [strtolower($this->data['brand_id'])])->first();
-        //     if($brand){
-        //         $this->data['brand_id'] = $brand->id;
-        //     }
-        // }
-        
+        // return Product::firstOrNew([
+        //     // Update existing records, matching them by `$this->data['column_name']`
+        //     'email' => $this->data['email'],
+        // ]);
 
         return new Product();
     }

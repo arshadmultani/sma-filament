@@ -30,6 +30,7 @@ use Filament\Support\Facades\FilamentView;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Support\Facades\Blade;
 use App\Filament\Widgets\CustomerOverviewWidget;
+use Illuminate\Support\Str;
 
 
 
@@ -114,7 +115,7 @@ class AdminPanelProvider extends PanelProvider
                     $user = Auth::user();
                     return $user !== null && $user->hasRole('super_admin');
                 }),
-                // HooksHelperPlugin::make(),
+                HooksHelperPlugin::make(),
 
                 // \RickDBCN\FilamentEmail\FilamentEmail::make(),
             ])
@@ -128,6 +129,38 @@ class AdminPanelProvider extends PanelProvider
 
     public function boot(): void
     {
+        FilamentView::registerRenderHook(
+            'panels::topbar.after',
+            function (): string {
+                // Exclude login/auth pages
+                if (request()->routeIs('filament.admin.auth.*')) {
+                    return '';
+                }
+                // Gather all custom pages
+                $pages = [
+                    \App\Filament\Pages\Dashboard::class,
+                    ...array_filter(
+                        array_map(function ($file) {
+                            $class = 'App\\Filament\\Pages\\' . pathinfo($file, PATHINFO_FILENAME);
+                            return $class !== 'App\\Filament\\Pages\\Dashboard' ? $class : null;
+                        }, glob(app_path('Filament/Pages/*.php')))
+                    ),
+                ];
+                $tabs = [];
+                foreach ($pages as $pageClass) {
+                    if (!class_exists($pageClass) || !is_subclass_of($pageClass, \Filament\Pages\Page::class)) continue;
+                    $tabs[] = [
+                        'label' => method_exists($pageClass, 'getNavigationLabel') ? $pageClass::getNavigationLabel() : ($pageClass::$navigationLabel ?? $pageClass::$title ?? class_basename($pageClass)),
+                        'icon' => $pageClass::$navigationIcon ?? 'heroicon-o-document-text',
+                        'url' => $pageClass::getUrl(),
+                        'active' => request()->routeIs('filament.admin.pages.' . \Illuminate\Support\Str::kebab(class_basename($pageClass))),
+                    ];
+                }
+                return \Illuminate\Support\Facades\Blade::render(
+                    'components.filament-header-tabs', ['tabs' => $tabs]
+                );
+            }
+        );
         FilamentView::registerRenderHook(
             'panels::body.end',
             function (): string {
