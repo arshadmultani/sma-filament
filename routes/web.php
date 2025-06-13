@@ -11,3 +11,7 @@ use Illuminate\Support\Facades\Auth;
 //     return view('welcome');
 // });
 
+Route::get('/offline', function () {
+    return view('offline');
+});
+
