@@ -1,0 +1,8 @@
+[{
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "in.exponit.sma.twa",
+      "sha256_cert_fingerprints": ["77:38:7A:38:4A:98:7D:90:CF:02:A3:BB:B2:3F:69:C9:27:48:89:55:4A:91:20:A4:7F:C4:13:65:62:5F:63:72"]
+    }
+  }]
