@@ -60,7 +60,7 @@ class AdminPanelProvider extends PanelProvider
             ->profile(isSimple: false)
             ->brandName('Charak SMA')
             ->favicon(asset('public/logo.svg'))
-            ->sidebarCollapsibleOnDesktop()
+            // ->sidebarCollapsibleOnDesktop()
             // ->brandLogo(fn () => view('filament.admin.logo'))
 
             ->colors([
@@ -86,7 +86,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                CustomerOverviewWidget::class,
+                // CustomerOverviewWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
