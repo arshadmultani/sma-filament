@@ -21,21 +21,44 @@ class ProductImporter extends Importer
                 ->requiredMapping()
                 ->numeric()
                 ->rules(['required', 'decimal:0,2']),
-            // ImportColumn::make('division_id')
-            //     ->requiredMapping()
-            //     ->numeric()
-            //     ->rules(['required', 'integer']),
+            ImportColumn::make('division_id')
+                ->label('Division')
+                ->requiredMapping()
+                ->rules(['required'])
+                ->examples(['Pharma', 'Phytonova'])
+                ->fillRecordUsing(function () {
+                    // handled in resolveRecord
+                }),
+            ImportColumn::make('brand_id')
+                ->label('Brand')
+                ->requiredMapping()
+                ->rules(['required'])
+                ->examples(['Kofol', 'Moha'])
+                ->fillRecordUsing(function () {
+                    // handled in resolveRecord
+                }),
         ];
     }
 
     public function resolveRecord(): ?Product
     {
-        // return Product::firstOrNew([
-        //     // Update existing records, matching them by `$this->data['column_name']`
-        //     'email' => $this->data['email'],
-        // ]);
+        $product = new Product();
+        $product->name = $this->data['name'] ?? null;
+        $product->price = $this->data['price'] ?? null;
 
-        return new Product();
+        // Resolve division name to ID
+        if (!empty($this->data['division_id'])) {
+            $division = \App\Models\Division::whereRaw('LOWER(name) = ?', [strtolower($this->data['division_id'])])->first();
+            $product->division_id = $division ? $division->id : null;
+        }
+
+        // Resolve brand name to ID
+        if (!empty($this->data['brand_id'])) {
+            $brand = \App\Models\Brand::whereRaw('LOWER(name) = ?', [strtolower($this->data['brand_id'])])->first();
+            $product->brand_id = $brand ? $brand->id : null;
+        }
+
+        return $product;
     }
 
     public static function getCompletedNotificationBody(Import $import): string
