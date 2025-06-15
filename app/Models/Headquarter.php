@@ -4,6 +4,31 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * 
+ *
+ * @property int $id
+ * @property string $name
+ * @property int $area_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\Area $area
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Chemist> $chemists
+ * @property-read int|null $chemists_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Doctor> $doctors
+ * @property-read int|null $doctors_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
+ * @property-read int|null $users_count
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Headquarter newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Headquarter newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Headquarter query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Headquarter whereAreaId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Headquarter whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Headquarter whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Headquarter whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Headquarter whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
 class Headquarter extends Model
 {
     protected $fillable = ['name', 'area_id'];
