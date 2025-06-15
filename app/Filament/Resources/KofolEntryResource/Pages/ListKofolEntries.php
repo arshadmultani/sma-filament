@@ -9,9 +9,13 @@ use Filament\Resources\Components\Tab;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\KofolEntry;
 use Filament\Tables\Columns\TextColumn;
+use Asmit\ResizedColumn\HasResizableColumn;
+
 
 class ListKofolEntries extends ListRecords
 {
+        
+    use HasResizableColumn;
     protected static string $resource = KofolEntryResource::class;
 
     protected function getHeaderActions(): array

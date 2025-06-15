@@ -31,6 +31,8 @@ use Filament\View\PanelsRenderHook;
 use Illuminate\Support\Facades\Blade;
 use App\Filament\Widgets\CustomerOverviewWidget;
 use Illuminate\Support\Str;
+use Asmit\ResizedColumn\ResizedColumnPlugin;
+
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -58,7 +60,7 @@ class AdminPanelProvider extends PanelProvider
             ->spa()
             ->unsavedChangesAlerts()
             ->profile(isSimple: false)
-            ->brandName('Charak SMA')
+            ->brandName('StepUp')
             ->favicon(asset('public/logo.svg'))
             // ->sidebarCollapsibleOnDesktop()
             // ->brandLogo(fn () => view('filament.admin.logo'))
@@ -86,7 +88,6 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                // CustomerOverviewWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -123,6 +124,8 @@ class AdminPanelProvider extends PanelProvider
                     $user = Auth::user();
                     return $user !== null && $user->hasRole('super_admin');
                 }),
+                ResizedColumnPlugin::make(),
+                    // ->preserveOnDB(true),
                 // HooksHelperPlugin::make(),
 
                 // \RickDBCN\FilamentEmail\FilamentEmail::make(),
@@ -160,16 +163,18 @@ class AdminPanelProvider extends PanelProvider
                 );
             }
         );
+        // MOBILE BOTTOM NAV HOOK
         FilamentView::registerRenderHook(
             'panels::body.end',
             function (): string {
-                // Only show the mobile nav on dashboard and resource pages, not on auth pages
-                if (request()->routeIs('filament.admin.pages.dashboard') || request()->routeIs('filament.admin.resources.*')) {
+                // Show the mobile nav on all Filament admin pages except auth pages
+                if (!request()->routeIs('filament.admin.auth.*')) {
                     return Blade::render('filament.admin.mobile-bottom-nav');
                 }
                 return '';
             }
         );
+        // PWA HEAD HOOK
         FilamentView::registerRenderHook(
             'panels::head.end',
             fn(): string => Blade::render('pwa-head')

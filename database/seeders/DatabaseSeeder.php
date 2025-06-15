@@ -24,10 +24,8 @@ class DatabaseSeeder extends Seeder
             DivisionSeeder::class,
             AreaSeeder::class,
             HeadquarterSeeder::class,
-            // UserSeeder::class,
-            // DoctorSeeder::class,
-            // ChemistSeeder::class,
-            
+            DoctorSeeder::class,
+            ChemistSeeder::class,            
             ProductSeeder::class,
             KofolCampaignSeeder::class,
             KofolEntrySeeder::class,

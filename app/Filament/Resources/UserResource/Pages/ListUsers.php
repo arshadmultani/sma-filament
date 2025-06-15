@@ -9,9 +9,11 @@ use Filament\Actions\ActionGroup;
 use Filament\Actions\ImportAction;
 use Filament\Resources\Pages\ListRecords;
 use App\Filament\Imports\UserImporter;
+use Asmit\ResizedColumn\HasResizableColumn;
 
 class ListUsers extends ListRecords
 {
+    use HasResizableColumn;
     protected static string $resource = UserResource::class;
 
     protected function getHeaderActions(): array
