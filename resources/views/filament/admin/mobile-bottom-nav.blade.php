@@ -142,7 +142,7 @@
             @endif
         </a>
         <!-- Reports -->
-        <a wire:navigate href="{{ route('filament.admin.pages.reports') }}"
+        <!-- <a wire:navigate href="{{ route('filament.admin.pages.reports') }}"
             class="nav-item {{ request()->routeIs('filament.admin.pages.reports') ? 'active' : '' }}"
             aria-label="Reports">
             <span class="nav-icon">
@@ -155,7 +155,7 @@
             @if(request()->routeIs('filament.admin.pages.reports'))
                 <span class="nav-label">Reports</span>
             @endif
-        </a>
+        </a> -->
     </div>
 </div>
 

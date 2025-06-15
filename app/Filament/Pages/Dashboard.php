@@ -13,7 +13,7 @@ class Dashboard extends \Filament\Pages\Dashboard
     }
     public function getHeaderWidgets(): array{
         return [
-            CustomerWidget::class,
+            // CustomerWidget::class,
             // CampaignWidget::class,
             // LatestCustomers::class,
         ];

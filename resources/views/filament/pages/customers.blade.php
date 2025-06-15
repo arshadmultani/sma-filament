@@ -21,13 +21,14 @@
             </div>
             <hr class="my-4" style="margin:50px" />
             <div class="flex gap-4">
-                <x-add-customer-button label="Doctor"  bgColor="bg-gradient-to-r from-green-700 to-emerald-500" leftIcon="heroicon-o-plus" action="window.location.href='{{ route('filament.admin.resources.doctors.create') }}'" />
-                <x-add-customer-button label=" Chemist" bgColor="bg-gradient-to-r from-green-700 to-emerald-500" leftIcon="heroicon-o-plus" action="window.location.href='{{ route('filament.admin.resources.chemists.create') }}'" />
+                <x-generic-action-button label="Doctor"  bgColor="bg-gradient-to-r from-green-700 to-emerald-500" leftIcon="heroicon-o-plus" action="window.location.href='{{ route('filament.admin.resources.doctors.create') }}'" />
+                <x-generic-action-button label="Doctor" bgColor="bg-gradient-to-r from-green-700 to-emerald-500" leftIcon="heroicon-o-eye" action="window.location.href='{{ route('filament.admin.resources.doctors.index') }}'" />
             </div>
 
             <div class="flex gap-4 mt-4">
-                <x-add-customer-button label="Doctor" bgColor="bg-gradient-to-r from-green-700 to-emerald-500" leftIcon="heroicon-o-eye" action="window.location.href='{{ route('filament.admin.resources.doctors.index') }}'" />
-                <x-add-customer-button label="Chemist" bgColor="bg-gradient-to-r from-green-700 to-emerald-500" leftIcon="heroicon-o-eye" action="window.location.href='{{ route('filament.admin.resources.chemists.index') }}'" />
+            <x-generic-action-button label=" Chemist" bgColor="bg-gradient-to-r from-green-700 to-emerald-500" leftIcon="heroicon-o-plus" action="window.location.href='{{ route('filament.admin.resources.chemists.create') }}'" />
+
+                <x-generic-action-button label="Chemist" bgColor="bg-gradient-to-r from-green-700 to-emerald-500" leftIcon="heroicon-o-eye" action="window.location.href='{{ route('filament.admin.resources.chemists.index') }}'" />
             </div>
         </div>
     </div>

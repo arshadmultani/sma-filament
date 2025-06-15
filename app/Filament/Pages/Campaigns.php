@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use Filament\Pages\Page;
 use App\Filament\Widgets\CampaignOverview;
+use App\Models\KofolCampaign;
 
 class Campaigns extends Page
 {
@@ -20,4 +21,5 @@ class Campaigns extends Page
             // CustomerOverviewWidget::class,
         ];
     }
+
 }
