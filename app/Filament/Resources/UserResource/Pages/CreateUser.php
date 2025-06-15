@@ -54,5 +54,9 @@ public function saved()
         $this->record->syncRoles([$this->data['roles']]);
     }
 }
+protected function getRedirectUrl(): string
+{
+    return $this->getResource()::getUrl('index');
+}
 
 }

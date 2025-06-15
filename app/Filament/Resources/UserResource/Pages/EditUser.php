@@ -93,6 +93,24 @@ class EditUser extends EditRecord
         $passwordChanged = !empty($data['password']);
         $plainPassword = $passwordChanged ? $data['password'] : null;
 
+        // Set location_type and location_id based on role
+        $roleID = $data['roles'] ?? null;
+        $roleName = $roleID ? \Spatie\Permission\Models\Role::find($roleID)?->name : null;
+        if ($roleName === 'RSM') {
+            $data['location_type'] = \App\Models\Region::class;
+            $data['location_id'] = $data['region_id'] ?? null;
+        } elseif ($roleName === 'ASM') {
+            $data['location_type'] = \App\Models\Area::class;
+            $data['location_id'] = $data['area_id'] ?? null;
+        } elseif ($roleName === 'DSA') {
+            $data['location_type'] = \App\Models\Headquarter::class;
+            $data['location_id'] = $data['headquarter_id'] ?? null;
+        } else {
+            $data['location_type'] = null;
+            $data['location_id'] = null;
+        }
+        unset($data['region_id'], $data['area_id'], $data['headquarter_id']);
+
         $record->update($data);
         // Assign roles if present
         if (isset($data['roles'])) {
@@ -109,5 +127,9 @@ class EditUser extends EditRecord
     if ($this->data['roles']) {
         $this->record->syncRoles([$this->data['roles']]);
     }
+}
+protected function getRedirectUrl(): string
+{
+    return $this->getResource()::getUrl('index');
 }
 }

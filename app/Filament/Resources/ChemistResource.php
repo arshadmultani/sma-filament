@@ -23,7 +23,7 @@ use Filament\Infolists\Components\Section;
 use App\Filament\Actions\UpdateStatusAction;
 use Filament\Tables\Filters\SelectFilter;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
-
+use Illuminate\Support\Facades\Auth;
 
 class ChemistResource extends Resource implements HasShieldPermissions
 {
@@ -59,10 +59,25 @@ class ChemistResource extends Resource implements HasShieldPermissions
                     ->options(['Ayurvedic' => 'Ayurvedic', 'Allopathic' => 'Allopathic'])
                     ->required(),
                 Select::make('headquarter_id')
-                    ->relationship('headquarter', 'name')
-                    ->searchable()
-                    ->preload()
                     ->native(false)
+                    ->options(function () {
+                        $user = Auth::user();
+
+                        if ($user->hasRole('ASM')) {
+                            // ASM: headquarters under their area
+                            return \App\Models\Headquarter::where('area_id', $user->location_id)->pluck('name', 'id');
+                        } elseif ($user->hasRole('RSM')) {
+                            // RSM: headquarters under all areas in their region
+                            $areaIds = \App\Models\Area::where('region_id', $user->location_id)->pluck('id');
+                            return \App\Models\Headquarter::whereIn('area_id', $areaIds)->pluck('name', 'id');
+                        } else {
+                            // Default: all headquarters (or adjust as needed)
+                            return \App\Models\Headquarter::pluck('name', 'id');
+                        }
+                    })
+                    ->searchable()
+                    ->hidden(fn() => Auth::user()->hasRole('DSA'))
+                    ->preload()
                     ->required(),
             ]);
     }
@@ -73,13 +88,14 @@ class ChemistResource extends Resource implements HasShieldPermissions
             ->columns([
                 TextColumn::make('name'),
                 IconColumn::make('status')
-                    ->icon(fn (string $state): string => match ($state) {
+                    ->sortable()
+                    ->icon(fn(string $state): string => match ($state) {
                         'Pending' => 'heroicon-o-clock',
                         'Approved' => 'heroicon-o-check-circle',
                         'Rejected' => 'heroicon-o-x-circle',
                         default => 'heroicon-o-question-mark-circle',
                     })
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'Pending' => 'warning',
                         'Approved' => 'success',
                         'Rejected' => 'danger',
@@ -95,8 +111,8 @@ class ChemistResource extends Resource implements HasShieldPermissions
                 TextColumn::make('phone')->toggleable(),
                 TextColumn::make('email')->toggleable(),
                 TextColumn::make('user.name')->label('Created By'),
-                TextColumn::make('created_at')->since()->toggleable(),
-                TextColumn::make('updated_at')->since()->toggleable(),
+                TextColumn::make('created_at')->since()->toggleable()->sortable(),
+                TextColumn::make('updated_at')->since()->toggleable()->sortable(),
             ])
             ->filters([
                 SelectFilter::make('status')
@@ -127,14 +143,14 @@ class ChemistResource extends Resource implements HasShieldPermissions
                         TextEntry::make('email'),
                         TextEntry::make('phone'),
                     ]),
-                    Section::make()
+                Section::make()
                     ->columns(3)
                     ->schema([
                         TextEntry::make('address'),
-                        TextEntry::make('town')->label('Area'),
-                        TextEntry::make('headquarter.name')->label('Region'),
+                        TextEntry::make('town')->label('Town'),
+                        TextEntry::make('headquarter.name')->label('Headquarter'),
                     ]),
-                    Section::make()
+                Section::make()
                     ->columns(3)
                     ->schema([
                         TextEntry::make('user.name'),

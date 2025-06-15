@@ -12,6 +12,9 @@ class CreateDoctor extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array{
         $data['user_id'] = Auth::id();
+        if(Auth::user()->hasRole('DSA')){
+            $data['headquarter_id'] = Auth::user()->location_id;
+        }
         return $data;
     }
 }

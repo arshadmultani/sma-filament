@@ -8,7 +8,7 @@ use Filament\Actions\Action;
 use Filament\Resources\Pages\ViewRecord;
 use App\Filament\Actions\UpdateStatusAction;
 use Illuminate\Support\Facades\Gate;
-
+use Illuminate\Support\Facades\Auth;
 
 class ViewChemist extends ViewRecord
 {
@@ -18,12 +18,14 @@ class ViewChemist extends ViewRecord
     public function getHeaderActions(): array
     {
         $actions = [];
-        $actions[] = UpdateStatusAction::make()
-            ->visible(fn() => Gate::allows('updateStatus', $this->getRecord()));
+        if (Gate::allows('updateStatus', $this->getRecord())) {
+            $actions[] = UpdateStatusAction::make();
+        }
         $actions[] = Action::make('edit')
+            ->hidden(fn() => !(Auth::user()->hasRole(['admin', 'super_admin']) || Auth::user()->id === $this->record->user_id))
             ->label('Edit')
             ->url(route('filament.admin.resources.chemists.edit', $this->record))
-            ->visible(fn() => Gate::allows('update', $this->getRecord()))
+            // ->visible(fn() => Gate::allows('update', $this->getRecord()))
             ->color('gray');
 
         return $actions;

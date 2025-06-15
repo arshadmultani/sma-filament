@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * 
@@ -52,6 +52,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Doctor extends BaseModel
 {
+    use HasFactory;
         protected $fillable = ['name', 'email', 'phone', 'qualification_id', 'profile_photo', 'user_id', 'headquarter_id', 'attachment', 'address','type','support_type','town'];
 
     protected $casts = [

@@ -10,6 +10,7 @@ use Filament\Actions\Action;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class UpdateStatusAction
 {
@@ -76,6 +77,7 @@ class UpdateStatusAction
     public static function makeBulk(): BulkAction
     {
         return BulkAction::make('update_status')
+            ->hidden(fn () => Auth::user()->hasRole(['DSA','ASM']))
             ->modalWidth('sm')
             ->label('Update Status')
             ->form([

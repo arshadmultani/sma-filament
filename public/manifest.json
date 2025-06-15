@@ -1,12 +1,12 @@
 {
-  "name": "Charak SMA",
-  "short_name": "SMA",
-  "description": "Sales and Marketing App for Charak Pharma",
+  "name": "StepUp",
+  "short_name": "StepUp",
+  "description": "Sales and Marketing App for StepUp",
   "lang": "en-US",
   "id": "/1",
   "scope": "/",
   "display_override": ["window-controls-overlay"],
-  "categories": ["sales", "marketing", "charak", "pharma"],
+  "categories": ["sales", "marketing", "stepup", "pharma"],
   "screenshots": [
     {
       "src": "/images/icons/icon.png",
@@ -21,7 +21,7 @@
   "orientation": "portrait",
   "status_bar": "#079669",
   "splash": {
-    "640x1136": "/images/icons/splash.png"
+    "640x1136": "/images/icons/splash.svg"
   },
   "icons": [
     {

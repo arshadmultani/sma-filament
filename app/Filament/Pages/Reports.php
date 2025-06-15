@@ -9,4 +9,9 @@ class Reports extends Page
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     protected static string $view = 'filament.pages.reports';
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
 }

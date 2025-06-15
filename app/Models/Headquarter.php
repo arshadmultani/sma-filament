@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * 
@@ -31,6 +32,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Headquarter extends Model
 {
+    use HasFactory;
     protected $fillable = ['name', 'area_id'];
 
     public function area()

@@ -30,7 +30,7 @@ use Filament\Tables\Columns\IconColumn;
 use App\Filament\Actions\UpdateStatusAction;
 use Filament\Tables\Filters\SelectFilter;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
-
+use Illuminate\Support\Facades\Auth;
 class DoctorResource extends Resource implements HasShieldPermissions
 {
 
@@ -77,10 +77,24 @@ class DoctorResource extends Resource implements HasShieldPermissions
 
                 Select::make('headquarter_id')
                     ->native(false)
-                    ->relationship('headquarter', 'name')
+                    ->options(function () {
+                        $user = Auth::user();
+
+                        if ($user->hasRole('ASM')) {
+                            // ASM: headquarters under their area
+                            return \App\Models\Headquarter::where('area_id', $user->location_id)->pluck('name', 'id');
+                        } elseif ($user->hasRole('RSM')) {
+                            // RSM: headquarters under all areas in their region
+                            $areaIds = \App\Models\Area::where('region_id', $user->location_id)->pluck('id');
+                            return \App\Models\Headquarter::whereIn('area_id', $areaIds)->pluck('name', 'id');
+                        } else {
+                            // Default: all headquarters (or adjust as needed)
+                            return \App\Models\Headquarter::pluck('name', 'id');
+                        }
+                    })
                     ->searchable()
+                    ->hidden(fn () => Auth::user()->hasRole('DSA'))
                     ->preload()
-                    ->native(false)
                     ->required(),
                 FileUpload::make('attachment')
                     ->directory('doctors/attachments')
@@ -163,7 +177,7 @@ class DoctorResource extends Resource implements HasShieldPermissions
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     UpdateStatusAction::makeBulk(),
-                    // Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }
