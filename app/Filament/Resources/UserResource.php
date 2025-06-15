@@ -234,6 +234,7 @@ class UserResource extends Resource
             )
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\RestoreAction::make(),
                 SendMailAction::make(),
             ])
             ->bulkActions([

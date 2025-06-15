@@ -10,6 +10,9 @@ use Filament\Actions\ImportAction;
 use Filament\Resources\Pages\ListRecords;
 use App\Filament\Imports\UserImporter;
 use Asmit\ResizedColumn\HasResizableColumn;
+use Filament\Resources\Components\Tab;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class ListUsers extends ListRecords
 {
@@ -35,5 +38,16 @@ class ListUsers extends ListRecords
 
             ])->icon('heroicon-m-bars-3-bottom-right'),
         ];
+    }
+    public function getTabs(): array
+    {
+        $tabs = [];
+        if (Auth::user()->hasRole('super_admin')){
+            $tabs['all'] = Tab::make('All')->badge(User::count());
+            $tabs['archived']=Tab::make('Archived')->badge(User::onlyTrashed()->count())->modifyQueryUsing(function($query){
+                return $query->onlyTrashed();
+            });
+        }
+        return $tabs;
     }
 }
