@@ -18,12 +18,12 @@
             <div class="flex gap-4">
                 <x-generic-action-button label="Add Submission" bgColor="bg-gradient-to-r from-green-700 to-emerald-500"
                     leftIcon="heroicon-o-plus"
-                    action="window.location.href='{{ route('filament.admin.resources.kofol-campaigns.create') }}'" />
+                    action="window.location.href='{{ route('filament.admin.resources.kofol-entries.create') }}'" />
             </div>
             <div class="flex gap-4 mt-4">
                 <x-generic-action-button label="View Submissions"
                     bgColor="bg-gradient-to-r from-green-700 to-emerald-500" leftIcon="heroicon-o-eye"
-                    action="window.location.href='{{ route('filament.admin.resources.kofol-entries.create') }}'" />
+                    action="window.location.href='{{ route('filament.admin.resources.kofol-entries.index') }}'" />
             </div>
         </div>
     </div>
