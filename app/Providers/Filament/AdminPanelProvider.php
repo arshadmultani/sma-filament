@@ -52,7 +52,7 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('admin')
-            ->path('')
+            ->path('admin')
             ->login(CustomLogin::class)
             ->darkMode(false)
             ->defaultThemeMode(ThemeMode::Light)
