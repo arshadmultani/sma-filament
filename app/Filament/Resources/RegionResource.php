@@ -3,21 +3,21 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\RegionResource\Pages;
-use App\Filament\Resources\RegionResource\RelationManagers;
 use App\Models\Region;
+use App\Models\Zone;
 use Filament\Forms;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Filament\Forms\Components\Select;
-use App\Models\Zone;
+
 class RegionResource extends Resource
 {
     protected static ?string $model = Region::class;
+
     protected static ?string $navigationGroup = 'Territory';
+
     protected static ?int $navigationSort = 3;
 
     // protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
@@ -71,8 +71,8 @@ class RegionResource extends Resource
             // 'edit' => Pages\EditRegion::route('/{record}/edit'),
         ];
     }
-//     public static function getNavigationBadge(): ?string
-// {
-//     return static::getModel()::count();
-// }
+    //     public static function getNavigationBadge(): ?string
+    // {
+    //     return static::getModel()::count();
+    // }
 }

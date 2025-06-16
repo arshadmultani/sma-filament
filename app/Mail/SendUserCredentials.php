@@ -11,6 +11,7 @@ class SendUserCredentials extends Mailable
     use Queueable, SerializesModels;
 
     public $email;
+
     public $password;
 
     public function __construct($email, $password)
@@ -28,4 +29,4 @@ class SendUserCredentials extends Mailable
                 'password' => $this->password,
             ]);
     }
-} 
+}

@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\KofolCampaignResource\Pages;
 
 use App\Filament\Resources\KofolCampaignResource;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateKofolCampaign extends CreateRecord

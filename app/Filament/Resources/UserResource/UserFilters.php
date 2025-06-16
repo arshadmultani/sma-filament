@@ -2,13 +2,12 @@
 
 namespace App\Filament\Resources\UserResource;
 
-use Filament\Tables\Filters\SelectFilter;
-use App\Models\Region;
 use App\Models\Area;
 use App\Models\Headquarter;
+use App\Models\Region;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Schema;
-use Spatie\Permission\Models\Role;
 
 class UserFilters
 {
@@ -26,9 +25,10 @@ class UserFilters
                 ->label('Region')
                 ->multiple()
                 ->options(function () {
-                    if (class_exists(Region::class) && Schema::hasTable((new Region())->getTable())) {
+                    if (class_exists(Region::class) && Schema::hasTable((new Region)->getTable())) {
                         return Region::pluck('name', 'id')->all();
                     }
+
                     return [];
                 })
                 ->query(function (Builder $query, array $data): Builder {
@@ -44,7 +44,7 @@ class UserFilters
                             'location',
                             Region::class,
                             function (Builder $subQuery) use ($values) {
-                                $subQuery->whereIn((new Region())->getKeyName(), $values);
+                                $subQuery->whereIn((new Region)->getKeyName(), $values);
                             }
                         );
 
@@ -80,9 +80,10 @@ class UserFilters
                 ->label('Area') // Changed label
                 ->multiple()
                 ->options(function () {
-                    if (class_exists(Area::class) && Schema::hasTable((new Area())->getTable())) {
+                    if (class_exists(Area::class) && Schema::hasTable((new Area)->getTable())) {
                         return Area::pluck('name', 'id')->all();
                     }
+
                     return [];
                 })
                 ->query(function (Builder $query, array $data): Builder {
@@ -98,7 +99,7 @@ class UserFilters
                             'location',
                             Area::class,
                             function (Builder $subQuery) use ($values) {
-                                $subQuery->whereIn((new Area())->getKeyName(), $values);
+                                $subQuery->whereIn((new Area)->getKeyName(), $values);
                             }
                         );
 
@@ -120,9 +121,10 @@ class UserFilters
                 ->label('Headquarter')
                 ->multiple()
                 ->options(function () {
-                    if (class_exists(Headquarter::class) && Schema::hasTable((new Headquarter())->getTable())) {
+                    if (class_exists(Headquarter::class) && Schema::hasTable((new Headquarter)->getTable())) {
                         return Headquarter::pluck('name', 'id')->all();
                     }
+
                     return [];
                 })
                 ->query(function (Builder $query, array $data): Builder {
@@ -130,11 +132,12 @@ class UserFilters
                     if (empty($values)) {
                         return $query;
                     }
+
                     return $query->whereHasMorph(
                         'location',
                         Headquarter::class,
                         function (Builder $subQuery) use ($values) {
-                            $subQuery->whereIn((new Headquarter())->getKeyName(), $values);
+                            $subQuery->whereIn((new Headquarter)->getKeyName(), $values);
                         }
                     );
                 }),

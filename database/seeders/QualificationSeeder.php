@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Qualification;
+use Illuminate\Database\Seeder;
 
 class QualificationSeeder extends Seeder
 {
@@ -25,4 +25,4 @@ class QualificationSeeder extends Seeder
             ]);
         }
     }
-} 
+}

@@ -2,12 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 /**
- * 
- *
  * @property int $id
  * @property string $name
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -18,6 +16,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
  * @property-read int|null $users_count
  * @property-read \App\Models\Zone|null $zone
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Region newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Region newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Region query()
@@ -26,19 +25,25 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Region whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Region whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Region whereZoneId($value)
+ *
  * @mixin \Eloquent
  */
 class Region extends Model
 {
     use HasFactory;
+
     protected $fillable = ['name', 'zone_id'];
 
-    public function areas(){
+    public function areas()
+    {
         return $this->hasMany(Area::class);
     }
-    public function users(){
+
+    public function users()
+    {
         return $this->morphMany(User::class, 'location');
     }
+
     public function zone()
     {
         return $this->belongsTo(Zone::class);

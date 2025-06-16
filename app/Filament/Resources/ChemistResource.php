@@ -2,32 +2,28 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Actions\UpdateStatusAction;
 use App\Filament\Resources\ChemistResource\Pages;
-use App\Filament\Resources\ChemistResource\RelationManagers;
 use App\Models\Chemist;
-use Filament\Forms;
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\IconColumn;
-use Filament\Infolists\Infolist;
-use Filament\Infolists\Components\ImageEntry;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Components\Section;
-use App\Filament\Actions\UpdateStatusAction;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
-use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
+use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 
 class ChemistResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = Chemist::class;
+
     protected static ?string $navigationGroup = 'Customer';
 
     public static function getPermissionPrefixes(): array
@@ -39,7 +35,7 @@ class ChemistResource extends Resource implements HasShieldPermissions
             'update',
             'delete',
             'delete_any',
-            'update_status'
+            'update_status',
         ];
     }
     // protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
@@ -69,6 +65,7 @@ class ChemistResource extends Resource implements HasShieldPermissions
                         } elseif ($user->hasRole('RSM')) {
                             // RSM: headquarters under all areas in their region
                             $areaIds = \App\Models\Area::where('region_id', $user->location_id)->pluck('id');
+
                             return \App\Models\Headquarter::whereIn('area_id', $areaIds)->pluck('name', 'id');
                         } else {
                             // Default: all headquarters (or adjust as needed)
@@ -76,7 +73,7 @@ class ChemistResource extends Resource implements HasShieldPermissions
                         }
                     })
                     ->searchable()
-                    ->hidden(fn() => Auth::user()->hasRole('DSA'))
+                    ->hidden(fn () => Auth::user()->hasRole('DSA'))
                     ->preload()
                     ->required(),
             ]);
@@ -89,13 +86,13 @@ class ChemistResource extends Resource implements HasShieldPermissions
                 TextColumn::make('name'),
                 IconColumn::make('status')
                     ->sortable()
-                    ->icon(fn(string $state): string => match ($state) {
+                    ->icon(fn (string $state): string => match ($state) {
                         'Pending' => 'heroicon-o-clock',
                         'Approved' => 'heroicon-o-check-circle',
                         'Rejected' => 'heroicon-o-x-circle',
                         default => 'heroicon-o-question-mark-circle',
                     })
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         'Pending' => 'warning',
                         'Approved' => 'success',
                         'Rejected' => 'danger',
@@ -132,6 +129,7 @@ class ChemistResource extends Resource implements HasShieldPermissions
                 ]),
             ]);
     }
+
     public static function infolist(Infolist $infolist): Infolist
     {
         return $infolist
@@ -158,7 +156,6 @@ class ChemistResource extends Resource implements HasShieldPermissions
                         TextEntry::make('updated_at')->since()->label('Updated'),
                     ]),
 
-
             ]);
     }
 
@@ -175,11 +172,11 @@ class ChemistResource extends Resource implements HasShieldPermissions
             'index' => Pages\ListChemists::route('/'),
             'create' => Pages\CreateChemist::route('/create'),
             'edit' => Pages\EditChemist::route('/{record}/edit'),
-            'view' => Pages\ViewChemist::route('/{record}')
+            'view' => Pages\ViewChemist::route('/{record}'),
         ];
     }
     //     public static function getNavigationBadge(): ?string
-// {
-//     return static::getModel()::count();
-// }
+    // {
+    //     return static::getModel()::count();
+    // }
 }

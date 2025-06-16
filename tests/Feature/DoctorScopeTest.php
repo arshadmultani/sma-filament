@@ -2,16 +2,16 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Models\User;
 use App\Models\Doctor;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class DoctorScopeTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         $this->seed(\Database\Seeders\RoleScopeTestSeeder::class);
@@ -58,4 +58,4 @@ class DoctorScopeTest extends TestCase
         $this->assertNotContains('Doctor 2', $doctorNames);
         $this->assertNotContains('Doctor 3', $doctorNames);
     }
-} 
+}

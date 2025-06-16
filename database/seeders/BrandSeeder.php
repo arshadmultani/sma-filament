@@ -18,4 +18,4 @@ class BrandSeeder extends Seeder
             ['name' => 'Manoll'],
         ]);
     }
-} 
+}

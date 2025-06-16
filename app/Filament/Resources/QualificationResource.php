@@ -3,18 +3,14 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\QualificationResource\Pages;
-use App\Filament\Resources\QualificationResource\RelationManagers;
 use App\Models\Qualification;
-use Filament\Forms;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
 class QualificationResource extends Resource
 {
@@ -28,17 +24,16 @@ class QualificationResource extends Resource
             ->schema([
                 TextInput::make('name')->required(),
                 Select::make('category')->required()->native(false)
-                ->options(fn()=>Qualification::distinct()->pluck('category','category')->toArray())
-                ->createOptionForm([
-                    TextInput::make('name')
-                    ->label('New Category')
-                    ->required(),
-                ])
-                ->createOptionUsing(function(array $data):string{
-                    return $data['name'];
-                }),
-                
-                
+                    ->options(fn () => Qualification::distinct()->pluck('category', 'category')->toArray())
+                    ->createOptionForm([
+                        TextInput::make('name')
+                            ->label('New Category')
+                            ->required(),
+                    ])
+                    ->createOptionUsing(function (array $data): string {
+                        return $data['name'];
+                    }),
+
             ]);
     }
 

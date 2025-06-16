@@ -3,9 +3,9 @@
 namespace App\Filament\Resources\KofolEntryResource\Pages;
 
 use App\Filament\Resources\KofolEntryResource;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
+
 class CreateKofolEntry extends CreateRecord
 {
     protected static string $resource = KofolEntryResource::class;
@@ -18,11 +18,12 @@ class CreateKofolEntry extends CreateRecord
         return $data;
     }
 
-protected function getFormActions(): array {
-    return[
-        $this->getSubmitFormAction()->label('Submit'),
-        $this->getCancelFormAction(),
-    ];
-    
-}
+    protected function getFormActions(): array
+    {
+        return [
+            $this->getSubmitFormAction()->label('Submit'),
+            $this->getCancelFormAction(),
+        ];
+
+    }
 }

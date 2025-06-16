@@ -2,20 +2,20 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\KofolEntry;
-use App\Models\User;
-use App\Models\Product;
-use App\Models\Doctor;
 use App\Models\Chemist;
+use App\Models\Doctor;
 use App\Models\KofolCampaign;
+use App\Models\KofolEntry;
+use App\Models\Product;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 
 class KofolEntrySeeder extends Seeder
 {
     public function run(): void
     {
         $users = User::inRandomOrder()->take(20)->get();
-        $products = Product::whereHas('brand', function($query) {
+        $products = Product::whereHas('brand', function ($query) {
             $query->where('name', 'Kofol');
         })->get();
         $doctors = Doctor::all();
@@ -74,6 +74,7 @@ class KofolEntrySeeder extends Seeder
         do {
             $code = rand(100000, 999999);
         } while (in_array($code, $used));
+
         return $code;
     }
-} 
+}

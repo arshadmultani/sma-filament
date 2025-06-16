@@ -2,12 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 /**
- * 
- *
  * @property int $id
  * @property string $name
  * @property string|null $category
@@ -15,6 +13,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Doctor> $doctors
  * @property-read int|null $doctors_count
+ *
  * @method static \Database\Factories\QualificationFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Qualification newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Qualification newQuery()
@@ -24,6 +23,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Qualification whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Qualification whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Qualification whereUpdatedAt($value)
+ *
  * @mixin \Eloquent
  */
 class Qualification extends Model

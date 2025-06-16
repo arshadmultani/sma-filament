@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Models\User;
 use App\Models\KofolEntry;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class KofolEntryPolicy
@@ -105,6 +105,7 @@ class KofolEntryPolicy
     {
         return $user->can('{{ Reorder }}');
     }
+
     public function updateStatus(User $user): bool
     {
         return $user->can('update_status_kofol::entry');

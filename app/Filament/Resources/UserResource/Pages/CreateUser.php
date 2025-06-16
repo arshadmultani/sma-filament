@@ -3,60 +3,60 @@
 namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Filament\Resources\UserResource;
-use Filament\Actions;
-use Filament\Resources\Pages\CreateRecord;
 use App\Mail\SendUserCredentials;
+use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Mail;
 use Spatie\Permission\Models\Role;
+
 class CreateUser extends CreateRecord
 {
     protected static string $resource = UserResource::class;
 
-
     protected function handleRecordCreation(array $data): \Illuminate\Database\Eloquent\Model
-{
-    $plainPassword = $this->plainPassword;
-    $roleID = $data['roles'];   
-    $roleName=Role::find($roleID)->name;
-    
-    if ($roleName === 'RSM') {
-        $data['location_type'] = \App\Models\Region::class;
-        $data['location_id'] = $data['region_id'] ?? null;
-    } elseif ($roleName === 'ASM') {
-        $data['location_type'] = \App\Models\Area::class;
-        $data['location_id'] = $data['area_id'] ?? null;
-    } elseif ($roleName === 'DSA') {
-        $data['location_type'] = \App\Models\Headquarter::class;
-        $data['location_id'] = $data['headquarter_id'] ?? null;
-    } else {
-        $data['location_type'] = null;
-        $data['location_id'] = null;
+    {
+        $plainPassword = $this->plainPassword;
+        $roleID = $data['roles'];
+        $roleName = Role::find($roleID)->name;
+
+        if ($roleName === 'RSM') {
+            $data['location_type'] = \App\Models\Region::class;
+            $data['location_id'] = $data['region_id'] ?? null;
+        } elseif ($roleName === 'ASM') {
+            $data['location_type'] = \App\Models\Area::class;
+            $data['location_id'] = $data['area_id'] ?? null;
+        } elseif ($roleName === 'DSA') {
+            $data['location_type'] = \App\Models\Headquarter::class;
+            $data['location_id'] = $data['headquarter_id'] ?? null;
+        } else {
+            $data['location_type'] = null;
+            $data['location_id'] = null;
+        }
+
+        // Remove these keys so they are not inserted as columns
+        unset($data['region_id'], $data['area_id'], $data['headquarter_id']);
+
+        $user = static::getModel()::create($data);
+
+        // Assign roles if present
+        if (isset($data['roles'])) {
+            $user->roles()->sync($data['roles']);
+        }
+
+        // Send notification with the plain password
+        // Mail::to($user->email)->send(mailable: new SendUserCredentials($user->email, $data['password']));
+
+        return $user;
     }
 
-    // Remove these keys so they are not inserted as columns
-    unset($data['region_id'], $data['area_id'], $data['headquarter_id']);
-
-    $user = static::getModel()::create($data);
-
-    // Assign roles if present
-    if (isset($data['roles'])) {
-        $user->roles()->sync($data['roles']);
+    public function saved()
+    {
+        if ($this->data['roles']) {
+            $this->record->syncRoles([$this->data['roles']]);
+        }
     }
 
-    // Send notification with the plain password
-    // Mail::to($user->email)->send(mailable: new SendUserCredentials($user->email, $data['password']));
-
-    return $user;
-}
-public function saved()
-{
-    if ($this->data['roles']) {
-        $this->record->syncRoles([$this->data['roles']]);
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
     }
-}
-protected function getRedirectUrl(): string
-{
-    return $this->getResource()::getUrl('index');
-}
-
 }

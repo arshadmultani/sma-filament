@@ -3,9 +3,8 @@
 namespace Database\Factories;
 
 use App\Models\Headquarter;
-use App\Models\Qualification;
-use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Doctor>

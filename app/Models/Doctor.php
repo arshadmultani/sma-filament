@@ -2,12 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
- * 
- *
  * @property int $id
  * @property string $name
  * @property string $email
@@ -29,6 +26,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property-read int|null $kofol_entries_count
  * @property-read \App\Models\Qualification|null $qualification
  * @property-read \App\Models\User|null $user
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Doctor newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Doctor newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Doctor query()
@@ -48,26 +46,30 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Doctor whereType($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Doctor whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Doctor whereUserId($value)
+ *
  * @mixin \Eloquent
  */
 class Doctor extends BaseModel
 {
     use HasFactory;
-        protected $fillable = ['name', 'email', 'phone', 'qualification_id', 'profile_photo', 'user_id', 'headquarter_id', 'attachment', 'address','type','support_type','town'];
+
+    protected $fillable = ['name', 'email', 'phone', 'qualification_id', 'profile_photo', 'user_id', 'headquarter_id', 'attachment', 'address', 'type', 'support_type', 'town'];
 
     protected $casts = [
         'attachment' => 'array',
     ];
 
-    public function user(){
+    public function user()
+    {
         return $this->belongsTo(User::class);
     }
 
-   public function headquarter(){
-    return $this->belongsTo(Headquarter::class);
-   }
+    public function headquarter()
+    {
+        return $this->belongsTo(Headquarter::class);
+    }
 
- public function kofolEntries()
+    public function kofolEntries()
     {
         return $this->morphMany(KofolEntry::class, 'customer');
     }

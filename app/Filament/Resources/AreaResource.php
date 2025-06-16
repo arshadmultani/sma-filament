@@ -3,23 +3,20 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\AreaResource\Pages;
-use App\Filament\Resources\AreaResource\RelationManagers;
 use App\Models\Area;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class AreaResource extends Resource
 {
     protected static ?string $model = Area::class;
 
     protected static ?string $navigationGroup = 'Territory';
-    protected static ?int $navigationSort = 2;
 
+    protected static ?int $navigationSort = 2;
 
     // protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -74,8 +71,8 @@ class AreaResource extends Resource
             'edit' => Pages\EditArea::route('/{record}/edit'),
         ];
     }
-//     public static function getNavigationBadge(): ?string
-// {
-//     return static::getModel()::count();
-// }
+    //     public static function getNavigationBadge(): ?string
+    // {
+    //     return static::getModel()::count();
+    // }
 }

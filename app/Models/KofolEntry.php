@@ -5,8 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * 
- *
  * @property int $id
  * @property int $kofol_campaign_id
  * @property int $user_id
@@ -23,6 +21,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read \App\Models\KofolCampaign $kofolCampaign
  * @property-read int|null $products_count
  * @property-read \App\Models\User $user
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|KofolEntry newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|KofolEntry newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|KofolEntry query()
@@ -38,6 +37,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|KofolEntry whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|KofolEntry whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|KofolEntry whereUserId($value)
+ *
  * @mixin \Eloquent
  */
 class KofolEntry extends Model
@@ -53,21 +53,26 @@ class KofolEntry extends Model
         'status',
         'coupon_code',
     ];
+
     protected $casts = [
         'products' => 'array',
     ];
+
     public function kofolCampaign()
     {
         return $this->belongsTo(KofolCampaign::class);
     }
+
     public function user()
     {
         return $this->belongsTo(User::class);
     }
+
     public function customer()
     {
         return $this->morphTo();
     }
+
     public function products()
     {
         return $this->hasMany(Product::class);

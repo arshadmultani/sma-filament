@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Zone;
+use Illuminate\Database\Seeder;
 
 class ZoneSeeder extends Seeder
 {
@@ -14,4 +14,4 @@ class ZoneSeeder extends Seeder
             Zone::firstOrCreate(['name' => $zone]);
         }
     }
-} 
+}

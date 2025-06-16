@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Doctor;
-use App\Models\User;
-use App\Models\Qualification;
 use App\Models\Headquarter;
+use App\Models\Qualification;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 
 class DoctorSeeder extends Seeder
 {
@@ -26,12 +26,12 @@ class DoctorSeeder extends Seeder
                     'email' => fake()->unique()->safeEmail(),
                     'phone' => fake()->phoneNumber(),
                     'qualification_id' => fake()->randomElement($qualificationIds),
-                    'profile_photo' => 'https://i.pravatar.cc/150?img=' . rand(1, 70),
+                    'profile_photo' => 'https://i.pravatar.cc/150?img='.rand(1, 70),
                     'user_id' => $user->id,
                     'headquarter_id' => fake()->randomElement($headquarterIds),
                     'attachment' => [
-                        'https://picsum.photos/200/300?random=' . rand(1, 100),
-                        'https://picsum.photos/200/300?random=' . rand(101, 200),
+                        'https://picsum.photos/200/300?random='.rand(1, 100),
+                        'https://picsum.photos/200/300?random='.rand(101, 200),
                     ],
                     'address' => fake()->address(),
                     'town' => fake()->city(),
@@ -41,4 +41,4 @@ class DoctorSeeder extends Seeder
             }
         }
     }
-} 
+}

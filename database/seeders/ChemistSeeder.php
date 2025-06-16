@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Chemist;
 use App\Models\Headquarter;
+use Illuminate\Database\Seeder;
 
 class ChemistSeeder extends Seeder
 {
@@ -25,4 +25,4 @@ class ChemistSeeder extends Seeder
             ]);
         }
     }
-} 
+}

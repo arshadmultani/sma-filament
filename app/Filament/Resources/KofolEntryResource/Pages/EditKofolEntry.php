@@ -6,6 +6,7 @@ use App\Filament\Resources\KofolEntryResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Auth;
+
 class EditKofolEntry extends EditRecord
 {
     protected static string $resource = KofolEntryResource::class;
@@ -16,6 +17,7 @@ class EditKofolEntry extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $data['user_id'] = Auth::user()->id;

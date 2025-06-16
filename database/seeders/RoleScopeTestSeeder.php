@@ -2,12 +2,12 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\User;
-use App\Models\Region;
 use App\Models\Area;
-use App\Models\Headquarter;
 use App\Models\Doctor;
+use App\Models\Headquarter;
+use App\Models\Region;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 
 class RoleScopeTestSeeder extends Seeder
@@ -42,4 +42,4 @@ class RoleScopeTestSeeder extends Seeder
         Doctor::factory()->create(['name' => 'Doctor 2', 'headquarter_id' => $hq2->id, 'user_id' => $asm->id]);
         Doctor::factory()->create(['name' => 'Doctor 3', 'headquarter_id' => $hq3->id, 'user_id' => $rsm->id]);
     }
-} 
+}

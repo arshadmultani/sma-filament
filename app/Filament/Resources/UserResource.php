@@ -2,41 +2,39 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\UserResource\Pages;
-use App\Models\User;
-use Filament\Forms\Form;
-use Filament\Forms\Components\Section;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\TextInput;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Mail;
 use App\Filament\Actions\SendMailAction;
-use Filament\Forms\Set;
-use Filament\Forms\Components\Select;
-use App\Models\Region;
+use App\Filament\Exports\UserExporter;
+use App\Filament\Resources\UserResource\Pages;
+use App\Filament\Resources\UserResource\UserFilters;
 use App\Models\Area;
 use App\Models\Headquarter;
+use App\Models\Region;
+use App\Models\User;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
 use Filament\Forms\Get;
-use Spatie\Permission\Models\Role;
+use Filament\Forms\Set;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
-use Filament\Tables\Filters\SelectFilter;
-use App\Filament\Exports\UserExporter;
-use App\Filament\Resources\UserResource\UserFilters;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Spatie\Permission\Models\Role;
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
+
     protected static ?int $navigationSort = 2;
 
-
-    protected ?string $plainPassword = null; //Temporary password
+    protected ?string $plainPassword = null; // Temporary password
 
     public static function form(Form $form): Form
     {
@@ -50,9 +48,10 @@ class UserResource extends Resource
                                 $query = Role::query();
                                 /** @var \App\Models\User|null $user */
                                 $user = Auth::user();
-                                if (!$user?->hasRole('super_admin')) {
+                                if (! $user?->hasRole('super_admin')) {
                                     $query->where('name', '!=', 'super_admin');
                                 }
+
                                 return $query->pluck('name', 'id');
                             })
                             ->preload()
@@ -60,8 +59,8 @@ class UserResource extends Resource
                             ->native(false)
                             ->reactive()
                             ->required()
-                            ->dehydrated(fn($state) => filled($state))
-                            ->required(fn(string $context): bool => $context === 'create'),
+                            ->dehydrated(fn ($state) => filled($state))
+                            ->required(fn (string $context): bool => $context === 'create'),
 
                         Select::make('region_id')
                             ->label('Region')
@@ -69,17 +68,19 @@ class UserResource extends Resource
                             ->preload()
                             ->searchable()
                             ->options(Region::all()->pluck('name', 'id'))
-                            ->afterStateUpdated(fn(Set $set) => $set('area_id', null))
+                            ->afterStateUpdated(fn (Set $set) => $set('area_id', null))
                             ->reactive()
                             ->required(function (Get $get) {
                                 $roleId = $get('roles');
                                 $roleName = $roleId ? Role::find($roleId)?->name : null;
+
                                 return $roleName === 'RSM';
                             })
                             ->hidden(function (Get $get) {
                                 $roleId = $get('roles');
                                 $roleName = $roleId ? Role::find($roleId)?->name : null;
-                                return !in_array($roleName, ['ASM', 'RSM', 'DSA']) || in_array($roleName, ['admin', 'super_admin']);
+
+                                return ! in_array($roleName, ['ASM', 'RSM', 'DSA']) || in_array($roleName, ['admin', 'super_admin']);
                             }),
 
                         Select::make('area_id')
@@ -90,19 +91,22 @@ class UserResource extends Resource
                             ->options(function (Get $get) {
                                 $regionId = $get('region_id');
                                 if ($regionId) {
-                                    return Area::where('region_id', (int)$regionId)->pluck('name', 'id');
+                                    return Area::where('region_id', (int) $regionId)->pluck('name', 'id');
                                 }
+
                                 return [];
                             })
                             ->required(function (Get $get) {
                                 $roleId = $get('roles');
                                 $roleName = $roleId ? Role::find($roleId)?->name : null;
+
                                 return $roleName === 'ASM';
                             })
                             ->hidden(function (Get $get) {
                                 $roleId = $get('roles');
                                 $roleName = $roleId ? Role::find($roleId)?->name : null;
-                                return !in_array($roleName, ['ASM', 'DSA']) || in_array($roleName, ['admin', 'super_admin']);
+
+                                return ! in_array($roleName, ['ASM', 'DSA']) || in_array($roleName, ['admin', 'super_admin']);
                             })
                             // ->afterStateUpdated(fn(Set $set) => $set('area_id', null))
                             ->reactive(),
@@ -115,25 +119,26 @@ class UserResource extends Resource
                             ->options(function (Get $get) {
                                 $areaId = $get('area_id');
                                 if ($areaId) {
-                                    return Headquarter::where('area_id', (int)$areaId)->pluck('name', 'id');
+                                    return Headquarter::where('area_id', (int) $areaId)->pluck('name', 'id');
                                 }
+
                                 return [];
                             })
                             ->required(function (Get $get) {
                                 $roleId = $get('roles');
                                 $roleName = $roleId ? Role::find($roleId)?->name : null;
+
                                 return $roleName === 'DSA';
                             })
                             ->hidden(function (Get $get) {
                                 $roleId = $get('roles');
                                 $roleName = $roleId ? Role::find($roleId)?->name : null;
+
                                 return $roleName !== 'DSA' || in_array($roleName, ['admin', 'super_admin']);
                             })
                             // ->afterStateUpdated(fn(Set $set) => $set('headquarter_id', null))
                             ->reactive(),
                     ]),
-
-
 
                 Section::make()
                     ->columns(2)
@@ -156,19 +161,19 @@ class UserResource extends Resource
                             ->visibleOn('create')
                             ->password()
                             ->revealable()
-                            ->default(fn() => Str::random(8))
-                            ->placeholder(fn($context) => $context === 'edit' ? 'Enter a new password to change' : null)
+                            ->default(fn () => Str::random(8))
+                            ->placeholder(fn ($context) => $context === 'edit' ? 'Enter a new password to change' : null)
                             ->maxLength(255)
                             ->dehydrateStateUsing(function ($state, $livewire) {
                                 // Store plain password in temporary variable
                                 $livewire->plainPassword = $state;
+
                                 // Return hashed password to be stored in DB
                                 return Hash::make($state);
                             })
-                            ->dehydrated(fn($state) => filled($state))
-                            ->required(fn(string $context): bool => $context === 'create'),
-                    ])
-
+                            ->dehydrated(fn ($state) => filled($state))
+                            ->required(fn (string $context): bool => $context === 'create'),
+                    ]),
 
             ]);
     }
@@ -182,7 +187,7 @@ class UserResource extends Resource
                 TextColumn::make('name')->searchable(),
                 TextColumn::make('roles.name')
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         'RSM' => 'danger',
                         'ASM' => 'warning',
                         'DSA' => 'info',
@@ -204,6 +209,7 @@ class UserResource extends Resource
                         } elseif ($record->location instanceof \App\Models\Headquarter) {
                             return $record->location->area?->region?->name;
                         }
+
                         return '-';
                     }),
                 TextColumn::make('area_name')
@@ -214,6 +220,7 @@ class UserResource extends Resource
                         } elseif ($record->location instanceof \App\Models\Headquarter) {
                             return $record->location->area?->name;
                         }
+
                         return '-';
                     }),
                 TextColumn::make('headquarter_name')
@@ -222,6 +229,7 @@ class UserResource extends Resource
                         if ($record->location instanceof \App\Models\Headquarter) {
                             return $record->location->name;
                         }
+
                         return '-';
                     }),
                 // TextColumn::make('phone_number'),
@@ -243,6 +251,7 @@ class UserResource extends Resource
                 Tables\Actions\ExportBulkAction::make()->exporter(UserExporter::class),
             ]);
     }
+
     public static function getRelations(): array
     {
         return [

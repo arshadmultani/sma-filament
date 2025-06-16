@@ -2,17 +2,15 @@
 
 namespace App\Filament\Resources\KofolEntryResource\Pages;
 
-use App\Filament\Resources\KofolEntryResource;
-use Filament\Actions;
-use Filament\Resources\Pages\ViewRecord;
-use Filament\Actions\Action;
-use Torgodly\Html2Media\Actions\Html2MediaAction;
-use Illuminate\Support\Str;
-use App\Models\KofolEntry;
-use App\Filament\Actions\UpdateKofolStatusAction;
 use App\Filament\Actions\SendKofolCouponAction;
-use Illuminate\Support\Facades\Gate;
+use App\Filament\Actions\UpdateKofolStatusAction;
+use App\Filament\Resources\KofolEntryResource;
+use App\Models\KofolEntry;
+use Filament\Actions\Action;
+use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
+use Torgodly\Html2Media\Actions\Html2MediaAction;
 
 class ViewKofolEntry extends ViewRecord
 {
@@ -20,7 +18,7 @@ class ViewKofolEntry extends ViewRecord
 
     public function getTitle(): string
     {
-        return 'KSV/POB/' . $this->record->id;
+        return 'KSV/POB/'.$this->record->id;
     }
 
     public function getHeaderActions(): array
@@ -34,7 +32,7 @@ class ViewKofolEntry extends ViewRecord
         /** @var \App\Models\User|null $user */
         $user = Auth::user();
         if ($user && $user->hasRole(['admin', 'super_admin'])) {
-            $actions[] = SendKofolCouponAction::make()->visible(fn($record) => $record->status == 'Approved');
+            $actions[] = SendKofolCouponAction::make()->visible(fn ($record) => $record->status == 'Approved');
         }
         if (Gate::allows('update', $this->record) && Auth::id() === $this->record->user_id) {
             $actions[] = Action::make('edit')
@@ -50,7 +48,6 @@ class ViewKofolEntry extends ViewRecord
         //     ->label('')
         //     ->filename('KSV-POB-' . $this->record->id)
         //     ->color('gray');
-
 
         return [
             ...$actions,

@@ -2,11 +2,12 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Support\Facades\Hash;
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
+
 class DatabaseSeeder extends Seeder
 {
     /**
@@ -16,8 +17,6 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        
-
         $this->call([
             ZoneSeeder::class,
             RegionSeeder::class,
@@ -25,21 +24,21 @@ class DatabaseSeeder extends Seeder
             AreaSeeder::class,
             HeadquarterSeeder::class,
             DoctorSeeder::class,
-            ChemistSeeder::class,            
+            ChemistSeeder::class,
             ProductSeeder::class,
             KofolCampaignSeeder::class,
             KofolEntrySeeder::class,
             QualificationSeeder::class,
         ]);
-        $role=Role::create(['name' => 'super_admin']);
+        $role = Role::create(['name' => 'super_admin']);
 
-        $user=User::factory()->create([
+        $user = User::factory()->create([
             'name' => 'Super Admin',
             'email' => 'arshadrmultani@gmail.com',
             'phone_number' => '1234567890',
             'password' => Hash::make('admin'),
             'division_id' => 1,
-            
+
         ]);
         $user->assignRole($role);
         User::factory()->create([
@@ -48,7 +47,7 @@ class DatabaseSeeder extends Seeder
             'phone_number' => '1234567899',
             'password' => Hash::make('admin'),
             'division_id' => 1,
-            
+
         ]);
     }
 }

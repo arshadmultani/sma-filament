@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Region;
 use App\Models\Zone;
+use Illuminate\Database\Seeder;
 
 class RegionSeeder extends Seeder
 {
@@ -28,11 +28,11 @@ class RegionSeeder extends Seeder
         foreach ($regionZoneMap as $zoneName => $regions) {
             foreach ($regions as $region) {
                 Region::firstOrCreate([
-                    'name' => $region
+                    'name' => $region,
                 ], [
-                    'zone_id' => $zones[$zoneName] ?? null
+                    'zone_id' => $zones[$zoneName] ?? null,
                 ]);
             }
         }
     }
-} 
+}

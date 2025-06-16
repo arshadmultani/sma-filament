@@ -2,51 +2,40 @@
 
 namespace App\Filament\Resources;
 
-
+use App\Filament\Actions\SendKofolCouponAction;
+use App\Filament\Actions\UpdateKofolStatusAction;
 use App\Filament\Resources\KofolEntryResource\Pages;
-use App\Filament\Resources\KofolEntryResource\RelationManagers;
-use App\Models\KofolEntry;
-use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Columns\ImageColumn;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Filament\Tables\Columns\TextColumn;
 use App\Models\Chemist;
-use Filament\Forms\Components\MorphToSelect;
 use App\Models\Doctor;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\TextInput;
-use Filament\Infolists\Infolist;
-use Filament\Infolists\Components\TextEntry;
+use App\Models\KofolEntry;
 use App\Models\Product;
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Forms\Components\Actions\Action;
-use Filament\Forms\Get;
-use Illuminate\Support\Collection;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\MorphToSelect;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
 use Filament\Infolists\Components;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\RepeatableEntry;
-use Filament\Support\Enums\FontFamily;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
-use Filament\Infolists\Components\Split;
-use Filament\Infolists\Components\Fieldset;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Select;
+use Filament\Tables;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 use Icetalker\FilamentTableRepeatableEntry\Infolists\Components\TableRepeatableEntry;
-use App\Filament\Actions\UpdateKofolStatusAction;
-use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
-use App\Filament\Actions\SendKofolCouponAction;
-use Illuminate\Support\Facades\Gate;
-
-
+use Illuminate\Support\Collection;
 
 class KofolEntryResource extends Resource implements HasShieldPermissions
 {
-    public static function getPermissionPrefixes(): array{
+    public static function getPermissionPrefixes(): array
+    {
         return [
             'view',
             'view_any',
@@ -57,9 +46,11 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
             'update_status',
         ];
     }
+
     protected static ?string $model = KofolEntry::class;
 
     protected static ?string $navigationGroup = 'Kofol Swarna Varsha';
+
     protected static ?string $modelLabel = 'Campaign Entries';
 
     public static function form(Form $form): Form
@@ -69,7 +60,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
             ->schema([
                 // campaign name
                 Select::make('kofol_campaign_id')
-                    ->relationship('kofolCampaign', 'name', fn($query) => $query->where('is_active', true))
+                    ->relationship('kofolCampaign', 'name', fn ($query) => $query->where('is_active', true))
                     ->native(false)
                     ->required(),
 
@@ -88,7 +79,6 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ->searchable()
                     ->required(),
 
-
                 // products
                 Repeater::make('products')
                     ->collapsible()
@@ -96,10 +86,10 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ->addActionLabel('Add Product')
                     ->reorderable(false)
                     ->itemLabel(
-                        fn(array $state): string => Product::find($state['product_id'])?->name ?? ''
+                        fn (array $state): string => Product::find($state['product_id'])?->name ?? ''
                     )
                     ->minItems(1)
-                    ->deleteAction(fn(Action $action) => $action->requiresConfirmation())
+                    ->deleteAction(fn (Action $action) => $action->requiresConfirmation())
                     // ->afterStateUpdated(fn($state, callable $set) => static::updateInvoiceTotal($state, $set))
                     // ->afterStateHydrated(fn($state, callable $set) => static::updateInvoiceTotal($state, $set))
                     ->schema([
@@ -129,8 +119,6 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                         // ),
                     ]),
 
-
-
                 Section::make()
                     ->columns(2)
                     ->schema([
@@ -145,14 +133,14 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                             ->maxSize(2048)
                             ->required(),
 
-
                     ]),
             ]);
     }
+
     private static function getKofolProductOptions(): Collection
     {
         return Product::query()
-            ->whereHas('brand', fn($query) => $query->where('name', 'Kofol'))
+            ->whereHas('brand', fn ($query) => $query->where('name', 'Kofol'))
             ->pluck('name', 'id');
     }
 
@@ -195,7 +183,6 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
     //     $set('../../invoice_amount', $total);
     // }
 
-
     public static function table(Table $table): Table
     {
         return $table
@@ -216,7 +203,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                 TextColumn::make(name: 'customer_type')
                     ->label('Cx. Type')
                     ->searchable()
-                    ->formatStateUsing(fn($state) => class_basename($state))
+                    ->formatStateUsing(fn ($state) => class_basename($state))
                     ->toggleable(),
                 ImageColumn::make('invoice_image')
                     ->label('Invoice')
@@ -228,7 +215,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ->toggleable(),
                 TextColumn::make('status')->label('Status')
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         'Pending' => 'warning',
                         'Approved' => 'primary',
                         'Rejected' => 'danger',
@@ -278,14 +265,14 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                         TextEntry::make('created_at')->label(label: 'Submission')->dateTime('d-m-y @ H:i'),
                         TextEntry::make('status')->label('Status')
                             ->badge()
-                            ->color(fn(string $state): string => match ($state) {
+                            ->color(fn (string $state): string => match ($state) {
                                 'Pending' => 'warning',
                                 'Approved' => 'primary',
                                 'Rejected' => 'danger',
                                 default => 'secondary'
                             }),
                         TextEntry::make('coupon_code')->label('Coupon Code')
-                            ->visible(fn($state, $record) => !is_null($state) && $record->status === 'Approved')
+                            ->visible(fn ($state, $record) => ! is_null($state) && $record->status === 'Approved')
                             ->badge()
                             ->color('gray'),
 
@@ -301,7 +288,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ])
                     ->schema([
                         TextEntry::make('customer.name'),
-                        TextEntry::make('customer_type')->formatStateUsing(fn($state) => class_basename($state)),
+                        TextEntry::make('customer_type')->formatStateUsing(fn ($state) => class_basename($state)),
                         // Have to fix HQ ......
                         TextEntry::make('user.headquarter.name')->label('Headquarter'),
 
@@ -328,7 +315,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                                 TextEntry::make('product_id')
                                     ->columnSpan(2)
                                     ->label('Product')
-                                    ->formatStateUsing(fn($state) => Product::find($state)?->name ?? ''),
+                                    ->formatStateUsing(fn ($state) => Product::find($state)?->name ?? ''),
                                 TextEntry::make('quantity')->columnSpan(1),
                                 TextEntry::make('price')->money('INR')->columnSpan(1),
                             ]),
@@ -339,7 +326,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                                 TextEntry::make('product_id')
                                     ->columnSpan(2)
                                     ->label('Product')
-                                    ->formatStateUsing(fn($state) => Product::find($state)?->name ?? ''),
+                                    ->formatStateUsing(fn ($state) => Product::find($state)?->name ?? ''),
                                 TextEntry::make('quantity'),
                                 TextEntry::make('price')->money('INR'),
                             ]),
@@ -359,6 +346,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
             //
         ];
     }
+
     public static function getNavigationBadge(): ?string
     {
         return static::getModel()::count();

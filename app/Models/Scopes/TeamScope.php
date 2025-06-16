@@ -16,13 +16,13 @@ class TeamScope implements Scope
     public function apply(Builder $builder, Model $model): void
     {
         $user = Auth::user();
-        
-        if (!$user) {
+
+        if (! $user) {
             return;
         }
 
         // Admin and Super-Admin can see all records
-        /*  */
+        /* */
         if ($user->hasAnyRole(['admin', 'super_admin'])) {
             return;
         }
@@ -31,17 +31,19 @@ class TeamScope implements Scope
         if ($user->hasRole('DSA')) {
             $builder->where(function ($query) use ($user) {
                 $query->where('user_id', $user->id)
-                ->orWhere('headquarter_id', $user->location_id);
+                    ->orWhere('headquarter_id', $user->location_id);
                 // LATER ADD DIVISION FILTER TOO
-            
+
             });
+
             return;
         }
 
-        // ASM logic 
+        // ASM logic
         if ($user->hasRole('ASM')) {
             $headquarterIds = Headquarter::where('area_id', $user->location_id)->pluck('id');
             $builder->whereIn('headquarter_id', $headquarterIds);
+
             return;
         }
 
@@ -50,6 +52,7 @@ class TeamScope implements Scope
             $areaIds = \App\Models\Area::where('region_id', $user->location_id)->pluck('id');
             $headquarterIds = Headquarter::whereIn('area_id', $areaIds)->pluck('id');
             $builder->whereIn('headquarter_id', $headquarterIds);
+
             return;
         }
 

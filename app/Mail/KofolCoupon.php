@@ -13,14 +13,20 @@ class KofolCoupon extends Mailable
     use Queueable, SerializesModels;
 
     public $customer;
+
     public $customerName;
+
     public $customerAddress;
+
     public $customerTown;
+
     public $headquarterName;
+
     public $couponCode;
+
     public $expiryDate;
+
     public $redeemUrl;
-    
 
     public function __construct($customer, $couponCode = null)
     {
@@ -29,9 +35,9 @@ class KofolCoupon extends Mailable
         $this->customerAddress = $customer->address ?? '';
         $this->customerTown = $customer->town ?? '';
         $this->headquarterName = $customer->headquarter->name ?? '';
-        $this->couponCode = $couponCode ?? 'KOFOL-' . date('Y') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
+        $this->couponCode = $couponCode ?? 'KOFOL-'.date('Y').'-'.str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
         $this->expiryDate = now()->addMonths(3)->format('F d, Y');
-        $this->redeemUrl = config('app.url') . '/redeem-coupon';
+        $this->redeemUrl = config('app.url').'/redeem-coupon';
     }
 
     public function envelope(): Envelope

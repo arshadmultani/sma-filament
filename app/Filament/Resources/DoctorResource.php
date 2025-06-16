@@ -2,39 +2,33 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Actions\UpdateStatusAction;
 use App\Filament\Resources\DoctorResource\Pages;
-use App\Filament\Resources\DoctorResource\RelationManagers;
 use App\Models\Doctor;
-use Filament\Forms;
-use Filament\Forms\Components\Tabs\Tab;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Models\Qualification;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Forms\Components\FileUpload;
-use Filament\Infolists\Components\Fieldset;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Resource;
+use Filament\Support\Enums\FontWeight;
+use Filament\Tables;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Support\Enums\FontWeight;
-use Filament\Tables\Actions\Action;
-use Filament\Infolists\Infolist;
-use Filament\Infolists\Components\ImageEntry;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Components\Section;
-use Filament\Tables\Columns\IconColumn;
-use App\Filament\Actions\UpdateStatusAction;
 use Filament\Tables\Filters\SelectFilter;
-use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
+use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
+
 class DoctorResource extends Resource implements HasShieldPermissions
 {
-
-    public static function getPermissionPrefixes(): array{
+    public static function getPermissionPrefixes(): array
+    {
         return [
             'view',
             'view_any',
@@ -42,9 +36,10 @@ class DoctorResource extends Resource implements HasShieldPermissions
             'update',
             'delete',
             'delete_any',
-            'update_status'
+            'update_status',
         ];
     }
+
     protected static ?string $model = Doctor::class;
 
     protected static ?string $navigationGroup = 'Customer';
@@ -73,7 +68,6 @@ class DoctorResource extends Resource implements HasShieldPermissions
                 TextInput::make('phone')->required(),
                 TextInput::make('address'),
                 TextInput::make('town'),
-                
 
                 Select::make('headquarter_id')
                     ->native(false)
@@ -86,6 +80,7 @@ class DoctorResource extends Resource implements HasShieldPermissions
                         } elseif ($user->hasRole('RSM')) {
                             // RSM: headquarters under all areas in their region
                             $areaIds = \App\Models\Area::where('region_id', $user->location_id)->pluck('id');
+
                             return \App\Models\Headquarter::whereIn('area_id', $areaIds)->pluck('name', 'id');
                         } else {
                             // Default: all headquarters (or adjust as needed)
@@ -107,7 +102,6 @@ class DoctorResource extends Resource implements HasShieldPermissions
                     ->label('Visiting Card/Rx. Pad'),
                 FileUpload::make('profile_photo')
                     ->image()->directory('doctors/profile_photos'),
-
 
             ]);
     }
@@ -151,7 +145,6 @@ class DoctorResource extends Resource implements HasShieldPermissions
                     ->label('Region')
                     ->searchable(),
 
-
                 TextColumn::make('type')->toggleable(),
                 TextColumn::make('support_type')->toggleable()->label('Support'),
                 TextColumn::make('email')->toggleable(),
@@ -181,6 +174,7 @@ class DoctorResource extends Resource implements HasShieldPermissions
                 ]),
             ]);
     }
+
     public static function infolist(Infolist $infolist): Infolist
     {
         return $infolist
@@ -193,7 +187,7 @@ class DoctorResource extends Resource implements HasShieldPermissions
                         ImageEntry::make('profile_photo')
                             ->simpleLightbox()
 
-                            ->visible(fn($state) => !is_null($state))
+                            ->visible(fn ($state) => ! is_null($state))
                             ->label('Photo')->circular(),
 
                         Section::make()
@@ -219,8 +213,6 @@ class DoctorResource extends Resource implements HasShieldPermissions
                         TextEntry::make('headquarter.area.name'),
                         TextEntry::make('headquarter.area.region.name'),
 
-
-
                         // TextEntry::make('created_at')->since()->label('Created'),
                         // TextEntry::make('user.name'),
                     ]),
@@ -230,13 +222,11 @@ class DoctorResource extends Resource implements HasShieldPermissions
                         ImageEntry::make('attachment')
                             ->simpleLightbox()
                             ->label('Visiting Card/Rx. Pad'),
-                        
+
                     ]),
 
             ]);
     }
-
-
 
     public static function getRelations(): array
     {

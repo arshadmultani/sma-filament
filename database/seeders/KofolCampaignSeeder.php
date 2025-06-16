@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\KofolCampaign;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 
 class KofolCampaignSeeder extends Seeder
@@ -34,4 +34,4 @@ class KofolCampaignSeeder extends Seeder
             ],
         ]);
     }
-} 
+}

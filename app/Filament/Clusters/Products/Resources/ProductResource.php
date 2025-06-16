@@ -2,27 +2,23 @@
 
 namespace App\Filament\Clusters\Products\Resources;
 
+use App\Filament\Clusters\Products;
 use App\Filament\Clusters\Products\Resources\ProductResource\Pages;
-use App\Filament\Clusters\Products\Resources\ProductResource\RelationManagers;
 use App\Models\Product;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Filament\Clusters\Products;
-use Filament\Actions;
-use Filament\Actions\ActionGroup;
+
 class ProductResource extends Resource
 {
     protected static ?string $model = Product::class;
 
     protected static ?string $cluster = Products::class;
 
-
     protected static ?string $navigationIcon = 'heroicon-o-bolt';
+
     protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
@@ -51,14 +47,13 @@ class ProductResource extends Resource
 
                 Forms\Components\FileUpload::make('image'),
 
-
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
-            ->paginated([25,50,100,'all'])
+            ->paginated([25, 50, 100, 'all'])
             ->columns([
                 Tables\Columns\ImageColumn::make('image')->circular(),
                 Tables\Columns\TextColumn::make('name')->searchable(),
@@ -79,7 +74,7 @@ class ProductResource extends Resource
                 ]),
             ]);
     }
-    
+
     public static function getRelations(): array
     {
         return [

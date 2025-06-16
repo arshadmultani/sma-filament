@@ -3,14 +3,12 @@
 namespace App\Filament\Imports;
 
 use App\Models\User;
+use App\Notifications\ImportFailedNotification;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
 use Illuminate\Support\Facades\Hash;
-use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
-use App\Notifications\ImportFailedNotification;
 use Illuminate\Support\Facades\Notification;
 
 class UserImporter extends Importer
@@ -18,8 +16,11 @@ class UserImporter extends Importer
     protected static ?string $model = User::class;
 
     protected ?string $importRoleName = null;
+
     protected ?string $importRegion = null;
+
     protected ?string $importArea = null;
+
     protected ?string $importHeadquarter = null;
 
     public static function getColumns(): array
@@ -83,13 +84,13 @@ class UserImporter extends Importer
     public function resolveRecord(): ?User
     {
         // Always create a new user, never set the id manually
-        $user = new User();
+        $user = new User;
         $user->name = $this->data['name'] ?? null;
         $user->email = $this->data['email'] ?? null;
         $user->password = Hash::make($this->data['password'] ?? null);
         $user->phone_number = $this->data['phone_number'] ?? null;
-        
-        if (!empty($this->data['division_id'])) {
+
+        if (! empty($this->data['division_id'])) {
             $division = \App\Models\Division::whereRaw('LOWER(name) = ?', [strtolower($this->data['division_id'])])->first();
             if ($division) {
                 $user->division_id = $division->id;
@@ -110,14 +111,14 @@ class UserImporter extends Importer
         if ($this->importRoleName && $this->record) {
             $this->record->assignRole($this->importRoleName);
 
-            if ($this->importRoleName === 'RSM' && !empty($this->importRegion)) {
+            if ($this->importRoleName === 'RSM' && ! empty($this->importRegion)) {
                 $region = \App\Models\Region::whereRaw('LOWER(name) = ?', [strtolower(trim($this->importRegion))])->first();
                 if ($region) {
                     $this->record->location_type = \App\Models\Region::class;
                     $this->record->location_id = $region->id;
                     $this->record->save();
                 }
-            } elseif ($this->importRoleName === 'ASM' && !empty($this->importArea)) {
+            } elseif ($this->importRoleName === 'ASM' && ! empty($this->importArea)) {
                 $area = \App\Models\Area::whereRaw('LOWER(name) = ?', [strtolower(trim($this->importArea))])->first();
                 if ($area) {
                     $this->record->location_type = \App\Models\Area::class;
@@ -126,7 +127,7 @@ class UserImporter extends Importer
                 } else {
                     // Log::warning('Area not found for import', ['area' => $this->importArea]);
                 }
-            } elseif ($this->importRoleName === 'DSA' && !empty($this->importHeadquarter)) {
+            } elseif ($this->importRoleName === 'DSA' && ! empty($this->importHeadquarter)) {
                 $hq = \App\Models\Headquarter::whereRaw('LOWER(name) = ?', [strtolower(trim($this->importHeadquarter))])->first();
                 if ($hq) {
                     $this->record->location_type = \App\Models\Headquarter::class;
@@ -141,10 +142,10 @@ class UserImporter extends Importer
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $body = 'Your user import has completed and ' . number_format($import->successful_rows) . ' ' . str('row')->plural($import->successful_rows) . ' imported.';
+        $body = 'Your user import has completed and '.number_format($import->successful_rows).' '.str('row')->plural($import->successful_rows).' imported.';
 
         if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= ' ' . number_format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to import.';
+            $body .= ' '.number_format($failedRowsCount).' '.str('row')->plural($failedRowsCount).' failed to import.';
         }
 
         $userId = $import->options['user_id'] ?? null;
@@ -157,6 +158,4 @@ class UserImporter extends Importer
 
         return $body;
     }
-    
 }
-    

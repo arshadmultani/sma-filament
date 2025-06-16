@@ -3,20 +3,21 @@
 namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Filament\Exports\UserExporter;
+use App\Filament\Imports\UserImporter;
 use App\Filament\Resources\UserResource;
+use App\Models\User;
+use Asmit\ResizedColumn\HasResizableColumn;
 use Filament\Actions;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\ImportAction;
-use Filament\Resources\Pages\ListRecords;
-use App\Filament\Imports\UserImporter;
-use Asmit\ResizedColumn\HasResizableColumn;
 use Filament\Resources\Components\Tab;
-use App\Models\User;
+use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\Auth;
 
 class ListUsers extends ListRecords
 {
     use HasResizableColumn;
+
     protected static string $resource = UserResource::class;
 
     protected function getHeaderActions(): array
@@ -39,15 +40,17 @@ class ListUsers extends ListRecords
             ])->icon('heroicon-m-bars-3-bottom-right'),
         ];
     }
+
     public function getTabs(): array
     {
         $tabs = [];
-        if (Auth::user()->hasRole('super_admin')){
+        if (Auth::user()->hasRole('super_admin')) {
             $tabs['all'] = Tab::make('All')->badge(User::count());
-            $tabs['archived']=Tab::make('Archived')->badge(User::onlyTrashed()->count())->modifyQueryUsing(function($query){
+            $tabs['archived'] = Tab::make('Archived')->badge(User::onlyTrashed()->count())->modifyQueryUsing(function ($query) {
                 return $query->onlyTrashed();
             });
         }
+
         return $tabs;
     }
 }

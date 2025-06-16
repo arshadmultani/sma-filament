@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\User;
-use App\Models\Region;
 use App\Models\Area;
 use App\Models\Headquarter;
+use App\Models\Region;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 
@@ -28,9 +28,9 @@ class UserSeeder extends Seeder
         foreach ($regions as $regionIndex => $region) {
             // Create RSM for this region
             $rsm = User::create([
-                'name' => 'RSM User ' . ($regionIndex + 1),
-                'email' => 'rsm' . ($regionIndex + 1) . '@example.com',
-                'phone_number' => '90000000' . ($regionIndex + 1),
+                'name' => 'RSM User '.($regionIndex + 1),
+                'email' => 'rsm'.($regionIndex + 1).'@example.com',
+                'phone_number' => '90000000'.($regionIndex + 1),
                 'division_id' => 1, // adjust as needed
                 'password' => Hash::make('password'),
                 'location_type' => Region::class,
@@ -44,9 +44,9 @@ class UserSeeder extends Seeder
                 $asmCount++;
                 // Create ASM for this area
                 $asm = User::create([
-                    'name' => 'ASM User ' . $asmCount,
-                    'email' => 'asm' . $asmCount . '@example.com',
-                    'phone_number' => '91000000' . $asmCount,
+                    'name' => 'ASM User '.$asmCount,
+                    'email' => 'asm'.$asmCount.'@example.com',
+                    'phone_number' => '91000000'.$asmCount,
                     'division_id' => 1, // adjust as needed
                     'password' => Hash::make('password'),
                     'location_type' => Area::class,
@@ -59,9 +59,9 @@ class UserSeeder extends Seeder
                 foreach ($headquarters as $hqIndex => $hq) {
                     $dsaCount++;
                     $dsa = User::create([
-                        'name' => 'DSA User ' . $dsaCount,
-                        'email' => 'dsa' . $dsaCount . '@example.com',
-                        'phone_number' => '92000000' . $dsaCount,
+                        'name' => 'DSA User '.$dsaCount,
+                        'email' => 'dsa'.$dsaCount.'@example.com',
+                        'phone_number' => '92000000'.$dsaCount,
                         'division_id' => 1, // adjust as needed
                         'password' => Hash::make('password'),
                         'location_type' => Headquarter::class,
@@ -72,4 +72,4 @@ class UserSeeder extends Seeder
             }
         }
     }
-} 
+}

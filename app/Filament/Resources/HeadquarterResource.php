@@ -3,9 +3,8 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\HeadquarterResource\Pages;
-use App\Filament\Resources\HeadquarterResource\RelationManagers;
-use App\Models\Headquarter;
 use App\Models\Area;
+use App\Models\Headquarter;
 use App\Models\Region;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -14,14 +13,14 @@ use Filament\Tables;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class HeadquarterResource extends Resource
 {
     protected static ?string $model = Headquarter::class;
-    protected static ?string $navigationGroup = 'Territory';
-    protected static ?int $navigationSort = 1;
 
+    protected static ?string $navigationGroup = 'Territory';
+
+    protected static ?int $navigationSort = 1;
 
     // protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -38,7 +37,10 @@ class HeadquarterResource extends Resource
                     ->label('Area')
                     ->options(function (callable $get) {
                         $regionId = $get('region_id');
-                        if (!$regionId) return [];
+                        if (! $regionId) {
+                            return [];
+                        }
+
                         return Area::where('region_id', $regionId)->pluck('name', 'id')->toArray();
                     })
                     ->required()
@@ -77,7 +79,7 @@ class HeadquarterResource extends Resource
             ->deferLoading()
             // ->striped()
             ->paginated([5, 10, 15, 'all'])
-            
+
             ->defaultPaginationPageOption(5)
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

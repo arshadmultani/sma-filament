@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Models\User;
 use App\Models\Chemist;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ChemistPolicy
@@ -105,6 +105,7 @@ class ChemistPolicy
     {
         return $user->can('{{ Reorder }}');
     }
+
     public function updateStatus(User $user, Chemist $chemist): bool
     {
         return $user->can('update_status_chemist');

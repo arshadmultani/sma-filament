@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DivisionSeeder extends Seeder
@@ -13,11 +12,11 @@ class DivisionSeeder extends Seeder
     public function run(): void
     {
         \App\Models\Division::create([
-            'name' => 'Pharma'
+            'name' => 'Pharma',
         ]);
 
         \App\Models\Division::create([
-            'name' => 'Phytonova'
+            'name' => 'Phytonova',
         ]);
     }
 }

@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Area;
 use App\Models\Headquarter;
+use Illuminate\Database\Seeder;
 
 class HeadquarterSeeder extends Seeder
 {
@@ -37,7 +37,7 @@ class HeadquarterSeeder extends Seeder
             'Kochi' => ['Edappally', 'Kakkanad', 'Fort Kochi', 'Palarivattom', 'Kaloor'],
             'Amritsar' => ['Lawrence Road', 'Ranjit Avenue', 'Green Avenue', 'Putlighar', 'Majitha Road'],
             'Vadodara' => ['Alkapuri', 'Fatehgunj', 'Sayajigunj', 'Gotri', 'Manjalpur'],
-            'Guwahati' => ['Zoo Road', 'GS Road', 'Fancy Bazar', 'Maligaon', 'Dispur']
+            'Guwahati' => ['Zoo Road', 'GS Road', 'Fancy Bazar', 'Maligaon', 'Dispur'],
         ];
 
         foreach ($headquartersByArea as $areaName => $headquarters) {

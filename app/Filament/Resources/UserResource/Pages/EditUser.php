@@ -3,23 +3,23 @@
 namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Filament\Resources\UserResource;
-use Filament\Actions;
-use Filament\Resources\Pages\EditRecord;
-use Filament\Forms;
-use Filament\Forms\Components\TextInput;
-use Illuminate\Support\Facades\Hash;
-use Filament\Actions\ActionGroup;
-use Illuminate\Support\Facades\Mail;
 use App\Mail\SendUserCredentials;
+use Filament\Actions;
+use Filament\Actions\ActionGroup;
+use Filament\Forms;
+use Filament\Resources\Pages\EditRecord;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 
 class EditUser extends EditRecord
 {
     protected static string $resource = UserResource::class;
-   
+
     public function getTitle(): string
-{
-    return ($this->record->roles->first()?->name ?? ' ').' - ' .$this->record->name ;
-}
+    {
+        return ($this->record->roles->first()?->name ?? ' ').' - '.$this->record->name;
+    }
+
     protected function getHeaderActions(): array
     {
         return [
@@ -36,7 +36,7 @@ class EditUser extends EditRecord
                                 Forms\Components\TextInput::make('email')
                                     ->label('User Email')
                                     ->disabled()
-                                    ->default(fn(EditUser $livewire) => $livewire->record->email),
+                                    ->default(fn (EditUser $livewire) => $livewire->record->email),
 
                                 Forms\Components\TextInput::make('password')
                                     ->label('New Password')
@@ -45,7 +45,7 @@ class EditUser extends EditRecord
                                     ->required()
                                     ->revealable()
                                     ->minLength(6),
-                            ])
+                            ]),
                     ])
                     ->modalHeading('Update Password')
                     ->modalDescription('Enter a new password. The user will receive these credentials by email.')
@@ -77,11 +77,10 @@ class EditUser extends EditRecord
                 Actions\DeleteAction::make()
                     ->color('danger')
                     ->label('Delete User Permanently'),
-                
+
             ])->icon('heroicon-m-cog-6-tooth')
                 ->label('Settings')
                 ->color('black'),
-
 
         ];
     }
@@ -90,7 +89,7 @@ class EditUser extends EditRecord
     {
         $originalEmail = $record->email;
         $emailChanged = isset($data['email']) && $data['email'] !== $originalEmail;
-        $passwordChanged = !empty($data['password']);
+        $passwordChanged = ! empty($data['password']);
         $plainPassword = $passwordChanged ? $data['password'] : null;
 
         // Set location_type and location_id based on role
@@ -120,16 +119,19 @@ class EditUser extends EditRecord
         if ($emailChanged || $passwordChanged) {
             Mail::to($record->email)->send(new SendUserCredentials($record->email, $plainPassword ?? 'Your password was not changed.'));
         }
+
         return $record;
     }
+
     public function saved()
-{
-    if ($this->data['roles']) {
-        $this->record->syncRoles([$this->data['roles']]);
+    {
+        if ($this->data['roles']) {
+            $this->record->syncRoles([$this->data['roles']]);
+        }
     }
-}
-protected function getRedirectUrl(): string
-{
-    return $this->getResource()::getUrl('index');
-}
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

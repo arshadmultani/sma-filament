@@ -30,6 +30,7 @@ class UserExporter extends Exporter
                     } elseif ($record->location instanceof \App\Models\Headquarter) {
                         return $record->location->area?->region?->name;
                     }
+
                     return '-';
                 }),
             ExportColumn::make('area')
@@ -40,6 +41,7 @@ class UserExporter extends Exporter
                     } elseif ($record->location instanceof \App\Models\Headquarter) {
                         return $record->location->area?->name;
                     }
+
                     return '-';
                 }),
             ExportColumn::make('headquarter')
@@ -48,6 +50,7 @@ class UserExporter extends Exporter
                     if ($record->location instanceof \App\Models\Headquarter) {
                         return $record->location->name;
                     }
+
                     return '-';
                 }),
         ];

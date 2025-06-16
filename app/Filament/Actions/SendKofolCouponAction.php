@@ -2,15 +2,12 @@
 
 namespace App\Filament\Actions;
 
-use Filament\Forms;
-use Filament\Actions\Action;
-use Filament\Tables\Actions\BulkAction;
-use Filament\Notifications\Notification;
-use Illuminate\Support\Facades\Mail;
 use App\Mail\KofolCoupon;
-use Illuminate\Support\Facades\Gate;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification;
+use Filament\Tables\Actions\BulkAction;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User;
+use Illuminate\Support\Facades\Mail;
 
 class SendKofolCouponAction
 {
@@ -23,15 +20,16 @@ class SendKofolCouponAction
             ->visible(function () {
                 /** @var \App\Models\User|null $user */
                 $user = Auth::user();
+
                 return $user && $user->hasRole(['admin', 'super_admin']);
             })
             ->requiresConfirmation()
             ->modalHeading('Send Kofol Coupon')
             ->modalDescription('Are you sure you want to send the coupon email?')
             ->modalSubmitActionLabel('Yes, send it')
-            ->action(function ($record) {   
+            ->action(function ($record) {
                 try {
-                    if (!$record->customer) {
+                    if (! $record->customer) {
                         throw new \Exception('No customer found for this record.');
                     }
 
@@ -50,7 +48,7 @@ class SendKofolCouponAction
                 } catch (\Exception $e) {
                     Notification::make()
                         ->title('Error Sending Email')
-                        ->body("Failed to send coupon email: " . $e->getMessage())
+                        ->body('Failed to send coupon email: '.$e->getMessage())
                         ->danger()
                         ->send();
                 }
@@ -66,6 +64,7 @@ class SendKofolCouponAction
             ->visible(function () {
                 /** @var \App\Models\User|null $user */
                 $user = Auth::user();
+
                 return $user && $user->hasRole(['admin', 'super_admin']);
             })
             ->requiresConfirmation()
@@ -80,17 +79,19 @@ class SendKofolCouponAction
 
                 foreach ($records as $record) {
                     try {
-                        if (!$record->customer) {
+                        if (! $record->customer) {
                             throw new \Exception('No customer found for this record.');
                         }
 
                         if ($record->status !== 'Approved') {
                             $rejectedCount++;
+
                             continue;
                         }
 
                         if (is_null($record->coupon_code)) {
                             $noCouponCount++;
+
                             continue;
                         }
 
@@ -125,10 +126,10 @@ class SendKofolCouponAction
                     $errorMessages[] = "{$errorCount} records failed due to other errors";
                 }
 
-                if (!empty($errorMessages)) {
+                if (! empty($errorMessages)) {
                     Notification::make()
                         ->title('Some Emails Failed')
-                        ->body(implode(', ', $errorMessages) . '.')
+                        ->body(implode(', ', $errorMessages).'.')
                         ->warning()
                         ->send();
                 }

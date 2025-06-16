@@ -18,7 +18,7 @@ class ListHeadquarters extends ListRecords
             Actions\CreateAction::make(),
         ];
     }
-    
+
     // protected function paginateTableQuery(Builder $query): CursorPaginator
     // {
     //     return $query->cursorPaginate($this->getTableRecordsPerPage());

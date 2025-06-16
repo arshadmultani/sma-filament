@@ -42,18 +42,18 @@ class ProductImporter extends Importer
 
     public function resolveRecord(): ?Product
     {
-        $product = new Product();
+        $product = new Product;
         $product->name = $this->data['name'] ?? null;
         $product->price = $this->data['price'] ?? null;
 
         // Resolve division name to ID
-        if (!empty($this->data['division_id'])) {
+        if (! empty($this->data['division_id'])) {
             $division = \App\Models\Division::whereRaw('LOWER(name) = ?', [strtolower($this->data['division_id'])])->first();
             $product->division_id = $division ? $division->id : null;
         }
 
         // Resolve brand name to ID
-        if (!empty($this->data['brand_id'])) {
+        if (! empty($this->data['brand_id'])) {
             $brand = \App\Models\Brand::whereRaw('LOWER(name) = ?', [strtolower($this->data['brand_id'])])->first();
             $product->brand_id = $brand ? $brand->id : null;
         }
@@ -63,10 +63,10 @@ class ProductImporter extends Importer
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $body = 'Your product import has completed and ' . number_format($import->successful_rows) . ' ' . str('row')->plural($import->successful_rows) . ' imported.';
+        $body = 'Your product import has completed and '.number_format($import->successful_rows).' '.str('row')->plural($import->successful_rows).' imported.';
 
         if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= ' ' . number_format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to import.';
+            $body .= ' '.number_format($failedRowsCount).' '.str('row')->plural($failedRowsCount).' failed to import.';
         }
 
         return $body;

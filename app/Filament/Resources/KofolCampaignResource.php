@@ -3,21 +3,19 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\KofolCampaignResource\Pages;
-use App\Filament\Resources\KofolCampaignResource\RelationManagers;
 use App\Models\KofolCampaign;
 use Filament\Forms;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Filament\Forms\Components\Section;
+use Filament\Tables\Table;
 
 class KofolCampaignResource extends Resource
 {
     protected static ?string $model = KofolCampaign::class;
+
     protected static ?string $navigationGroup = 'Kofol Swarna Varsha';
 
     // protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
@@ -48,10 +46,9 @@ class KofolCampaignResource extends Resource
                             ->required()
                             ->native(false)
                             ->displayFormat('d F Y')
-                            ->minDate(fn (Forms\Get $get) => 
-                                $get('start_date') ? \Carbon\Carbon::parse($get('start_date'))->addDay() : null
+                            ->minDate(fn (Forms\Get $get) => $get('start_date') ? \Carbon\Carbon::parse($get('start_date'))->addDay() : null
                             ),
-                    ])
+                    ]),
             ]);
     }
 
@@ -69,19 +66,19 @@ class KofolCampaignResource extends Resource
                         if ($record->is_active) {
                             return 'Active';
                         }
-                        
+
                         $today = now()->startOfDay();
                         $startDate = \Carbon\Carbon::parse($record->start_date)->startOfDay();
                         $endDate = \Carbon\Carbon::parse($record->end_date)->endOfDay();
-                        
-                        if (!$record->is_active && $startDate->greaterThan($today)) {
+
+                        if (! $record->is_active && $startDate->greaterThan($today)) {
                             return 'Upcoming';
                         }
-                        
-                        if (!$record->is_active && $today->greaterThan($endDate)) {
+
+                        if (! $record->is_active && $today->greaterThan($endDate)) {
                             return 'Completed';
                         }
-                        
+
                         return 'Unknown';
                     })
                     ->badge()
@@ -97,7 +94,7 @@ class KofolCampaignResource extends Resource
                         'Completed' => 'heroicon-o-check-circle',
                         default => 'heroicon-o-x-circle'
                     }),
-                
+
             ])
             ->filters([
                 //

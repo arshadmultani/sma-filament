@@ -2,7 +2,9 @@
 
 namespace App\Providers\Filament;
 
+use Agencetwogether\HooksHelper\HooksHelperPlugin;
 use App\Filament\Auth\CustomLogin;
+use Asmit\ResizedColumn\ResizedColumnPlugin;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
@@ -15,24 +17,17 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Widgets;
+use Filament\Support\Facades\FilamentView;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
-use Illuminate\View\Middleware\ShareErrorsFromSession;
-use SolutionForest\FilamentSimpleLightBox\SimpleLightBoxPlugin;
-use ShuvroRoy\FilamentSpatieLaravelHealth\FilamentSpatieLaravelHealthPlugin;
 use Illuminate\Support\Facades\Auth;
-use Agencetwogether\HooksHelper\HooksHelperPlugin;
-use Filament\Support\Facades\FilamentView;
-use Filament\View\PanelsRenderHook;
 use Illuminate\Support\Facades\Blade;
-use App\Filament\Widgets\CustomerOverviewWidget;
-use Illuminate\Support\Str;
-use Asmit\ResizedColumn\ResizedColumnPlugin;
-
+use Illuminate\View\Middleware\ShareErrorsFromSession;
+use ShuvroRoy\FilamentSpatieLaravelHealth\FilamentSpatieLaravelHealthPlugin;
+use SolutionForest\FilamentSimpleLightBox\SimpleLightBoxPlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -105,7 +100,7 @@ class AdminPanelProvider extends PanelProvider
                 FilamentShieldPlugin::make()->gridColumns([
                     'default' => 1,
                     'sm' => 2,
-                    'lg' => 3
+                    'lg' => 3,
                 ])
                     ->sectionColumnSpan(1)
                     ->checkboxListColumns([
@@ -122,10 +117,11 @@ class AdminPanelProvider extends PanelProvider
                 FilamentSpatieLaravelHealthPlugin::make()->authorize(function (): bool {
                     /** @var \App\Models\User|null $user */
                     $user = Auth::user();
+
                     return $user !== null && $user->hasRole('super_admin');
                 }),
                 ResizedColumnPlugin::make(),
-                    // ->preserveOnDB(true),
+                // ->preserveOnDB(true),
                 // HooksHelperPlugin::make(),
 
                 // \RickDBCN\FilamentEmail\FilamentEmail::make(),
@@ -150,14 +146,17 @@ class AdminPanelProvider extends PanelProvider
                 $pages = $this->tabPages;
                 $tabs = [];
                 foreach ($pages as $pageClass) {
-                    if (!class_exists($pageClass) || !is_subclass_of($pageClass, \Filament\Pages\Page::class)) continue;
+                    if (! class_exists($pageClass) || ! is_subclass_of($pageClass, \Filament\Pages\Page::class)) {
+                        continue;
+                    }
                     $tabs[] = [
                         'label' => method_exists($pageClass, 'getNavigationLabel') ? $pageClass::getNavigationLabel() : ($pageClass::$navigationLabel ?? $pageClass::$title ?? class_basename($pageClass)),
                         'icon' => $pageClass::$navigationIcon ?? 'heroicon-o-document-text',
                         'url' => $pageClass::getUrl(),
-                        'active' => request()->routeIs('filament.admin.pages.' . \Illuminate\Support\Str::kebab(class_basename($pageClass))),
+                        'active' => request()->routeIs('filament.admin.pages.'.\Illuminate\Support\Str::kebab(class_basename($pageClass))),
                     ];
                 }
+
                 return \Illuminate\Support\Facades\Blade::render(
                     'components.filament-header-tabs', ['tabs' => $tabs]
                 );
@@ -168,16 +167,17 @@ class AdminPanelProvider extends PanelProvider
             'panels::body.end',
             function (): string {
                 // Show the mobile nav on all Filament admin pages except auth pages
-                if (!request()->routeIs('filament.admin.auth.*')) {
+                if (! request()->routeIs('filament.admin.auth.*')) {
                     return Blade::render('filament.admin.mobile-bottom-nav');
                 }
+
                 return '';
             }
         );
         // PWA HEAD HOOK
         FilamentView::registerRenderHook(
             'panels::head.end',
-            fn(): string => Blade::render('pwa-head')
+            fn (): string => Blade::render('pwa-head')
         );
     }
 }

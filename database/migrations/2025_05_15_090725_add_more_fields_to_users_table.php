@@ -15,8 +15,7 @@ return new class extends Migration
             $table->string('phone_number')->nullable();
             $table->foreignId('division_id')->nullable()->constrained('divisions');
             $table->nullableMorphs('location');
-            
-            
+
         });
     }
 

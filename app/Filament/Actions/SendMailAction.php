@@ -2,12 +2,12 @@
 
 namespace App\Filament\Actions;
 
+use App\Mail\GenericMail;
 use Filament\Forms;
+use Filament\Notifications\Notification;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\BulkAction;
-use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\GenericMail;
 
 class SendMailAction
 {
@@ -55,7 +55,7 @@ class SendMailAction
 
                 Notification::make()
                     ->title('Emails Queued')
-                    ->body("Emails have been queued for " . $records->count() . " users.")
+                    ->body('Emails have been queued for '.$records->count().' users.')
                     ->success()
                     ->send();
             });
@@ -67,9 +67,9 @@ class SendMailAction
             Forms\Components\TextInput::make('email')
                 ->label('To')
                 ->disabled()
-                ->default(fn($record) => $record->email)
+                ->default(fn ($record) => $record->email)
                 ->extraAttributes(['class' => 'badge badge-primary']),
-                
+
             Forms\Components\TextInput::make('subject')
                 ->label('Subject')
                 ->required(),
