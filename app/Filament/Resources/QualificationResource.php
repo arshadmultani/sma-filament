@@ -16,7 +16,7 @@ class QualificationResource extends Resource
 {
     protected static ?string $model = Qualification::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'healthicons-f-award-ribbon';
 
     public static function form(Form $form): Form
     {
@@ -67,8 +67,8 @@ class QualificationResource extends Resource
     {
         return [
             'index' => Pages\ListQualifications::route('/'),
-            'create' => Pages\CreateQualification::route('/create'),
-            'edit' => Pages\EditQualification::route('/{record}/edit'),
+            // 'create' => Pages\CreateQualification::route('/create'),
+            // 'edit' => Pages\EditQualification::route('/{record}/edit'),
         ];
     }
 }

@@ -6,6 +6,7 @@ use App\Filament\Actions\UpdateStatusAction;
 use App\Filament\Resources\DoctorResource\Pages;
 use App\Models\Doctor;
 use App\Models\Qualification;
+use App\Models\Specialty;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -50,7 +51,10 @@ class DoctorResource extends Resource implements HasShieldPermissions
     {
         return $form
             ->schema([
-                TextInput::make('name')->required()->prefix('Dr. '),
+                TextInput::make('name')
+                    ->required()
+                    ->prefix('Dr. ')
+                    ->label('Name'),
                 Select::make('type')
                     ->native(false)
                     ->options(['Ayurvedic' => 'Ayurvedic', 'Allopathic' => 'Allopathic'])
@@ -59,6 +63,12 @@ class DoctorResource extends Resource implements HasShieldPermissions
                     ->native(false)
                     ->label('Qualification')
                     ->options(Qualification::where('category', 'Doctor')->pluck('name', 'id'))
+                    ->required(),
+                Select::make('specialty_id')
+                    ->label('Specialty')
+                    ->native(false)
+                    ->label('Specialty')
+                    ->options(Specialty::pluck('name', 'id'))
                     ->required(),
                 Select::make('support_type')
                     ->native(false)
@@ -70,6 +80,7 @@ class DoctorResource extends Resource implements HasShieldPermissions
                 TextInput::make('town'),
 
                 Select::make('headquarter_id')
+                    ->label('Headquarter')
                     ->native(false)
                     ->options(function () {
                         $user = Auth::user();
@@ -88,7 +99,7 @@ class DoctorResource extends Resource implements HasShieldPermissions
                         }
                     })
                     ->searchable()
-                    ->hidden(fn () => Auth::user()->hasRole('DSA'))
+                    ->hidden(fn() => Auth::user()->hasRole('DSA'))
                     ->preload()
                     ->required(),
                 FileUpload::make('attachment')
@@ -118,13 +129,13 @@ class DoctorResource extends Resource implements HasShieldPermissions
                 TextColumn::make('name')->weight(FontWeight::Bold)->label('Dr.')->searchable(),
 
                 IconColumn::make('status')
-                    ->icon(fn (string $state): string => match ($state) {
+                    ->icon(fn(string $state): string => match ($state) {
                         'Pending' => 'heroicon-o-clock',
                         'Approved' => 'heroicon-o-check-circle',
                         'Rejected' => 'heroicon-o-x-circle',
                         default => 'heroicon-o-question-mark-circle',
                     })
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'Pending' => 'warning',
                         'Approved' => 'success',
                         'Rejected' => 'danger',
@@ -187,7 +198,7 @@ class DoctorResource extends Resource implements HasShieldPermissions
                         ImageEntry::make('profile_photo')
                             ->simpleLightbox()
 
-                            ->visible(fn ($state) => ! is_null($state))
+                            ->visible(fn($state) => !is_null($state))
                             ->label('Photo')->circular(),
 
                         Section::make()

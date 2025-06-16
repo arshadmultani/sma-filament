@@ -53,7 +53,7 @@ class Doctor extends BaseModel
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'email', 'phone', 'qualification_id', 'profile_photo', 'user_id', 'headquarter_id', 'attachment', 'address', 'type', 'support_type', 'town'];
+    protected $fillable = ['name', 'email', 'phone', 'qualification_id', 'profile_photo', 'user_id', 'headquarter_id', 'attachment', 'address', 'type', 'support_type', 'town', 'specialty_id'];
 
     protected $casts = [
         'attachment' => 'array',
