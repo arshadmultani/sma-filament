@@ -15,6 +15,7 @@ class ListKofolEntries extends ListRecords
 
     protected static string $resource = KofolEntryResource::class;
 
+
     protected function getHeaderActions(): array
     {
         return [

@@ -15,7 +15,8 @@ class UserOverview extends BaseWidget
                 $query->where('name', 'super_admin');
             })->count())
                 ->icon('heroicon-s-user-group')
-                ->backgroundColor('primary'),
+                ->backgroundColor('primary')
+                ->url(route('filament.admin.resources.users.index')),
         ];
     }
 }

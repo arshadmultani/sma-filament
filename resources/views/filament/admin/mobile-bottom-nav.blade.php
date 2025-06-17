@@ -6,83 +6,60 @@
 
         .mobile-bottom-nav {
             position: fixed;
-            left: 50%;
-            bottom: 24px;
-            transform: translateX(-50%);
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 100vw;
             background: #fff;
-            border-radius: 32px;
-            box-shadow: 0 8px 32px rgba(60, 60, 120, 0.12), 0 1.5px 6px rgba(60, 60, 120, 0.08);
-            padding: 8px 18px 8px 18px;
-            width: calc(100vw - 32px);
-            max-width: 420px;
-            z-index: 0;
+            border-top: 1px solid #e5e7eb;
             display: flex;
             justify-content: center;
             align-items: center;
-            border: none;
-            transition: opacity 0.4s cubic-bezier(.4,0,.2,1), visibility 0.4s cubic-bezier(.4,0,.2,1);
-            opacity: 1;
-            visibility: visible;
-            pointer-events: auto;
-        }
-        .mobile-bottom-nav.hide-on-scroll {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
+            z-index: 50;
+            padding: 0;
+            min-height: 56px;
+            box-shadow: none;
+            border-radius: 0;
         }
         .nav-container {
             display: flex;
             justify-content: space-between;
             align-items: center;
             width: 100%;
+            max-width: 420px;
+            margin: 0 auto;
         }
         .nav-item {
+            flex: 1 1 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             text-decoration: none;
             color: #7b8190;
-            font-family: 'Inter', system-ui, sans-serif;
             font-size: 13px;
             font-weight: 500;
-            min-width: 64px;
+            min-width: 60px;
             min-height: 56px;
-            border-radius: 18px;
-            transition: background 0.18s, color 0.18s;
+            border-radius: 0;
+            background: none;
+            transition: color 0.18s;
             position: relative;
+            padding: 0 2px;
         }
         .nav-item.active {
             color: #10b981;
         }
-        .nav-item .nav-icon,
-        .nav-item .nav-label {
-            position: relative;
-            z-index: 1;
-        }
-        .nav-item .nav-icon {
-            margin-bottom: 2px;
-        }
         .nav-item .nav-icon svg {
             width: 24px;
             height: 24px;
-            display: block;
             color: inherit;
-            fill: none;
         }
-        .nav-item.active .nav-icon svg {
-            color: #10b981;
-            fill: #10b981;
-        }
-        .nav-item .nav-label {
-            font-size: 12px;
+        .nav-label {
+            font-size: 11px;
             font-weight: 500;
             margin-top: 2px;
-        }
-        .nav-item:active:not(.active),
-        .nav-item:hover:not(.active) {
-            background: #f1f5f9;
-            color: #10b981;
+            line-height: 1;
         }
     }
 
@@ -93,7 +70,7 @@
     }
 </style>
 
-<div class="mobile-bottom-nav" id="mobileBottomNav">
+<div class="mobile-bottom-nav">
     <div class="nav-container">
         <!-- Home -->
         <a href="{{ route('filament.admin.pages.dashboard') }}"
@@ -194,3 +171,7 @@
     });
 })();
 </script>
+
+<div class="main-content" style="padding-bottom: 64px;">
+    <!-- Your page content here -->
+</div>

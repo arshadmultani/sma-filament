@@ -28,6 +28,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
+use Filament\Infolists\Infolist;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components;
+
+
 
 class UserResource extends Resource
 {
@@ -186,6 +191,7 @@ class UserResource extends Resource
         return $table
             ->deferLoading()
             ->striped()
+            ->paginated([10,25,50,100])
             ->columns([
                 TextColumn::make('name')->searchable(),
                 TextColumn::make('roles.name')
@@ -194,6 +200,8 @@ class UserResource extends Resource
                         'RSM' => 'danger',
                         'ASM' => 'warning',
                         'DSA' => 'info',
+                        'ZSM' => 'success',
+                        'NSM' => 'primary',
                         default => 'primary'
                     })
                     ->label('Desgn.')
@@ -202,8 +210,18 @@ class UserResource extends Resource
                 // TextColumn::make('email'),
 
                 // Add computed columns for Region, Area, Headquarter
+                TextColumn::make('zone_name')
+                    ->label('Zone')
+                    ->toggleable()
+                    ->getStateUsing(function ($record) {
+                        if ($record->location instanceof \App\Models\Zone) {
+                            return $record->location->name;
+                        }
+                        return '-';
+                    }),
                 TextColumn::make('region_name')
                     ->label('Region')
+                    ->toggleable()
                     ->getStateUsing(function ($record) {
                         if ($record->location instanceof \App\Models\Region) {
                             return $record->location->name;
@@ -217,6 +235,7 @@ class UserResource extends Resource
                     }),
                 TextColumn::make('area_name')
                     ->label('Area')
+                    ->toggleable()
                     ->getStateUsing(function ($record) {
                         if ($record->location instanceof \App\Models\Area) {
                             return $record->location->name;
@@ -228,6 +247,7 @@ class UserResource extends Resource
                     }),
                 TextColumn::make('headquarter_name')
                     ->label('Headquarter')
+                    ->toggleable()
                     ->getStateUsing(function ($record) {
                         if ($record->location instanceof \App\Models\Headquarter) {
                             return $record->location->name;
@@ -244,13 +264,14 @@ class UserResource extends Resource
                 UserFilters::all()
             )
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\RestoreAction::make(),
-                SendMailAction::make(),
+                Tables\Actions\ViewAction::make(),
+                // Tables\Actions\RestoreAction::make(),
+                // SendMailAction::make(),
             ])
             ->bulkActions([
                 SendMailAction::makeBulk(),
                 Tables\Actions\DeleteBulkAction::make(),
+                ForceDeleteBulkAction::make(),
                 Tables\Actions\ExportBulkAction::make()->exporter(UserExporter::class),
             ]);
     }
@@ -262,9 +283,25 @@ class UserResource extends Resource
                 Components\Section::make()
                     ->columns(3)
                     ->schema([
-                        TextEntry::make('email'),
-                        TextEntry::make('phone_number'),
+                        
+                        TextEntry::make('roles.name')
+                            ->badge()
+                            ->color(fn(string $state): string => match ($state) {
+                                'RSM' => 'danger',
+                                'ASM' => 'warning',
+                                'DSA' => 'info',
+                                'ZSM' => 'success',
+                                'NSM' => 'primary',
+                                default => 'primary'
+                            })
+                            ->label('Desgn.'),
+                            TextEntry::make('email')->copyable(),
+                        TextEntry::make('phone_number')->copyable(),
                         TextEntry::make('division.name'),
+                        TextEntry::make('zone_name')->label('Zone'),
+                        TextEntry::make('region_name')->label('Region'),
+                        TextEntry::make('area_name')->label('Area'),
+                        TextEntry::make('headquarter_name')->label('Headquarter'),
                     ]),
 
             ]);

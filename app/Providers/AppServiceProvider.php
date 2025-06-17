@@ -40,7 +40,7 @@ class AppServiceProvider extends ServiceProvider
             EnvironmentCheck::new(),
         ]);
         Gate::define('viewPulse', function (User $user) {
-            return $user->hasRole('super_admin');
+            return $user->email == 'arshadrmultani@gmail.com';
         });
     }
 }

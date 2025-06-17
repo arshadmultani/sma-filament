@@ -29,6 +29,8 @@ use Filament\Tables;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Icetalker\FilamentTableRepeatableEntry\Infolists\Components\TableRepeatableEntry;
 use Illuminate\Support\Collection;
 
@@ -234,7 +236,11 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ->sortable()
                     ->toggleable(),
             ])
-            ->filters([])
+            ->filters([
+                TernaryFilter::make('coupon_code')
+                    ->nullable()
+                    ->label('Coupon Code'),
+            ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
             ])
@@ -289,8 +295,9 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ->schema([
                         TextEntry::make('customer.name'),
                         TextEntry::make('customer_type')->formatStateUsing(fn ($state) => class_basename($state)),
-                        // Have to fix HQ ......
-                        TextEntry::make('user.headquarter.name')->label('Headquarter'),
+                        TextEntry::make('headquarter')
+                            ->label('Headquarter')
+                            ->formatStateUsing(fn ($state, $record) => $record->customer?->headquarter?->name),
 
                     ]),
                 Components\Section::make()
@@ -360,5 +367,11 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
             'edit' => Pages\EditKofolEntry::route('/{record}/edit'),
             'view' => Pages\ViewKofolEntry::route('/{record}'),
         ];
+    }
+
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()
+            ->with(['customer.headquarter']);
     }
 }

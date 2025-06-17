@@ -25,16 +25,16 @@ class ListUsers extends ListRecords
         return [
             Actions\CreateAction::make(),
             ActionGroup::make([
+                ImportAction::make()
+                    ->importer(UserImporter::class)
+                    ->label('Import Users')
+                    // ->icon('heroicon-m-arrow-down-on-square')
+                    ->color('primary'),
                 Actions\ExportAction::make()
                     ->exporter(UserExporter::class)
                     ->label('Download All Users')
                     // ->icon('heroicon-m-arrow-long-up')
                     ->maxRows(2000)
-                    ->color('primary'),
-                ImportAction::make()
-                    ->importer(UserImporter::class)
-                    ->label('Import Users')
-                    // ->icon('heroicon-m-arrow-down-on-square')
                     ->color('primary'),
 
             ])->icon('heroicon-m-bars-3-bottom-right'),
@@ -45,8 +45,12 @@ class ListUsers extends ListRecords
     {
         $tabs = [];
         if (Auth::user()->hasRole('super_admin')) {
-            $tabs['all'] = Tab::make('All')->badge(User::count());
-            $tabs['archived'] = Tab::make('Archived')->badge(User::onlyTrashed()->count())->modifyQueryUsing(function ($query) {
+            $tabs['all'] = Tab::make('All')->badge(User::whereDoesntHave('roles', function ($query) {
+                $query->where('name', 'super_admin');
+            })->count());
+            $tabs['archived'] = Tab::make('Archived')->badge(User::onlyTrashed()->whereDoesntHave('roles', function ($query) {
+                $query->where('name', 'super_admin');
+            })->count())->modifyQueryUsing(function ($query) {
                 return $query->onlyTrashed();
             });
         }

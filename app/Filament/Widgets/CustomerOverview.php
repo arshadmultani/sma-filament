@@ -17,21 +17,24 @@ class CustomerOverview extends BaseWidget
                 ->icon('healthicons-f-agriculture')
                 ->backgroundColor('')
                 ->textColor('info', 'info', descriptionColor: 'info')
-                ->iconColor('info'),
+                ->iconColor('info')
+                ->url(route('filament.admin.pages.customers')),
 
             Stat::make('Chemists', Chemist::count())
                 ->color('success')
                 ->iconColor('info')
                 ->iconPosition('start')
                 ->backgroundColor('warning')
-                ->icon('healthicons-f-medicine-mortar'),
+                ->icon('healthicons-f-medicine-mortar')
+                ->url(route('filament.admin.resources.chemists.index')),
 
             Stat::make('Doctors', Doctor::count())
                 ->color('success')
                 ->backgroundColor('warning')
                 ->iconPosition('start')
                 ->iconColor('info')
-                ->icon('healthicons-f-doctor-male'),
+                ->icon('healthicons-f-doctor-male')
+                ->url(route('filament.admin.resources.doctors.index')),
         ];
     }
 }

@@ -3,7 +3,9 @@
 namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Filament\Resources\UserResource;
+use Filament\Actions\Action;
 use Filament\Resources\Pages\ViewRecord;
+use Illuminate\Support\Facades\Auth;
 
 class ViewUser extends ViewRecord
 {
@@ -12,5 +14,15 @@ class ViewUser extends ViewRecord
     public function getTitle(): string
     {
         return $this->record->name;
+    }
+    public function getHeaderActions(): array
+    {
+        return [
+            Action::make('edit')
+                ->label('Edit')
+                ->color('gray')
+                ->url(route('filament.admin.resources.users.edit', $this->record))
+                ->hidden(fn () => ! (Auth::user()->hasRole(['admin', 'super_admin']) || Auth::user()->id === $this->record->id))
+        ];
     }
 }
