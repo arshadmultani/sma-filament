@@ -4,9 +4,11 @@ namespace App\Filament\Resources\HeadquarterResource\Pages;
 
 use App\Filament\Resources\HeadquarterResource;
 use Filament\Actions;
+use Filament\Actions\ActionGroup;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Imports\HeadquarterImporter;
 
 class ListHeadquarters extends ListRecords
 {
@@ -16,6 +18,13 @@ class ListHeadquarters extends ListRecords
     {
         return [
             Actions\CreateAction::make(),
+            ActionGroup::make([
+                Actions\ImportAction::make()
+                    ->importer(HeadquarterImporter::class)
+                    ->label('Import Headquarters')
+                    ->maxRows(2000)
+                    ->color('primary'),
+            ])->icon('heroicon-m-bars-3-bottom-right'),
         ];
     }
 

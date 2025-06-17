@@ -28,27 +28,18 @@ class HeadquarterResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('region_id')
-                    ->label('Region')
-                    ->options(Region::all()->pluck('name', 'id')->toArray())
-                    ->reactive()
-                    ->required(),
-                Forms\Components\Select::make('area_id')
-                    ->label('Area')
-                    ->options(function (callable $get) {
-                        $regionId = $get('region_id');
-                        if (! $regionId) {
-                            return [];
-                        }
-
-                        return Area::where('region_id', $regionId)->pluck('name', 'id')->toArray();
-                    })
-                    ->required()
-                    ->reactive()
-                    ->afterStateUpdated(fn ($set) => $set('headquarter_id', null)),
                 Forms\Components\TextInput::make('name')
                     ->label('Headquarter Name')
                     ->required(),
+                Forms\Components\Select::make('area_id')
+                    ->label('Area')
+                    ->searchable()
+                    ->preload()
+                    ->native(false)
+                    ->relationship('area', 'name')
+                    ->required()
+                    ->reactive(),
+                
             ]);
     }
 
@@ -78,7 +69,7 @@ class HeadquarterResource extends Resource
             ])
             ->deferLoading()
             // ->striped()
-            ->paginated([5, 10, 15, 'all'])
+            ->paginated([25, 50, 100, 250,'all'])
 
             ->defaultPaginationPageOption(5)
             ->bulkActions([
