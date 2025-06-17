@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\RegionResource\Pages;
 
+use App\Filament\Imports\RegionImporter;
 use App\Filament\Resources\RegionResource;
 use Filament\Actions;
 use Filament\Actions\ActionGroup;
 use Filament\Resources\Pages\ListRecords;
-use App\Filament\Imports\RegionImporter;
 
 class ListRegions extends ListRecords
 {

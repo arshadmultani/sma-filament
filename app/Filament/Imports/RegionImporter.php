@@ -27,7 +27,7 @@ class RegionImporter extends Importer
 
     public function resolveRecord(): ?Region
     {
-        $region = new Region();
+        $region = new Region;
         $region->name = $this->data['name'] ?? null;
 
         if (! empty($this->data['zone_id'])) {
@@ -40,10 +40,10 @@ class RegionImporter extends Importer
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $body = 'Your region import has completed and ' . number_format($import->successful_rows) . ' ' . str('row')->plural($import->successful_rows) . ' imported.';
+        $body = 'Your region import has completed and '.number_format($import->successful_rows).' '.str('row')->plural($import->successful_rows).' imported.';
 
         if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= ' ' . number_format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to import.';
+            $body .= ' '.number_format($failedRowsCount).' '.str('row')->plural($failedRowsCount).' failed to import.';
         }
 
         return $body;

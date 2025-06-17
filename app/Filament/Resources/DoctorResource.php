@@ -99,7 +99,7 @@ class DoctorResource extends Resource implements HasShieldPermissions
                         }
                     })
                     ->searchable()
-                    ->hidden(fn() => Auth::user()->hasRole('DSA'))
+                    ->hidden(fn () => Auth::user()->hasRole('DSA'))
                     ->preload()
                     ->required(),
                 FileUpload::make('attachment')
@@ -129,13 +129,13 @@ class DoctorResource extends Resource implements HasShieldPermissions
                 TextColumn::make('name')->weight(FontWeight::Bold)->label('Dr.')->searchable(),
 
                 IconColumn::make('status')
-                    ->icon(fn(string $state): string => match ($state) {
+                    ->icon(fn (string $state): string => match ($state) {
                         'Pending' => 'heroicon-o-clock',
                         'Approved' => 'heroicon-o-check-circle',
                         'Rejected' => 'heroicon-o-x-circle',
                         default => 'heroicon-o-question-mark-circle',
                     })
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         'Pending' => 'warning',
                         'Approved' => 'success',
                         'Rejected' => 'danger',
@@ -198,7 +198,7 @@ class DoctorResource extends Resource implements HasShieldPermissions
                         ImageEntry::make('profile_photo')
                             ->simpleLightbox()
 
-                            ->visible(fn($state) => !is_null($state))
+                            ->visible(fn ($state) => ! is_null($state))
                             ->label('Photo')->circular(),
 
                         Section::make()

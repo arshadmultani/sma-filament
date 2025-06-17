@@ -16,7 +16,7 @@ class AreaImporter extends Importer
     {
         return [
             ImportColumn::make('name')
-                ->requiredMapping(),   
+                ->requiredMapping(),
             ImportColumn::make('region_id')
                 ->label('Region')
                 ->requiredMapping()
@@ -28,10 +28,9 @@ class AreaImporter extends Importer
 
     public function resolveRecord(): ?Area
     {
-        $area = new Area();
+        $area = new Area;
 
         $area->name = Str::title($this->data['name'] ?? null);
-
 
         if (! empty($this->data['region_id'])) {
             $region = \App\Models\Region::whereRaw('LOWER(name) = ?', [strtolower($this->data['region_id'])])->first();
@@ -43,10 +42,10 @@ class AreaImporter extends Importer
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $body = 'Your area import has completed and ' . number_format($import->successful_rows) . ' ' . str('row')->plural($import->successful_rows) . ' imported.';
+        $body = 'Your area import has completed and '.number_format($import->successful_rows).' '.str('row')->plural($import->successful_rows).' imported.';
 
         if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= ' ' . number_format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to import.';
+            $body .= ' '.number_format($failedRowsCount).' '.str('row')->plural($failedRowsCount).' failed to import.';
         }
 
         return $body;

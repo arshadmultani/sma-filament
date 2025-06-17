@@ -2,13 +2,13 @@
 
 namespace App\Filament\Resources\HeadquarterResource\Pages;
 
+use App\Filament\Imports\HeadquarterImporter;
 use App\Filament\Resources\HeadquarterResource;
 use Filament\Actions;
 use Filament\Actions\ActionGroup;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Database\Eloquent\Builder;
-use App\Filament\Imports\HeadquarterImporter;
 
 class ListHeadquarters extends ListRecords
 {

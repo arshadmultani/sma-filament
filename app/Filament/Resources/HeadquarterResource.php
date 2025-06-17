@@ -39,7 +39,7 @@ class HeadquarterResource extends Resource
                     ->relationship('area', 'name')
                     ->required()
                     ->reactive(),
-                
+
             ]);
     }
 
@@ -69,7 +69,7 @@ class HeadquarterResource extends Resource
             ])
             ->deferLoading()
             // ->striped()
-            ->paginated([25, 50, 100, 250,'all'])
+            ->paginated([25, 50, 100, 250, 'all'])
 
             ->defaultPaginationPageOption(5)
             ->bulkActions([
