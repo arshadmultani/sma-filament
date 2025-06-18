@@ -261,10 +261,10 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
             ->columns(4)
             ->schema([
                 Components\Section::make()
-                    ->columns([
-                        'sm' => 2,
-                        'md' => 4,
-                    ])
+                    // ->columns([
+                    //     'sm' => 2,
+                    //     'md' => 4,
+                    // ])
                     ->columnSpan(4)
                     ->schema([
                         TextEntry::make('kofolCampaign.name'),
@@ -284,14 +284,14 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
 
                     ]),
                 Components\Section::make()
-                    ->columns([
-                        'sm' => 1,
-                        'md' => 3,
-                    ])
-                    ->columnSpan([
-                        'sm' => 1,
-                        'md' => 3,
-                    ])
+                    // ->columns([
+                    //     'sm' => 1,
+                    //     'md' => 3,
+                    // ])
+                    // ->columnSpan([
+                    //     'sm' => 1,
+                    //     'md' => 3,
+                    // ])
                     ->schema([
                         TextEntry::make('customer.name'),
                         TextEntry::make('customer_type')->formatStateUsing(fn ($state) => class_basename($state)),
@@ -301,18 +301,18 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
 
                     ]),
                 Components\Section::make()
-                    ->columns(1)
-                    ->columnSpan([
-                        'sm' => 4,
-                        'md' => 1,
-                    ])
+                    // ->columns(1)
+                    // ->columnSpan([
+                    //     'sm' => 4,
+                    //     'md' => 1,
+                    // ])
                     ->schema([
                         TextEntry::make('user.name'),
 
                     ]),
 
                 Components\Section::make()
-                    ->columnSpan(3)
+                    // ->columnSpan(3)
                     ->schema([
                         TableRepeatableEntry::make('products') // repeater for desktop
                             ->columnSpan(2)
@@ -327,7 +327,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                                 TextEntry::make('price')->money('INR')->columnSpan(1),
                             ]),
                         RepeatableEntry::make('products')  // repeater for mobile
-                            ->columns(2)
+                            // ->columns(2)
                             ->extraAttributes(['class' => 'block sm:hidden']) // Visible only on mobile
                             ->schema([
                                 TextEntry::make('product_id')
@@ -339,7 +339,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                             ]),
                     ]),
                 Components\Section::make()
-                    ->columnSpan(1)
+                    // ->columnSpan(1)
                     ->schema([
                         ImageEntry::make('invoice_image')->label('Invoice')->square()->simpleLightbox()->columnSpan(2),
                         TextEntry::make('invoice_amount')->label('Total Amount')->money('INR')->weight(FontWeight::SemiBold),
