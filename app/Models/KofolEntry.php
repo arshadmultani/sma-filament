@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Scopes\TeamHierarchyScope;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 
 /**
  * @property int $id
@@ -40,6 +42,8 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @mixin \Eloquent
  */
+
+#[ScopedBy(TeamHierarchyScope::class)]
 class KofolEntry extends Model
 {
     protected $fillable = [

@@ -9,30 +9,55 @@ use Illuminate\Database\Seeder;
 class RegionSeeder extends Seeder
 {
     public function run(): void
-    {
-        $zones = Zone::pluck('id', 'name');
-        $regionZoneMap = [
-            'North' => [
-                'Delhi', 'Uttar Pradesh', 'Punjab', 'Haryana', 'Himachal Pradesh', 'Uttarakhand', 'Jammu and Kashmir', 'Chhattisgarh', 'Jharkhand', 'Bihar', 'Assam', 'Tripura', 'Meghalaya', 'Manipur', 'Nagaland', 'Arunachal Pradesh',
-            ],
-            'South' => [
-                'Karnataka', 'Tamil Nadu', 'Andhra Pradesh', 'Telangana', 'Kerala', 'Goa',
-            ],
-            'East' => [
-                'West Bengal', 'Odisha',
-            ],
-            'West' => [
-                'Maharashtra', 'Gujarat', 'Rajasthan', 'Madhya Pradesh',
-            ],
-        ];
-        foreach ($regionZoneMap as $zoneName => $regions) {
-            foreach ($regions as $region) {
-                Region::firstOrCreate([
-                    'name' => $region,
-                ], [
-                    'zone_id' => $zones[$zoneName] ?? null,
-                ]);
+{
+    Region::truncate();
+
+    // Pre-load all zones into memory with case-insensitive keys
+    $zones = Zone::all()->keyBy(function ($zone) {
+        return strtolower($zone->name);
+    });
+
+    $csvFile = fopen(base_path('csv/phytonova/regionseeder.csv'), 'r');
+    $regionsToInsert = [];
+    $missingZones = [];
+    $batchSize = 1000;
+
+    // Skip header row
+    fgetcsv($csvFile, 2000, ',', '"', '\\');
+
+    while (($data = fgetcsv($csvFile, 2000, ',', '"', '\\')) !== false) {
+        $regionName = trim($data[0]);
+        $zoneName = trim($data[1]);
+        $zoneKey = strtolower($zoneName);
+
+        if (isset($zones[$zoneKey])) {
+            $regionsToInsert[] = [
+                'name' => $regionName,
+                'zone_id' => $zones[$zoneKey]->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+
+            // Batch insert when we reach the batch size
+            if (count($regionsToInsert) >= $batchSize) {
+                Region::insert($regionsToInsert);
+                $regionsToInsert = [];
             }
+        } else {
+            $missingZones[] = $zoneName;
         }
     }
+
+    // Insert remaining records
+    if (!empty($regionsToInsert)) {
+        Region::insert($regionsToInsert);
+    }
+
+    fclose($csvFile);
+
+    // Log all missing zones at once
+    if (!empty($missingZones)) {
+        logger()->warning('Zones not found: ' . implode(', ', array_unique($missingZones)));
+    }
+}
 }

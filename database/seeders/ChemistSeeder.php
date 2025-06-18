@@ -4,25 +4,21 @@ namespace Database\Seeders;
 
 use App\Models\Chemist;
 use App\Models\Headquarter;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class ChemistSeeder extends Seeder
 {
     public function run(): void
     {
-        $headquarterIds = Headquarter::pluck('id')->toArray();
-        $types = ['Ayurvedic', 'Allopathic'];
-        for ($i = 0; $i < 100; $i++) {
-            Chemist::create([
-                'name' => fake()->name(),
-                'phone' => fake()->phoneNumber(),
-                'email' => fake()->unique()->safeEmail(),
-                'address' => fake()->address(),
-                'town' => fake()->city(),
-                'headquarter_id' => fake()->randomElement($headquarterIds),
-                'type' => fake()->randomElement($types),
-                'user_id' => fake()->randomElement(\App\Models\User::pluck('id')->toArray()),
+        $users = User::role('DSA')->get();
+        foreach ($users as $user) {
+            Chemist::factory()->count(50)->create([
+                'user_id' => $user->id,
+                'headquarter_id' => $user->location_id,
+                'status'=>'Approved'
             ]);
         }
     }
 }
+

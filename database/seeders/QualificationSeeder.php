@@ -11,11 +11,13 @@ class QualificationSeeder extends Seeder
     {
         $qualifications = [
             ['name' => 'MBBS', 'category' => 'Doctor'],
-            ['name' => 'MD', 'category' => 'Doctor'],
-            ['name' => 'BDS', 'category' => 'Doctor'],
-            ['name' => 'PhD', 'category' => 'User'],
-            ['name' => 'MSc', 'category' => 'User'],
-            ['name' => 'BSc', 'category' => 'User'],
+            ['name' => 'BAMS', 'category' => 'Doctor'],
+            ['name' => 'BUMS', 'category' => 'Doctor'],
+            ['name' => 'BHMS', 'category' => 'Doctor'],
+            ['name' => 'MD Ayurveda', 'category' => 'Doctor'],
+            ['name' => 'MD Physician', 'category' => 'Doctor'],
+            ['name' => 'MBBS DCH', 'category' => 'Doctor'],
+            ['name' => 'Other', 'category' => 'Doctor'],
         ];
 
         foreach ($qualifications as $qualification) {

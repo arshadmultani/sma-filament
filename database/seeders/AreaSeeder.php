@@ -10,55 +10,48 @@ class AreaSeeder extends Seeder
 {
     public function run(): void
     {
-        $areasByRegion = [
-            'Maharashtra' => [
-                'Mumbai', 'Pune', 'Nagpur', 'Nashik', 'Aurangabad', 'Solapur', 'Amravati', 'Kolhapur', 'Sangli', 'Jalgaon',
-            ],
-            'Karnataka' => [
-                'Bengaluru', 'Mysuru', 'Mangaluru', 'Hubballi', 'Belagavi', 'Davanagere', 'Ballari', 'Tumakuru', 'Shivamogga', 'Raichur',
-            ],
-            'Tamil Nadu' => [
-                'Chennai', 'Coimbatore', 'Madurai', 'Salem', 'Tiruchirappalli', 'Tirunelveli', 'Vellore', 'Erode', 'Thoothukudi', 'Thanjavur',
-            ],
-            'Uttar Pradesh' => [
-                'Lucknow', 'Kanpur', 'Varanasi', 'Agra', 'Prayagraj', 'Meerut', 'Bareilly', 'Aligarh', 'Moradabad', 'Gorakhpur',
-            ],
-            'Gujarat' => [
-                'Ahmedabad', 'Surat', 'Vadodara', 'Rajkot', 'Bhavnagar', 'Jamnagar', 'Gandhinagar', 'Junagadh', 'Anand', 'Nadiad',
-            ],
-            'West Bengal' => [
-                'Kolkata', 'Howrah', 'Durgapur', 'Asansol', 'Siliguri', 'Bardhaman', 'Malda', 'Kharagpur', 'Haldia', 'Darjeeling',
-            ],
-            'Rajasthan' => [
-                'Jaipur', 'Jodhpur', 'Udaipur', 'Kota', 'Bikaner', 'Ajmer', 'Bhilwara', 'Alwar', 'Sikar', 'Sri Ganganagar',
-            ],
-            'Madhya Pradesh' => [
-                'Bhopal', 'Indore', 'Jabalpur', 'Gwalior', 'Ujjain', 'Sagar', 'Dewas', 'Satna', 'Ratlam', 'Rewa',
-            ],
-            'Bihar' => [
-                'Patna', 'Gaya', 'Muzaffarpur', 'Bhagalpur', 'Darbhanga', 'Purnia', 'Arrah', 'Begusarai', 'Katihar', 'Munger',
-            ],
-            'Kerala' => [
-                'Thiruvananthapuram', 'Kochi', 'Kozhikode', 'Thrissur', 'Kollam', 'Palakkad', 'Alappuzha', 'Kannur', 'Kottayam', 'Malappuram',
-            ],
-            'Punjab' => [
-                'Ludhiana', 'Amritsar', 'Jalandhar', 'Patiala', 'Bathinda', 'Mohali', 'Pathankot', 'Hoshiarpur', 'Batala', 'Moga',
-            ],
-            'Telangana' => [
-                'Hyderabad', 'Warangal', 'Nizamabad', 'Karimnagar', 'Khammam', 'Ramagundam', 'Secunderabad', 'Mahbubnagar', 'Nalgonda', 'Adilabad',
-            ],
-        ];
+     Area::truncate();
 
-        foreach ($areasByRegion as $regionName => $areas) {
-            $region = Region::where('name', $regionName)->first();
-            if ($region) {
-                foreach ($areas as $area) {
-                    Area::firstOrCreate([
-                        'name' => $area,
-                        'region_id' => $region->id,
-                    ]);
-                }
+     $regions=Region::all()->keyBy(function($region){
+        return strtolower($region->name);
+    });
+
+    $csvFile=fopen(base_path('csv/phytonova/areaseeder.csv'),'r');
+    $areasToInsert=[];
+    $missingRegions=[];
+    $batchSize=1000;
+
+    fgetcsv($csvFile, 2000, ',', '"', '\\');
+
+    while(($data=fgetcsv($csvFile,2000,',','"','\\'))!==false){
+        $areaName=trim($data[0]);
+        $regionName=trim($data[1]);
+        $regionKey=strtolower($regionName);
+
+        if(isset($regions[$regionKey])){
+            $areasToInsert[]=[
+                'name'=>$areaName,
+                'region_id'=>$regions[$regionKey]->id,
+                'created_at'=>now(),
+                'updated_at'=>now(),
+            ];
+            if(count($areasToInsert)>= $batchSize){
+                Area::insert($areasToInsert);
+                $areasToInsert=[];
             }
+        }else{
+            $missingRegions[]=$regionName;
         }
+        
     }
+    if(!empty($areasToInsert)){
+        Area::insert($areasToInsert);
+    }
+
+    fclose($csvFile);
+
+    if(!empty($missingRegions)){
+        logger()->warning('Regions not found: ' . implode(', ', array_unique($missingRegions)));
+    }
+}
 }

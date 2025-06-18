@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 /**
  * @property int $id
  * @property string $name
@@ -40,6 +42,7 @@ namespace App\Models;
  */
 class Chemist extends BaseModel
 {
+    use HasFactory;
     protected $fillable = ['name', 'phone', 'email', 'address', 'headquarter_id', 'type'];
 
     public function headquarter()

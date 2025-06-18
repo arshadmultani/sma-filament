@@ -18,19 +18,22 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
 
         $this->call([
+            RoleSeeder::class,
+            DivisionSeeder::class,
             ZoneSeeder::class,
             RegionSeeder::class,
-            DivisionSeeder::class,
             AreaSeeder::class,
             HeadquarterSeeder::class,
-            DoctorSeeder::class,
-            ChemistSeeder::class,
-            ProductSeeder::class,
-            KofolCampaignSeeder::class,
-            KofolEntrySeeder::class,
+            UserSeeder::class,
             QualificationSeeder::class,
+            // DoctorSeeder::class,
+            // ChemistSeeder::class,
+            // ProductSeeder::class,
+            // KofolCampaignSeeder::class,
+            // KofolEntrySeeder::class,
+            
         ]);
-        $role = Role::create(['name' => 'super_admin']);
+        $role = 'super_admin';
 
         $user = User::factory()->create([
             'name' => 'Super Admin',

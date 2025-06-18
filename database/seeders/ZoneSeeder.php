@@ -9,9 +9,17 @@ class ZoneSeeder extends Seeder
 {
     public function run(): void
     {
-        $zones = ['North', 'South', 'East', 'West'];
-        foreach ($zones as $zone) {
-            Zone::firstOrCreate(['name' => $zone]);
+        Zone::truncate();
+        $csvFile=fopen(base_path('csv/phytonova/zoneseeder.csv'),'r');
+        $firstLine=true;
+        while(($data=fgetcsv($csvFile,2000,','))!==false){
+            if(!$firstLine){
+                Zone::create([
+                    'name'=>$data[0],
+                ]);
+            }
+            $firstLine=false;
         }
+        fclose($csvFile);
     }
 }
