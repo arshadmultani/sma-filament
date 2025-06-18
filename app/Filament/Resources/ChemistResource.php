@@ -73,7 +73,7 @@ class ChemistResource extends Resource implements HasShieldPermissions
                         }
                     })
                     ->searchable()
-                    ->hidden(fn () => Auth::user()->hasRole('DSA'))
+                    ->hidden(fn() => Auth::user()->hasRole('DSA'))
                     ->preload()
                     ->required(),
             ]);
@@ -82,17 +82,18 @@ class ChemistResource extends Resource implements HasShieldPermissions
     public static function table(Table $table): Table
     {
         return $table
+            ->paginated([10, 25, 50])
             ->columns([
                 TextColumn::make('name'),
                 IconColumn::make('status')
                     ->sortable()
-                    ->icon(fn (string $state): string => match ($state) {
+                    ->icon(fn(string $state): string => match ($state) {
                         'Pending' => 'heroicon-o-clock',
                         'Approved' => 'heroicon-o-check-circle',
                         'Rejected' => 'heroicon-o-x-circle',
                         default => 'heroicon-o-question-mark-circle',
                     })
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'Pending' => 'warning',
                         'Approved' => 'success',
                         'Rejected' => 'danger',

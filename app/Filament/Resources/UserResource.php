@@ -29,6 +29,10 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 use Filament\Tables\Actions\ForceDeleteBulkAction;
+use STS\FilamentImpersonate\Tables\Actions\Impersonate;
+use Filament\Tables\Grouping\Group;
+
+
 
 
 
@@ -265,6 +269,7 @@ class UserResource extends Resource
             )
             ->actions([
                 Tables\Actions\ViewAction::make(),
+                Impersonate::make(),
                 // Tables\Actions\RestoreAction::make(),
                 // SendMailAction::make(),
             ])

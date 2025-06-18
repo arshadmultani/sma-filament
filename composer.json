@@ -23,6 +23,7 @@
         "rickdbcn/filament-email": "^1.10",
         "shuvroroy/filament-spatie-laravel-health": "^2.3",
         "solution-forest/filament-simplelightbox": "^0.0.11",
+        "stechstudio/filament-impersonate": "^3.16",
         "torgodly/html2media": "^1.1",
         "troccoli/blade-health-icons": "^5.0"
     },

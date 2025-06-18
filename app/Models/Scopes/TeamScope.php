@@ -23,12 +23,12 @@ class TeamScope implements Scope
 
         // Admin and Super-Admin can see all records
         /* */
-        if ($user->hasAnyRole(['admin', 'super_admin'])) {
+        if (method_exists($user, 'hasAnyRole') && $user->hasAnyRole(['admin', 'super_admin'])) {
             return;
         }
 
         // DSA can only see their own records + same headquarter
-        if ($user->hasRole('DSA')) {
+        if (method_exists($user, 'hasRole') && $user->hasRole('DSA')) {
             $builder->where(function ($query) use ($user) {
                 $query->where('user_id', $user->id)
                     ->orWhere('headquarter_id', $user->location_id);
@@ -40,7 +40,7 @@ class TeamScope implements Scope
         }
 
         // ASM logic
-        if ($user->hasRole('ASM')) {
+        if (method_exists($user, 'hasRole') && $user->hasRole('ASM')) {
             $headquarterIds = Headquarter::where('area_id', $user->location_id)->pluck('id');
             $builder->whereIn('headquarter_id', $headquarterIds);
 
@@ -48,14 +48,25 @@ class TeamScope implements Scope
         }
 
         // RSM logic (adjust as needed)
-        if ($user->hasRole('RSM')) {
+        if (method_exists($user, 'hasRole') && $user->hasRole('RSM')) {
             $areaIds = \App\Models\Area::where('region_id', $user->location_id)->pluck('id');
             $headquarterIds = Headquarter::whereIn('area_id', $areaIds)->pluck('id');
             $builder->whereIn('headquarter_id', $headquarterIds);
 
             return;
         }
-
+        // ZSM logic
+        if (method_exists($user, 'hasRole') && $user->hasRole('ZSM')) {
+            // Get all region IDs under the ZSM's zone
+            $regionIds = \App\Models\Region::where('zone_id', $user->location_id)->pluck('id');
+            // Get all area IDs under those regions
+            $areaIds = \App\Models\Area::whereIn('region_id', $regionIds)->pluck('id');
+            // Get all headquarter IDs under those areas
+            $headquarterIds = Headquarter::whereIn('area_id', $areaIds)->pluck('id');
+            // Filter records by those headquarter IDs
+            $builder->whereIn('headquarter_id', $headquarterIds);
+            return;
+        }
         // Default: user can only see their own records
         $builder->where('user_id', $user->id);
     }
