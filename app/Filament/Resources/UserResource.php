@@ -331,6 +331,9 @@ class UserResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->with(['roles', 'division', 'location']);
+            ->with(['roles', 'division', 'location'])
+            ->whereDoesntHave('roles', function ($query) {
+                $query->whereIn('name', ['admin', 'super_admin']);
+            });
     }
 }

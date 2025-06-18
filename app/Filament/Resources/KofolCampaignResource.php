@@ -55,6 +55,7 @@ class KofolCampaignResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->paginated(false)
             ->columns([
                 TextColumn::make('name'),
                 TextColumn::make('start_date')
