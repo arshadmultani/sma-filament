@@ -16,8 +16,7 @@ use Illuminate\Validation\ValidationException;
 
 class UserImporter extends Importer
 {
-   
-    
+    protected static ?string $model = User::class;
 
     public static function getColumns(): array
     {
@@ -27,14 +26,13 @@ class UserImporter extends Importer
                 ->rules(['required', 'max:255']),
             ImportColumn::make('email')
                 ->requiredMapping()
-                ->rules(['required', 'email', 'max:255']),
+                ->rules(['required']),
             ImportColumn::make('phone_number')
                 ->rules(['max:255']),
             ImportColumn::make('division_id')
                 ->label('Division')
                 ->requiredMapping()
                 ->rules(['required'])
-                ->examples(['Pharma', 'Phytonova'])
                 ->fillRecordUsing(function () {
                     // handled in resolveRecord
                 }),
@@ -76,14 +74,23 @@ class UserImporter extends Importer
     {
         $user = new User();
         $user->name = $this->data['name'];
-        $user->password = Hash::make('12345678');
+        $user->password = Hash::make(config('app.default_user_password'));
         $user->email = $this->data['email'];
         $user->phone_number = $this->data['phone_number'];
 
-        if (!empty($this->data['division_id'])) {
-            $division = Division::whereRaw('LOWER(name) = ?', [strtolower($this->data['division_id'])])->first();
-            $user->division_id = $division ? $division->id : null;
+        if (empty($this->data['division_id'])) {
+            throw ValidationException::withMessages([
+                'division_id' => ['Division is required.'],
+            ]);
         }
+        $division = Division::whereRaw('LOWER(name) = ?', [strtolower($this->data['division_id'])])->first();
+        if (!$division) {
+            throw ValidationException::withMessages([
+                'division_id' => ['Division not found: ' . $this->data['division_id']],
+            ]);
+        }
+        $user->division_id = $division->id;
+
         $roleConfig = [
             'ZSM' => ['model' => Zone::class, 'id_key' => 'zone_id'],
             'RSM' => ['model' => Region::class, 'id_key' => 'region_id'],
@@ -92,55 +99,29 @@ class UserImporter extends Importer
         ];
         
         $roleName = $this->data['role'];
-        if (isset($roleConfig[$roleName])) {
-            $config = $roleConfig[$roleName];
-            $locationModel = $config['model'];
-            $locationIdKey = $config['id_key'];
-        
-            $user->location_type = $locationModel;
-        
-            // Check if the corresponding ID is provided in the data
-            if (!empty($this->data[$locationIdKey])) {
-                // Find the location by its name (case-insensitive)
-                $location = $locationModel::whereRaw('LOWER(name) = ?', [strtolower($this->data[$locationIdKey])])->firstOrFail();
-                $user->location_id = $location->id;
-            }
+        if (!isset($roleConfig[$roleName])) {
+            throw ValidationException::withMessages([
+                'role' => ['Invalid or missing role: ' . $roleName],
+            ]);
         }
+        $config = $roleConfig[$roleName];
+        $locationModel = $config['model'];
+        $locationIdKey = $config['id_key'];
+        $user->location_type = $locationModel;
+        if (empty($this->data[$locationIdKey])) {
+            throw ValidationException::withMessages([
+                $locationIdKey => [ucfirst(str_replace('_', ' ', $locationIdKey)) . ' is required for role ' . $roleName . '.'],
+            ]);
+        }
+        $location = $locationModel::whereRaw('LOWER(name) = ?', [strtolower($this->data[$locationIdKey])])->first();
+        if (!$location) {
+            throw ValidationException::withMessages([
+                $locationIdKey => [ucfirst(str_replace('_', ' ', $locationIdKey)) . ' not found: ' . $this->data[$locationIdKey]],
+            ]);
+        }
+        $user->location_id = $location->id;
 
-        // switch ($roleName) {
-        //     case 'ZSM':
-        //         $user->location_type = Zone::class;
-        //         if (!empty($this->data['zone_id'])) {
-        //             $zone = Zone::whereRaw('LOWER(name) = ?', [strtolower($this->data['zone_id'])])->firstOrFail();
-        //             $user->location_id = $zone->id;
-        //         }
-        //         break;
-        //     case 'RSM':
-        //         $user->location_type = Region::class;
-        //         if (!empty($this->data['region_id'])) {
-        //             $region = Region::whereRaw('LOWER(name) = ?', [strtolower($this->data['region_id'])])->firstOrFail();
-        //             $user->location_id = $region->id;
-        //         }
-        //         break;
-        //     case 'ASM':
-        //         $user->location_type = Area::class;
-        //         if (!empty($this->data['area_id'])) {
-        //             $area = Area::whereRaw('LOWER(name) = ?', [strtolower($this->data['area_id'])])->firstOrFail();
-        //             $user->location_id = $area->id;
-        //         }
-        //         break;
-        //     case 'DSA':
-        //         $user->location_type = Headquarter::class;
-        //         if (!empty($this->data['headquarter_id'])) {
-        //             $headquarter = Headquarter::whereRaw('LOWER(name) = ?', [strtolower($this->data['headquarter_id'])])->firstOrFail();
-        //             $user->location_id = $headquarter->id;
-        //         }
-        //         break;
-        // }
-        // $user->save();
         return $user;
-
-
     }
     protected function afterSave()
     {
@@ -172,4 +153,6 @@ class UserImporter extends Importer
         return $body;
     }
 }
+
+
 
