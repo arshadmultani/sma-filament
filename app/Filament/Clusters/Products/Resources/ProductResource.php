@@ -39,7 +39,6 @@ class ProductResource extends Resource
                     ->searchable()
                     ->preload(),
                 Forms\Components\TextArea::make('description')
-                    ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('price')
                     ->required()
@@ -86,8 +85,8 @@ class ProductResource extends Resource
     {
         return [
             'index' => Pages\ListProducts::route('/'),
-            // 'create' => Pages\CreateProduct::route('/create'),
-            // 'edit' => Pages\EditProduct::route('/{record}/edit'),
+            'create' => Pages\CreateProduct::route('/create'),
+            'edit' => Pages\EditProduct::route('/{record}/edit'),
         ];
     }
     //     public static function getNavigationBadge(): ?string

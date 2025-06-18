@@ -33,6 +33,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Icetalker\FilamentTableRepeatableEntry\Infolists\Components\TableRepeatableEntry;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 
 class KofolEntryResource extends Resource implements HasShieldPermissions
 {
@@ -295,9 +296,8 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ->schema([
                         TextEntry::make('customer.name'),
                         TextEntry::make('customer_type')->formatStateUsing(fn ($state) => class_basename($state)),
-                        TextEntry::make('headquarter')
+                        TextEntry::make('customer.headquarter.name')
                             ->label('Headquarter')
-                            ->formatStateUsing(fn ($state, $record) => $record->customer?->headquarter?->name),
 
                     ]),
                 Components\Section::make()
@@ -341,7 +341,11 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                 Components\Section::make()
                     // ->columnSpan(1)
                     ->schema([
-                        ImageEntry::make('invoice_image')->label('Invoice')->square()->simpleLightbox()->columnSpan(2),
+                        ImageEntry::make('invoice_image')->label('Invoice')
+                            ->visibility('private')
+                            ->square()
+                            ->simpleLightbox()
+                            ->columnSpan(2),
                         TextEntry::make('invoice_amount')->label('Total Amount')->money('INR')->weight(FontWeight::SemiBold),
                     ]),
             ]);
