@@ -15,7 +15,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 50;
+            z-index: 10;
             padding: 0;
             min-height: 56px;
             box-shadow: none;
