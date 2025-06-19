@@ -2,28 +2,15 @@
 
 namespace App\Filament\Pages;
 
-use App\Filament\Widgets\CampaignOverview;
-use App\Filament\Widgets\CustomerOverview;
-use App\Filament\Widgets\UserOverview;
-use Illuminate\Support\Facades\Auth;
+use Filament\Pages\Page;
 
-class Dashboard extends \Filament\Pages\Dashboard
+class Dashboard extends Page
 {
-    public function getTitle(): string
+    protected static ?string $navigationIcon = 'heroicon-o-home';
+    protected static string $view = 'filament.pages.dashboard';
+    
+    public static function shouldRegisterNavigation(): bool
     {
-        return 'Hello '.Auth::user()->name;
-    }
-
-    public function getHeaderWidgets(): array
-    {
-        $widgets = [];
-
-        if (Auth::user()->hasRole(['super_admin', 'admin'])) {
-            $widgets[] = UserOverview::class;
-        }
-        $widgets[] = CampaignOverview::class;
-        $widgets[] = CustomerOverview::class;
-
-        return $widgets;
+        return true;
     }
 }

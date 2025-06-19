@@ -29,7 +29,7 @@ class KofolEntrySeeder extends Seeder
             $chemists = Chemist::where('headquarter_id', $user->location_id)->get();
 
             for ($i = 0; $i < 10; $i++) {
-                $numProducts = rand(1, 5);
+                $numProducts = rand(1, 3);
                 $entryProducts = [];
                 $invoiceAmount = 0;
                 $selectedProducts = $products->random($numProducts);
