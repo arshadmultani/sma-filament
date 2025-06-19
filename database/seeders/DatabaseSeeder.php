@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Specialty;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -26,8 +27,9 @@ class DatabaseSeeder extends Seeder
             HeadquarterSeeder::class,
             UserSeeder::class,
             QualificationSeeder::class,
-            // DoctorSeeder::class,
-            // ChemistSeeder::class,
+            SpecialtySeeder::class,
+            DoctorSeeder::class,
+            ChemistSeeder::class,
             // ProductSeeder::class,
             // KofolCampaignSeeder::class,
             // KofolEntrySeeder::class,

@@ -63,7 +63,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
             ->schema([
                 // campaign name
                 Select::make('kofol_campaign_id')
-                    ->relationship('kofolCampaign', 'name', fn ($query) => $query->where('is_active', true))
+                    ->relationship('kofolCampaign', 'name', fn($query) => $query->where('is_active', true))
                     ->native(false)
                     ->required(),
 
@@ -72,10 +72,10 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ->types([
                         MorphToSelect\Type::make(Doctor::class)
                             ->titleAttribute('name')
-                            ->modifyOptionsQueryUsing(fn ($query) => $query->where('status', 'Approved')),
+                            ->modifyOptionsQueryUsing(fn($query) => $query->where('status', 'Approved')),
                         MorphToSelect\Type::make(Chemist::class)
                             ->titleAttribute('name')
-                            ->modifyOptionsQueryUsing(fn ($query) => $query->where('status', 'Approved')),
+                            ->modifyOptionsQueryUsing(fn($query) => $query->where('status', 'Approved')),
                     ])
                     ->native(false)
                     ->preload()
@@ -89,10 +89,10 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ->addActionLabel('Add Product')
                     ->reorderable(false)
                     ->itemLabel(
-                        fn (array $state): string => Product::find($state['product_id'])?->name ?? ''
+                        fn(array $state): string => Product::find($state['product_id'])?->name ?? ''
                     )
                     ->minItems(1)
-                    ->deleteAction(fn (Action $action) => $action->requiresConfirmation())
+                    ->deleteAction(fn(Action $action) => $action->requiresConfirmation())
                     // ->afterStateUpdated(fn($state, callable $set) => static::updateInvoiceTotal($state, $set))
                     // ->afterStateHydrated(fn($state, callable $set) => static::updateInvoiceTotal($state, $set))
                     ->schema([
@@ -143,7 +143,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
     private static function getKofolProductOptions(): Collection
     {
         return Product::query()
-            ->whereHas('brand', fn ($query) => $query->where('name', 'Kofol'))
+            ->whereHas('brand', fn($query) => $query->where('name', 'Kofol'))
             ->pluck('name', 'id');
     }
 
@@ -206,7 +206,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                 TextColumn::make(name: 'customer_type')
                     ->label('Cx. Type')
                     ->searchable()
-                    ->formatStateUsing(fn ($state) => class_basename($state))
+                    ->formatStateUsing(fn($state) => class_basename($state))
                     ->toggleable(),
                 ImageColumn::make('invoice_image')
                     ->label('Invoice')
@@ -218,7 +218,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ->toggleable(),
                 TextColumn::make('status')->label('Status')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'Pending' => 'warning',
                         'Approved' => 'primary',
                         'Rejected' => 'danger',
@@ -228,6 +228,14 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ->label('Amount')
                     ->sortable()
                     ->money('INR'),
+                TextColumn::make('coupon_codes_list')
+                    ->label('Coupon Codes')
+                    ->formatStateUsing(fn($state, $record) => ($record && isset($record->coupons) && $record->coupons ? $record->coupons->pluck('coupon_code')->implode(', ') : ''))
+                    ->visible(fn($record) => $record && isset($record->coupons) && $record->coupons && $record->coupons->isNotEmpty()),
+                TextColumn::make('coupon_count')
+                    ->label('Coupons')
+                    ->state(fn($record) => $record && $record->coupons ? $record->coupons->count() : '0')
+                    ->sortable(),
                 TextColumn::make('created_at')->label('Submission')
                     ->since()
                     ->sortable()
@@ -238,9 +246,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ->toggleable(),
             ])
             ->filters([
-                TernaryFilter::make('coupon_code')
-                    ->nullable()
-                    ->label('Coupon Code'),
+                // Removed coupon_code filter
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
@@ -248,7 +254,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
-                    UpdateKofolStatusAction::makeBulk(),
+                    // UpdateKofolStatusAction::makeBulk(), // Removed as bulk actions are commented out
                     SendKofolCouponAction::makeBulk(),
                 ]),
             ]);
@@ -259,60 +265,55 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
     public static function infolist(Infolist $infolist): Infolist
     {
         return $infolist
-            ->columns(4)
             ->schema([
-                Components\Section::make()
-                    // ->columns([
-                    //     'sm' => 2,
-                    //     'md' => 4,
-                    // ])
-                    ->columnSpan(4)
+                Components\Section::make('Customer Details')
+                ->collapsible()
+                ->compact()
+                    ->columns(4)
+                    ->schema([
+                        TextEntry::make('customer.name'),
+                        TextEntry::make('customer_type')->formatStateUsing(fn($state) => class_basename($state)),
+                        TextEntry::make('customer.headquarter.name')
+                            ->label('Headquarter'),
+                            TextEntry::make('user.name')->label('Submitted By'),
+                    ]),
+                Components\Section::make('Status')
+                ->collapsible()
+                ->compact()
+                    ->columns(3)
                     ->schema([
                         TextEntry::make('kofolCampaign.name'),
                         TextEntry::make('created_at')->label(label: 'Submission')->dateTime('d-m-y @ H:i'),
                         TextEntry::make('status')->label('Status')
                             ->badge()
-                            ->color(fn (string $state): string => match ($state) {
+                            ->color(fn(string $state): string => match ($state) {
                                 'Pending' => 'warning',
                                 'Approved' => 'primary',
                                 'Rejected' => 'danger',
                                 default => 'secondary'
                             }),
-                        TextEntry::make('coupon_code')->label('Coupon Code')
-                            ->visible(fn ($state, $record) => ! is_null($state) && $record->status === 'Approved')
-                            ->badge()
-                            ->color('gray'),
-
                     ]),
-                Components\Section::make()
-                    // ->columns([
-                    //     'sm' => 1,
-                    //     'md' => 3,
-                    // ])
-                    // ->columnSpan([
-                    //     'sm' => 1,
-                    //     'md' => 3,
-                    // ])
+                Components\Section::make('Coupons')
+                ->collapsed()
+                ->compact()
+                    ->visible(fn($record) => $record && $record->coupons && $record->coupons->isNotEmpty())
+                    ->columns(2)
                     ->schema([
-                        TextEntry::make('customer.name'),
-                        TextEntry::make('customer_type')->formatStateUsing(fn ($state) => class_basename($state)),
-                        TextEntry::make('customer.headquarter.name')
-                            ->label('Headquarter')
-
+                        TextEntry::make('coupon_count')
+                            ->label('Coupon Count')
+                            ->state(fn($record) => $record && $record->coupons ? $record->coupons->count() : '0'),
+                        Components\RepeatableEntry::make('coupons')
+                            ->label('Coupons')
+                            ->contained(false)
+                            ->grid(2)
+                            ->schema([
+                                TextEntry::make('coupon_code')->badge()->label(''),
+                            ])
+                            ->visible(fn($record) => $record && $record->coupons && $record->coupons->isNotEmpty()),
                     ]),
-                Components\Section::make()
-                    // ->columns(1)
-                    // ->columnSpan([
-                    //     'sm' => 4,
-                    //     'md' => 1,
-                    // ])
-                    ->schema([
-                        TextEntry::make('user.name'),
-
-                    ]),
-
-                Components\Section::make()
-                    // ->columnSpan(3)
+                Components\Section::make('Products')
+                ->collapsible()
+                ->compact()
                     ->schema([
                         TableRepeatableEntry::make('products') // repeater for desktop
                             ->columnSpan(2)
@@ -322,24 +323,22 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                                 TextEntry::make('product_id')
                                     ->columnSpan(2)
                                     ->label('Product')
-                                    ->formatStateUsing(fn ($state) => Product::find($state)?->name ?? ''),
+                                    ->formatStateUsing(fn($state) => Product::find($state)?->name ?? ''),
                                 TextEntry::make('quantity')->columnSpan(1),
                                 TextEntry::make('price')->money('INR')->columnSpan(1),
                             ]),
                         RepeatableEntry::make('products')  // repeater for mobile
-                            // ->columns(2)
                             ->extraAttributes(['class' => 'block sm:hidden']) // Visible only on mobile
                             ->schema([
                                 TextEntry::make('product_id')
                                     ->columnSpan(2)
                                     ->label('Product')
-                                    ->formatStateUsing(fn ($state) => Product::find($state)?->name ?? ''),
+                                    ->formatStateUsing(fn($state) => Product::find($state)?->name ?? ''),
                                 TextEntry::make('quantity'),
                                 TextEntry::make('price')->money('INR'),
                             ]),
                     ]),
                 Components\Section::make()
-                    // ->columnSpan(1)
                     ->schema([
                         ImageEntry::make('invoice_image')->label('Invoice')
                             ->visibility('private')
@@ -376,6 +375,6 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
         return parent::getEloquentQuery()
-            ->with(['customer.headquarter']);
+            ->with(['customer.headquarter', 'coupons']);
     }
 }

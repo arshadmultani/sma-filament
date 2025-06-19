@@ -75,11 +75,12 @@
             <p>Thank you for participating in our Kofol Swarna Varsha! We're excited to provide you with your exclusive coupon.</p>
 
             <div class="coupon-box">
-                <h3>Your Coupon Code</h3>
-                <p style="font-size: 24px; font-weight: bold; color: #079669;">
-                    {{ $couponCode ?? 'KOFOL-2024-001' }}
-                </p>
-                <!-- <p>Valid until: {{ $expiryDate ?? 'December 31, 2024' }}</p> -->
+                <h3>{{ count($couponCodes) > 1 ? 'Your Coupon Codes' : 'Your Coupon Code' }}</h3>
+                <ul style="list-style: none; padding: 0;">
+                    @foreach($couponCodes as $code)
+                        <li style="font-size: 24px; font-weight: bold; color: #079669; margin-bottom: 8px;">{{ $code }}</li>
+                    @endforeach
+                </ul>
             </div>
 
             <div class="customer-info">
