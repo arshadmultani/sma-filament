@@ -13,8 +13,9 @@ class ChemistSeeder extends Seeder
     {
         $users = User::role('DSA')->get();
         foreach ($users as $user) {
-            Chemist::factory()->count(50)->create([
+            Chemist::factory()->count(10)->create([
                 'user_id' => $user->id,
+                'name'=> $user->location->name.'Chem'.$user->name,
                 'headquarter_id' => $user->location_id,
                 'status'=>'Approved'
             ]);

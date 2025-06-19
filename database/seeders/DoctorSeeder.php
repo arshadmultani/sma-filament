@@ -24,14 +24,15 @@ class DoctorSeeder extends Seeder
         $users = User::role('DSA')->get();
 
         foreach ($users as $user) {
-            Doctor::factory()->count(50)->create([
+            Doctor::factory()->count(10)->create([
                 'user_id' => $user->id,
+                'name' => $user->location->name.'Dr'.$user->name,
                 'qualification_id' => fake()->randomElement($qualificationIds),
                 'specialty_id' => fake()->randomElement($specialtyIds),
                 'headquarter_id' => $user->location_id,
                 'type' => fake()->randomElement($types),
                 'support_type' => fake()->randomElement($supportTypes),
-                'status'=>'Approved'
+                'status'=>'Approved',
             ]);
         }
     }
