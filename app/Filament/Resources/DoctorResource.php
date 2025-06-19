@@ -220,9 +220,9 @@ class DoctorResource extends Resource implements HasShieldPermissions
                         TextEntry::make('address'),
                         TextEntry::make('email'),
                         TextEntry::make('phone'),
-                        TextEntry::make('headquarter.name'),
-                        TextEntry::make('headquarter.area.name'),
-                        TextEntry::make('headquarter.area.region.name'),
+                        TextEntry::make('headquarter.name')->label('HQ'),
+                        TextEntry::make('headquarter.area.name')->label('Area'),
+                        TextEntry::make('headquarter.area.region.name')->label('Region'),
 
                         // TextEntry::make('created_at')->since()->label('Created'),
                         // TextEntry::make('user.name'),
