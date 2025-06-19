@@ -22,20 +22,20 @@ class KofolCoupon extends Mailable
 
     public $headquarterName;
 
-    public $couponCode;
+    public $couponCodes;
 
     public $expiryDate;
 
     public $redeemUrl;
 
-    public function __construct($customer, $couponCode = null)
+    public function __construct($customer, $couponCodes = [])
     {
         $this->customer = $customer;
         $this->customerName = $customer->name ?? '';
         $this->customerAddress = $customer->address ?? '';
         $this->customerTown = $customer->town ?? '';
         $this->headquarterName = $customer->headquarter->name ?? '';
-        $this->couponCode = $couponCode ?? 'KOFOL-'.date('Y').'-'.str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
+        $this->couponCodes = $couponCodes;
         $this->expiryDate = now()->addMonths(3)->format('F d, Y');
         $this->redeemUrl = config('app.url').'/redeem-coupon';
     }

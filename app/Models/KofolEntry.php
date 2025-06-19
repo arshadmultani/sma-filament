@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Attributes\ScopedBy;
  * @property-read \App\Models\KofolCampaign $kofolCampaign
  * @property-read int|null $products_count
  * @property-read \App\Models\User $user
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\KofolEntryCoupon[] $coupons
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|KofolEntry newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|KofolEntry newQuery()
@@ -55,7 +56,6 @@ class KofolEntry extends Model
         'customer_id',
         'invoice_amount',
         'status',
-        'coupon_code',
     ];
 
     protected $casts = [
@@ -80,5 +80,10 @@ class KofolEntry extends Model
     public function products()
     {
         return $this->hasMany(Product::class);
+    }
+
+    public function coupons()
+    {
+        return $this->hasMany(KofolEntryCoupon::class);
     }
 }

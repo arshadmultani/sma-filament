@@ -29,14 +29,18 @@ class SendKofolCouponAction
             ->modalSubmitActionLabel('Yes, send it')
             ->action(function ($record) {
                 try {
+                    $couponCodes = $record->coupons ? $record->coupons->pluck('coupon_code')->toArray() : [];
                     if (! $record->customer) {
                         throw new \Exception('No customer found for this record.');
+                    }
+                    if (empty($couponCodes)) {
+                        throw new \Exception('No coupon codes found for this record.');
                     }
 
                     Mail::to($record->customer->email)->queue(
                         new KofolCoupon(
                             $record->customer,
-                            $record->coupon_code
+                            $couponCodes
                         )
                     );
 
@@ -83,22 +87,22 @@ class SendKofolCouponAction
                             throw new \Exception('No customer found for this record.');
                         }
 
+                        $couponCodes = $record->coupons ? $record->coupons->pluck('coupon_code')->toArray() : [];
+
                         if ($record->status !== 'Approved') {
                             $rejectedCount++;
-
                             continue;
                         }
 
-                        if (is_null($record->coupon_code)) {
+                        if (empty($couponCodes)) {
                             $noCouponCount++;
-
                             continue;
                         }
 
                         Mail::to($record->customer->email)->queue(
                             new KofolCoupon(
                                 $record->customer,
-                                $record->coupon_code
+                                $couponCodes
                             )
                         );
                         $successCount++;

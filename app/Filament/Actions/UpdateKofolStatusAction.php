@@ -3,6 +3,8 @@
 namespace App\Filament\Actions;
 
 use Filament\Actions\Action;
+use Filament\Forms\Get;
+use Filament\Forms\Components\Component;
 use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Tables\Actions\BulkAction;
@@ -13,7 +15,12 @@ use Illuminate\Support\Facades\Log;
 
 class UpdateKofolStatusAction
 {
-    private static int $maxCouponAttempts = 100;
+    // Maximum number of attempts to generate a unique coupon code
+    private static int $maxCouponAttempts = 1000;
+
+    // Range for 7-digit coupon codes
+    private static int $minCouponCode = 1000000;
+    private static int $maxCouponCode = 9999999;
 
     private static int $bulkProcessLimit = 500; // Prevent memory issues
 
@@ -26,48 +33,68 @@ class UpdateKofolStatusAction
                 Select::make('status')
                     ->native(false)
                     ->label('Status')
-                    ->native(false)
                     ->options(fn ($record) => collect([
                         'Pending' => 'Pending',
                         'Approved' => 'Approved',
                         'Rejected' => 'Rejected',
                     ])->except($record?->status)->toArray())
-                    ->required(),
+                    ->required()
+                    ->reactive(),
+                \Filament\Forms\Components\TextInput::make('num_coupons')
+                    ->label('No. of Coupons')
+                    ->numeric()
+                    ->minValue(1)
+                    ->required(fn ($get) => $get('status') === 'Approved')
+                    ->visible(fn ($get) => $get('status') === 'Approved')
+                    ->rule(function () {
+                        return function (string $attribute, $value, \Closure $fail) {
+                            if ($value > 50) {
+                                $fail('Yikes! You are trying to generate too many coupons.');
+                            }
+                        };
+                    }),
+                \Filament\Forms\Components\TextInput::make('rejection_reason')
+                    ->label('Reason for Rejection')
+                    ->required(fn ($get) => $get('status') === 'Rejected')
+                    ->visible(fn ($get) => $get('status') === 'Rejected'),
             ])
             ->action(function (array $data, $record) {
                 try {
                     DB::beginTransaction();
 
                     $record->status = $data['status'];
-                    $couponGenerated = false;
-                    $generatedCouponCode = null;
 
-                    if ($data['status'] === 'Approved' && empty($record->coupon_code)) {
-                        $couponCode = self::generateUniqueCouponCode(get_class($record));
-
-                        if ($couponCode === null) {
-                            DB::rollBack();
-                            Notification::make()
-                                ->title('Error')
-                                ->body('Unable to generate unique coupon code after multiple attempts')
-                                ->danger()
-                                ->send();
-
-                            return;
+                    if ($data['status'] === 'Approved') {
+                        $numCoupons = (int) ($data['num_coupons'] ?? 1);
+                        $generatedCodes = [];
+                        for ($i = 0; $i < $numCoupons; $i++) {
+                            try {
+                                $couponCode = self::generateUniqueCouponCode();
+                            } catch (\RuntimeException $e) {
+                                DB::rollBack();
+                                Notification::make()
+                                    ->title('Error')
+                                    ->body($e->getMessage())
+                                    ->danger()
+                                    ->send();
+                                return;
+                            }
+                            $record->coupons()->create(['coupon_code' => $couponCode]);
+                            $generatedCodes[] = $couponCode;
                         }
+                    }
 
-                        $record->coupon_code = $couponCode;
-                        $couponGenerated = true;
-                        $generatedCouponCode = $couponCode;
+                    // If status is set to Rejected, delete all coupons for this entry
+                    if ($data['status'] === 'Rejected') {
+                        $record->coupons()->delete();
                     }
 
                     $record->save();
                     DB::commit();
 
-                    // Dynamic success message
-                    $message = 'Status updated to '.$data['status'];
-                    if ($couponGenerated) {
-                        $message .= '. Coupon code generated: '.$generatedCouponCode;
+                    $message = 'Status updated to ' . $data['status'];
+                    if (!empty($generatedCodes)) {
+                        $message .= '. Coupon codes generated: ' . implode(', ', $generatedCodes);
                     }
 
                     Notification::make()
@@ -76,34 +103,38 @@ class UpdateKofolStatusAction
                         ->success()
                         ->send();
 
+                    // Notify the user who created the record
+                    if ($record->user) {
+                        $notificationBody = 'Your Booking with amount ' . $record->invoice_amount . ' has been ' . $data['status'];
+                        if ($data['status'] === 'Rejected' && !empty($data['rejection_reason'])) {
+                            $notificationBody .= ". Reason: " . $data['rejection_reason'];
+                        }
+                        Notification::make()
+                            ->title('Kofol Booking Status')
+                            ->body($notificationBody)
+                            ->when(
+                                $data['status'] === 'Approved',
+                                fn ($notification) => $notification->success(),
+                                fn ($notification) => $notification->danger()
+                            )
+                            ->sendToDatabase($record->user);
+                    }
+
                 } catch (QueryException $e) {
                     DB::rollBack();
-
-                    // Handle duplicate coupon code constraint violation
-                    if (str_contains($e->getMessage(), 'coupon_code')) {
-                        Notification::make()
-                            ->title('Error')
-                            ->body('Coupon code conflict detected. Please try again.')
-                            ->danger()
-                            ->send();
-                    } else {
-                        Notification::make()
-                            ->title('Database Error')
-                            ->body('Failed to update record. Please try again.')
-                            ->danger()
-                            ->send();
-                    }
+                    Notification::make()
+                        ->title('Database Error')
+                        ->body('Failed to update record. Please try again.')
+                        ->danger()
+                        ->send();
                 } catch (\Exception $e) {
                     DB::rollBack();
-
                     Notification::make()
                         ->title('Unexpected Error')
                         ->body('An error occurred while updating the record.')
                         ->danger()
                         ->send();
-
-                    // Log the error for debugging
-                    Log::error('UpdateStatusAction error: '.$e->getMessage(), [
+                    Log::error('UpdateStatusAction error: ' . $e->getMessage(), [
                         'record_id' => $record->id ?? 'unknown',
                         'status' => $data['status'] ?? 'unknown',
                     ]);
@@ -113,140 +144,49 @@ class UpdateKofolStatusAction
             ->icon('heroicon-o-arrow-path');
     }
 
-    public static function makeBulk(): BulkAction
-    {
-        return BulkAction::make('update_status')
-            ->modalWidth('sm')
-            ->label('Update Status')
-            ->visible(fn () => Gate::allows('update_status_kofol::entry'))
-            ->form([
-                Select::make('status')
-                    ->label('Status')
-                    ->options([
-                        'Pending' => 'Pending',
-                        'Approved' => 'Approved',
-                        'Rejected' => 'Rejected',
-                    ])
-                    ->required()
-                    ->native(false),
-            ])
-            ->action(function (array $data, $records) {
-                $recordsCollection = $records instanceof \Illuminate\Database\Eloquent\Collection
-                    ? $records
-                    : collect($records);
-
-                $totalRecords = $recordsCollection->count();
-
-                // Prevent memory issues with large datasets
-                if ($totalRecords > self::$bulkProcessLimit) {
-                    Notification::make()
-                        ->title('Bulk Limit Exceeded')
-                        ->body('Please select fewer than '.self::$bulkProcessLimit.' records at a time.')
-                        ->warning()
-                        ->send();
-
-                    return;
-                }
-
-                $couponsGenerated = 0;
-                $failedCoupons = 0;
-                $failedUpdates = 0;
-                $modelClass = $recordsCollection->first() ? get_class($recordsCollection->first()) : null;
-
-                try {
-                    DB::beginTransaction();
-
-                    foreach ($recordsCollection as $record) {
-                        try {
-                            $record->status = $data['status'];
-
-                            if ($data['status'] === 'Approved' && empty($record->coupon_code)) {
-                                $couponCode = self::generateUniqueCouponCode($modelClass);
-
-                                if ($couponCode !== null) {
-                                    $record->coupon_code = $couponCode;
-                                    $couponsGenerated++;
-                                } else {
-                                    $failedCoupons++;
-                                }
-                            }
-
-                            $record->save();
-
-                        } catch (\Exception $e) {
-                            $failedUpdates++;
-                            Log::error('Bulk update failed for record: '.($record->id ?? 'unknown'), [
-                                'error' => $e->getMessage(),
-                            ]);
-                        }
-                    }
-
-                    DB::commit();
-
-                } catch (\Exception $e) {
-                    DB::rollBack();
-
-                    Notification::make()
-                        ->title('Bulk Update Failed')
-                        ->body('Failed to update records. Please try again.')
-                        ->danger()
-                        ->send();
-
-                    return;
-                }
-
-                // Build comprehensive success message
-                $message = "Status updated to {$data['status']} for ".($totalRecords - $failedUpdates)." of {$totalRecords} records.";
-
-                if ($couponsGenerated > 0) {
-                    $message .= " {$couponsGenerated} coupon codes generated.";
-                }
-
-                if ($failedCoupons > 0) {
-                    $message .= " {$failedCoupons} coupon codes failed to generate.";
-                }
-
-                if ($failedUpdates > 0) {
-                    $message .= " {$failedUpdates} records failed to update.";
-                }
-
-                $notificationType = ($failedCoupons > 0 || $failedUpdates > 0) ? 'warning' : 'success';
-                $notificationTitle = ($failedCoupons > 0 || $failedUpdates > 0) ? 'Bulk update completed with issues' : 'Bulk update successful';
-
-                Notification::make()
-                    ->title($notificationTitle)
-                    ->body($message)
-                    ->{$notificationType}()
-                    ->send();
-            })
-            ->color('primary')
-            ->icon('heroicon-o-arrow-path');
-    }
+    // Comment out bulk actions for now
+    // public static function makeBulk(): BulkAction
+    // {
+    //     // ...
+    // }
 
     /**
-     * Generate a unique coupon code with proper model handling
+     * Generate a unique 7-digit coupon code with guaranteed uniqueness
      */
-    private static function generateUniqueCouponCode(?string $modelClass = null): ?int
+    private static function generateUniqueCouponCode(): int
     {
-        if (! $modelClass) {
-            return null;
+        // Check if we have exhausted the coupon space
+        $totalPossibleCoupons = self::$maxCouponCode - self::$minCouponCode + 1;
+        $existingCoupons = DB::table('kofol_entry_coupons')->count();
+        
+        if ($existingCoupons >= $totalPossibleCoupons) {
+            throw new \RuntimeException('All possible coupon codes have been exhausted. Please contact system administrator.');
         }
 
         $attempts = 0;
+        $maxAttempts = self::$maxCouponAttempts;
 
-        do {
-            $couponCode = random_int(100000, 999999);
-            $attempts++;
-
+        while ($attempts < $maxAttempts) {
             try {
-                $exists = $modelClass::where('coupon_code', $couponCode)->exists();
+                $couponCode = random_int(self::$minCouponCode, self::$maxCouponCode);
+                
+                // Try to insert the record with a unique constraint
+                $exists = DB::table('kofol_entry_coupons')
+                    ->where('coupon_code', $couponCode)
+                    ->lockForUpdate()
+                    ->exists();
+                
+                if (!$exists) {
+                    return $couponCode;
+                }
+                
+                $attempts++;
             } catch (\Exception $e) {
-                // If query fails, assume it exists to be safe
-                $exists = true;
+                Log::error('Error generating coupon code: ' . $e->getMessage());
+                $attempts++;
             }
+        }
 
-        } while ($exists && $attempts < self::$maxCouponAttempts);
-
-        return $attempts >= self::$maxCouponAttempts ? null : $couponCode;
+        throw new \RuntimeException('Failed to generate a unique coupon code after ' . $maxAttempts . ' attempts. Please try again.');
     }
 }

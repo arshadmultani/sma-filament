@@ -11,6 +11,8 @@ use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Torgodly\Html2Media\Actions\Html2MediaAction;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 class ViewKofolEntry extends ViewRecord
 {
@@ -20,6 +22,12 @@ class ViewKofolEntry extends ViewRecord
     {
         return 'KSV/POB/'.$this->record->id;
     }
+    protected function resolveRecord($key): Model
+{
+    $record = parent::resolveRecord($key)->load(['customer.headquarter', 'coupons']);
+    Log::info('Coupons are loaded:',[$record->coupons]);
+    return $record;
+}
 
     public function getHeaderActions(): array
     {
@@ -53,4 +61,5 @@ class ViewKofolEntry extends ViewRecord
             ...$actions,
         ];
     }
+    
 }
