@@ -38,7 +38,7 @@ class ProductResource extends Resource
                     ->native(false)
                     ->searchable()
                     ->preload(),
-                Forms\Components\TextArea::make('description')
+                Forms\Components\Textarea::make('description')
                     ->maxLength(255),
                 Forms\Components\TextInput::make('price')
                     ->required()
