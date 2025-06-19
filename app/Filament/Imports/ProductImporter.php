@@ -55,6 +55,9 @@ class ProductImporter extends Importer
         // Resolve brand name to ID
         if (! empty($this->data['brand_id'])) {
             $brand = \App\Models\Brand::whereRaw('LOWER(name) = ?', [strtolower($this->data['brand_id'])])->first();
+            if (! $brand) {
+                $brand = \App\Models\Brand::create(['name' => $this->data['brand_id']]);
+            }
             $product->brand_id = $brand ? $brand->id : null;
         }
 
