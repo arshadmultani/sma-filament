@@ -77,9 +77,6 @@ class DoctorResource extends Resource implements HasShieldPermissions
                 TextInput::make('email')
                 ->email()
                 ->required()
-                ->validationMessages([
-                    'unique' => 'This email address is already in use.'
-                ])
                 ->unique(ignoreRecord: true),
                 TextInput::make('phone')->required(),
                 TextInput::make('address'),

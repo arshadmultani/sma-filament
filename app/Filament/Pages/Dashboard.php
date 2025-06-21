@@ -13,4 +13,8 @@ class Dashboard extends Page
     {
         return true;
     }
+    public function getTitle(): string
+    {
+        return '';
+    }
 }
