@@ -41,7 +41,7 @@ class Card extends Component
     {
         $isOver = Carbon::parse($this->campaign->end_date)->isPast();
         $text = $isOver ? 'Over' : 'Live';
-        $dotClass = $this->campaign->is_active ? 'bg-green-500' : 'bg-red-500';
+        $dotClass = $this->campaign->is_active ? 'bg-primary' : 'bg-danger';
 
         $html = <<<HTML
 <span class="inline-flex items-center space-x-2">
@@ -55,7 +55,7 @@ HTML;
 
     public function getAmount(): string
     {
-        return Number::currency($this->amount, in: 'INR');
+        return Number::currency($this->amount, in: 'INR',locale:'en_IN');
     }
 
     public function render()
