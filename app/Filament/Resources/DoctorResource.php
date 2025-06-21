@@ -74,7 +74,13 @@ class DoctorResource extends Resource implements HasShieldPermissions
                     ->native(false)
                     ->options(['Prescribing' => 'Prescribing', 'Dispensing' => 'Dispensing'])
                     ->required(),
-                TextInput::make('email')->email()->required(),
+                TextInput::make('email')
+                ->email()
+                ->required()
+                ->validationMessages([
+                    'unique' => 'This email address is already in use.'
+                ])
+                ->unique(ignoreRecord: true),
                 TextInput::make('phone')->required(),
                 TextInput::make('address'),
                 TextInput::make('town'),
