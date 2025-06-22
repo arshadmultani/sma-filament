@@ -104,8 +104,8 @@
             @endif
         </a>
         <!-- Campaigns -->
-        <a wire:navigate href="{{ route('filament.admin.pages.campaigns') }}"
-            class="nav-item {{ request()->routeIs('filament.admin.pages.campaigns') ? 'active' : '' }}"
+        <a wire:navigate href="{{ route('filament.admin.pages.campaign-page') }}"
+            class="nav-item {{ request()->routeIs('filament.admin.pages.campaign-page') ? 'active' : '' }}"
             aria-label="Campaigns">
             <span class="nav-icon">
                 @if(request()->routeIs('filament.admin.pages.campaigns'))

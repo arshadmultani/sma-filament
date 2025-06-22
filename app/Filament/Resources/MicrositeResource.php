@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\MicrositeResource\Pages;
 use App\Filament\Resources\MicrositeResource\RelationManagers;
+use App\Models\Campaign;
 use App\Models\Microsite;
 use Filament\Forms;
 use Filament\Forms\Components\Repeater;
@@ -11,8 +12,13 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Forms\Components\Select;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Infolists\Infolist;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\TextEntry;
+
+use Illuminate\Database\Eloquent\Model;
 
 class MicrositeResource extends Resource
 {
@@ -24,6 +30,12 @@ class MicrositeResource extends Resource
     {
         return $form
             ->schema([
+                Forms\Components\Select::make('campaign_id')
+                    ->label('Campaign')
+                    ->options(Campaign::query()->pluck('name', 'id'))
+                    ->required()
+                    ->searchable()
+                    ->native(false),
                 Forms\Components\Select::make('doctor_id')
                     ->relationship('doctor', 'name')
                     ->required()
@@ -43,13 +55,17 @@ class MicrositeResource extends Resource
     {
         return $table
             ->columns([
-                //
+                Tables\Columns\TextColumn::make('doctor.name'),
+                Tables\Columns\TextColumn::make('campaignEntry.campaign.name')->label('Campaign'),
+                Tables\Columns\IconColumn::make('is_active')->boolean(),
+                Tables\Columns\TextColumn::make('status'),
+                Tables\Columns\TextColumn::make('url'),
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -58,6 +74,22 @@ class MicrositeResource extends Resource
             ]);
     }
 
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Section::make()
+                    ->columns(3)
+                    ->schema([
+                        TextEntry::make('doctor.name'),
+                        TextEntry::make('campaignEntry.campaign.name')->label('Campaign'),
+                        TextEntry::make('url')->copyable(true),
+                        // TextEntry::make('is_active')->boolean(),
+                        // TextEntry::make('status'),
+                    ]),
+
+            ]);
+    }
     public static function getRelations(): array
     {
         return [
@@ -71,6 +103,12 @@ class MicrositeResource extends Resource
             'index' => Pages\ListMicrosites::route('/'),
             'create' => Pages\CreateMicrosite::route('/create'),
             'edit' => Pages\EditMicrosite::route('/{record}/edit'),
+            'view' => Pages\ViewMicrosite::route('/{record}'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->with(['campaignEntry.campaign']);
     }
 }

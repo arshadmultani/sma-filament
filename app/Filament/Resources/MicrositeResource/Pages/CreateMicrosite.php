@@ -16,7 +16,8 @@ class CreateMicrosite extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $doctor = Doctor::find($data['doctor_id']);
-        $slug = Str::slug($doctor->name);
+        $firstName = explode(' ', $doctor->name)[0];
+        $slug = Str::slug($firstName);
 
         do {
             $random = Str::lower(Str::random(5));
@@ -36,5 +37,15 @@ class CreateMicrosite extends CreateRecord
         }
 
         return $data;
+    }
+
+    protected function afterCreate(): void
+    {
+        $campaignId = $this->data['campaign_id'];
+        $this->record->campaignEntry()->create([
+            'campaign_id'   => $campaignId,
+            'customer_id'   => $this->record->doctor_id,
+            'customer_type' => 'doctor',
+        ]);
     }
 }
