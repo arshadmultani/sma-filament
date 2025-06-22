@@ -123,6 +123,7 @@ class DoctorResource extends Resource implements HasShieldPermissions
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('created_at', 'desc')
             ->columns([
                 ImageColumn::make('profile_photo')
                     ->circular()

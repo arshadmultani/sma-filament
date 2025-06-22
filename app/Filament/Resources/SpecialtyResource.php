@@ -17,6 +17,7 @@ class SpecialtyResource extends Resource
 
     protected static ?string $navigationGroup = 'Dr. Attributes';
 
+
     public static function form(Form $form): Form
     {
         return $form

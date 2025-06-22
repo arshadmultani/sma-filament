@@ -37,6 +37,7 @@ class MicrositeResource extends Resource
                     ->options(function () {
                         return Campaign::query()
                             ->where('allowed_entry_type', 'microsite')
+                            ->where('is_active', true)
                             ->pluck('name', 'id');
                     })
                     ->required()

@@ -43,7 +43,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Chemist extends BaseModel
 {
     use HasFactory;
-    protected $fillable = ['name', 'phone', 'email', 'address', 'headquarter_id', 'type'];
+    protected $fillable = ['name', 'phone', 'email', 'town', 'user_id', 'address', 'headquarter_id', 'type'];
 
     public function headquarter()
     {

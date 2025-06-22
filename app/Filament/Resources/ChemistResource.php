@@ -82,6 +82,7 @@ class ChemistResource extends Resource implements HasShieldPermissions
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('created_at', 'desc')
             ->paginated([10, 25, 50])
             ->columns([
                 TextColumn::make('name'),
@@ -152,7 +153,7 @@ class ChemistResource extends Resource implements HasShieldPermissions
                 Section::make()
                     ->columns(3)
                     ->schema([
-                        TextEntry::make('user.name'),
+                        TextEntry::make('user.name')->label('Created By'),
                         TextEntry::make('created_at')->since()->label('Created'),
                         TextEntry::make('updated_at')->since()->label('Updated'),
                     ]),

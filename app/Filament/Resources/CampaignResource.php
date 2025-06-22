@@ -77,6 +77,9 @@ class CampaignResource extends Resource
                     ->date('d F Y'),
                 TextColumn::make('end_date')
                     ->date('d F Y'),
+                TextColumn::make('allowed_entry_type')
+                    ->label('Activity')
+                    ->formatStateUsing(fn (string $state): string => ucfirst(str_replace('_', ' ', $state))),
                 TextColumn::make('status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
@@ -96,7 +99,7 @@ class CampaignResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                // Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

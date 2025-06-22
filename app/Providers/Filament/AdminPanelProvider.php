@@ -47,7 +47,7 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('admin')
-            ->path('admin')
+            ->path('stepup')
             ->login(CustomLogin::class)
             ->darkMode(false)
             ->defaultThemeMode(ThemeMode::Light)
@@ -68,14 +68,19 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->navigationGroups([
                 NavigationGroup::make()
+                    ->label('Activities')
+                    ->icon('heroicon-o-chart-bar'),
+                NavigationGroup::make()
                     ->label('Customer')
                     ->icon('heroicon-o-currency-dollar'),
                 NavigationGroup::make()
+                    ->label('Dr. Attributes')
+                    ->icon('healthicons-o-doctor'),
+                NavigationGroup::make()
                     ->label('Territory')
                     ->icon('heroicon-o-map-pin'),
-                NavigationGroup::make()
-                    ->label('Activities')
-                    ->icon('heroicon-o-chart-bar'),
+                
+                
             ])
             ->sidebarWidth('15rem')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
