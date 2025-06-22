@@ -24,7 +24,9 @@ class MicrositeResource extends Resource
 {
     protected static ?string $model = Microsite::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = '';
+    protected static ?string $navigationGroup = 'Activities';
+
 
     public static function form(Form $form): Form
     {
@@ -32,13 +34,19 @@ class MicrositeResource extends Resource
             ->schema([
                 Forms\Components\Select::make('campaign_id')
                     ->label('Campaign')
-                    ->options(Campaign::query()->pluck('name', 'id'))
+                    ->options(function () {
+                        return Campaign::query()
+                            ->where('allowed_entry_type', 'microsite')
+                            ->pluck('name', 'id');
+                    })
                     ->required()
+                    ->preload()
                     ->searchable()
                     ->native(false),
                 Forms\Components\Select::make('doctor_id')
                     ->relationship('doctor', 'name')
                     ->required()
+                    ->preload()
                     ->searchable()
                     ->native(false),
                 Repeater::make('doctor.reviews')

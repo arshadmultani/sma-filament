@@ -6,7 +6,7 @@ use Filament\Clusters\Cluster;
 
 class Products extends Cluster
 {
-    protected static ?string $navigationIcon = 'heroicon-o-squares-2x2';
+    protected static ?string $navigationIcon = 'healthicons-o-pill-1';
 
     // protected static ?string $navigationGroup = 'Product';
     protected static ?string $navigationLabel = 'Products';

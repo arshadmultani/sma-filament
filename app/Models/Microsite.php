@@ -2,9 +2,15 @@
 
 namespace App\Models;
 
+use App\Contracts\IsCampaignEntry;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Scopes\TeamHierarchyScope;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 
-class Microsite extends Model
+
+#[ScopedBy(TeamHierarchyScope::class)]
+
+class Microsite extends Model implements IsCampaignEntry
 {
     protected $fillable = ['doctor_id', 'url', 'is_active', 'status'];
 
@@ -13,10 +19,10 @@ class Microsite extends Model
         return $this->belongsTo(Doctor::class);
     }
 
-    public function reviews()
-    {
-        return $this->doctor()->reviews();
-    }
+    // public function reviews()
+    // {
+    //     return $this->doctor()->reviews();
+    // }
 
     public function campaignEntry()
     {

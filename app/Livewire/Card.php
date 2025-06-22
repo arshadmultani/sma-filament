@@ -20,8 +20,8 @@ class Card extends Component
     {
         $this->campaign = KofolCampaign::where('is_active', true)->latest()->first();
         if ($this->campaign) {
-            $this->amount = KofolEntry::where('kofol_campaign_id', $this->campaign->id)->sum('invoice_amount');
-            $this->entries = KofolEntry::where('kofol_campaign_id', $this->campaign->id)->count();
+            // $this->amount = KofolEntry::where('kofol_campaign_id', $this->campaign->id)->sum('invoice_amount');
+            // $this->entries = KofolEntry::where('kofol_campaign_id', $this->campaign->id)->count();
         }
     }
     public function getCountdownMessageProperty(): string

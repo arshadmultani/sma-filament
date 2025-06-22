@@ -16,7 +16,8 @@ class KofolCampaignResource extends Resource
 {
     protected static ?string $model = KofolCampaign::class;
 
-    protected static ?string $navigationGroup = 'Kofol Swarna Varsha';
+    protected static ?string $navigationGroup = '';
+    protected static bool $shouldRegisterNavigation = false;
 
     // protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 

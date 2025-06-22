@@ -54,11 +54,11 @@ class ProductResource extends Resource
         return $table
             ->paginated([25, 50, 100, 'all'])
             ->columns([
-                Tables\Columns\ImageColumn::make('image')->circular(),
+                Tables\Columns\ImageColumn::make('image')->circular()->toggleable(),
                 Tables\Columns\TextColumn::make('name')->searchable(),
-                Tables\Columns\TextColumn::make('division.name')->searchable(),
-                Tables\Columns\TextColumn::make('brand.name')->searchable()->label('Brand')->badge(),
-                Tables\Columns\TextColumn::make('price')->money('INR')->searchable(),
+                Tables\Columns\TextColumn::make('division.name')->searchable()->toggleable(),
+                Tables\Columns\TextColumn::make('brand.name')->searchable()->label('Brand')->badge()->toggleable(),
+                Tables\Columns\TextColumn::make('price')->money('INR')->searchable()->toggleable(),
 
             ])
             ->filters([

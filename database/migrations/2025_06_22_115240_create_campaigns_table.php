@@ -17,7 +17,8 @@ return new class extends Migration
             $table->string('description')->nullable();
             $table->date('start_date');
             $table->date('end_date');
-            $table->foreignId('status_id')->constrained('campaign_statuses');
+            $table->boolean('is_active')->default(false);
+            $table->string('allowed_entry_type')->nullable();
             $table->timestamps();
         });
     }
@@ -28,5 +29,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('campaigns');
+        Schema::dropIfExists('campaign_statuses');
+        Schema::dropIfExists('campaign_entry_types');
     }
 };
