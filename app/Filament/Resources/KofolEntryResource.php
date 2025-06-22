@@ -68,6 +68,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ->options(function () {
                         return Campaign::query()
                             ->where('allowed_entry_type', 'kofol_entry')
+                            ->where('is_active', true)
                             ->pluck('name', 'id');
                     })
                     ->required()
