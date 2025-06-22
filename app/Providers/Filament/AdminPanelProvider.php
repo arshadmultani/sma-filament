@@ -38,7 +38,7 @@ class AdminPanelProvider extends PanelProvider
     protected array $tabPages = [
         \App\Filament\Pages\Dashboard::class,
         \App\Filament\Pages\Customers::class,
-        \App\Filament\Pages\Campaigns::class,
+        \App\Filament\Pages\CampaignPage::class,
         // Add more custom pages here
     ];
 

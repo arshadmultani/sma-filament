@@ -9,6 +9,7 @@ use App\Models\Chemist;
 use App\Models\Doctor;
 use App\Models\KofolEntry;
 use App\Models\Product;
+use App\Models\Campaign;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\FileUpload;
@@ -62,8 +63,11 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
             ->columns(1)
             ->schema([
                 // campaign name
-                Select::make('kofol_campaign_id')
-                    ->relationship('kofolCampaign', 'name', fn($query) => $query->where('is_active', true))
+                Select::make('campaign_id')
+                    ->label('Campaign')
+                    ->options(Campaign::query()->pluck('name', 'id'))
+                    ->required()
+                    ->searchable()
                     ->native(false)
                     ->required(),
 
@@ -197,7 +201,8 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ->label('Invoice #')
                     ->toggleable()
                     ->weight(FontWeight::Bold),
-                TextColumn::make('kofolCampaign.name')
+                TextColumn::make('campaignEntry.campaign.name')
+                    ->label('Campaign')
                     ->toggleable(),
                 TextColumn::make('customer.name')
                     ->label('Cx. Name')
@@ -282,7 +287,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                 ->compact()
                     ->columns(3)
                     ->schema([
-                        TextEntry::make('kofolCampaign.name'),
+                        TextEntry::make('campaignEntry.campaign.name'),
                         TextEntry::make('created_at')->label(label: 'Submission')->dateTime('d-m-y @ H:i'),
                         TextEntry::make('status')->label('Status')
                             ->badge()
@@ -375,6 +380,6 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
         return parent::getEloquentQuery()
-            ->with(['customer.headquarter', 'coupons']);
+            ->with(['customer.headquarter', 'coupons', 'campaignEntry.campaign']);
     }
 }

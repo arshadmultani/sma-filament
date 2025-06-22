@@ -86,4 +86,16 @@ class KofolEntry extends Model
     {
         return $this->hasMany(KofolEntryCoupon::class);
     }
+
+    public function campaignEntry()
+    {
+        return $this->morphOne(CampaignEntry::class, 'entryable');
+    }
+
+    protected static function booted()
+    {
+        static::deleting(function ($kofolEntry) {
+            $kofolEntry->campaignEntry()->delete();
+        });
+    }
 }

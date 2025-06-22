@@ -11,6 +11,11 @@ use Spatie\Health\Checks\Checks\DebugModeCheck;
 use Spatie\Health\Checks\Checks\EnvironmentCheck;
 use Spatie\Health\Checks\Checks\OptimizedAppCheck;
 use Spatie\Health\Facades\Health;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use App\Models\KofolEntry;
+use App\Models\Microsite;
+use App\Models\Doctor;
+use App\Models\Chemist;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -42,5 +47,11 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('viewPulse', function (User $user) {
             return $user->email == 'arshadrmultani@gmail.com';
         });
+        Relation::morphMap([
+            'kofol_entry' => KofolEntry::class,
+            'microsite_entry' => Microsite::class,
+            'doctor' => Doctor::class,
+            'chemist' => Chemist::class,
+        ]);
     }
 }

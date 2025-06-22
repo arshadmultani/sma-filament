@@ -17,5 +17,16 @@ class Microsite extends Model
     {
         return $this->doctor()->reviews();
     }
-    
+
+    public function campaignEntry()
+    {
+        return $this->morphOne(CampaignEntry::class, 'entryable');
+    }
+
+    protected static function booted()
+    {
+        static::deleting(function ($microsite) {
+            $microsite->campaignEntry()->delete();
+        });
+    }
 }

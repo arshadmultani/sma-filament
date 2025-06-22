@@ -4,10 +4,11 @@ namespace Database\Seeders;
 
 use App\Models\Chemist;
 use App\Models\Doctor;
-use App\Models\KofolCampaign;
 use App\Models\KofolEntry;
 use App\Models\Product;
 use App\Models\User;
+use App\Models\Campaign;
+use App\Models\CampaignEntry;
 use Illuminate\Database\Seeder;
 
 class KofolEntrySeeder extends Seeder
@@ -19,7 +20,7 @@ class KofolEntrySeeder extends Seeder
         $products = Product::whereHas('brand', function ($query) {
             $query->where('name', 'Kofol');
         })->get();
-        $campaigns = KofolCampaign::where('is_active', true)->get();
+        $campaigns = Campaign::all();
         $status = 'Pending';
         $usedCouponCodes = [];
 
@@ -62,8 +63,9 @@ class KofolEntrySeeder extends Seeder
                 //     $usedCouponCodes[] = $couponCode;
                 // }
 
-                KofolEntry::create([
-                    'kofol_campaign_id' => $campaigns->random()->id,
+                $campaign = $campaigns->random();
+
+                $kofolEntry = KofolEntry::create([
                     'user_id' => $user->id,
                     'invoice_image' => 'https://picsum.photos/200/300?random=1',
                     'products' => $entryProducts,
@@ -72,6 +74,13 @@ class KofolEntrySeeder extends Seeder
                     'invoice_amount' => (int) $invoiceAmount,
                     'status' => $status,
                     // 'coupon_code' => $couponCode,
+                ]);
+
+                // Create the CampaignEntry link
+                $kofolEntry->campaignEntry()->create([
+                    'campaign_id'   => $campaign->id,
+                    'customer_id'   => $customer->id,
+                    'customer_type' => $customerType,
                 ]);
             }
         }

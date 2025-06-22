@@ -26,4 +26,14 @@ class CreateKofolEntry extends CreateRecord
         ];
 
     }
+
+    protected function afterCreate(): void
+    {
+        $campaignId = $this->data['campaign_id'];
+        $this->record->campaignEntry()->create([
+            'campaign_id'   => $campaignId,
+            'customer_id'   => $this->record->customer_id,
+            'customer_type' => $this->record->customer_type,
+        ]);
+    }
 }
