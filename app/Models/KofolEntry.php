@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Scopes\TeamHierarchyScope;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use App\Contracts\IsCampaignEntry;
 
 /**
  * @property int $id
@@ -45,7 +46,7 @@ use Illuminate\Database\Eloquent\Attributes\ScopedBy;
  */
 
 #[ScopedBy(TeamHierarchyScope::class)]
-class KofolEntry extends Model
+class KofolEntry extends Model implements IsCampaignEntry
 {
     protected $fillable = [
         'kofol_campaign_id',

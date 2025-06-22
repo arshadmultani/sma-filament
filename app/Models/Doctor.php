@@ -78,6 +78,12 @@ class Doctor extends BaseModel
     {
         return $this->belongsTo(Qualification::class);
     }
+
+    public function specialty()
+    {
+        return $this->belongsTo(Specialty::class);
+    }
+
     public function reviews()
     {
         return $this->hasMany(Review::class);

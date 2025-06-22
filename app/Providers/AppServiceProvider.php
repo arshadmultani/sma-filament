@@ -49,9 +49,13 @@ class AppServiceProvider extends ServiceProvider
         });
         Relation::morphMap([
             'kofol_entry' => KofolEntry::class,
-            'microsite_entry' => Microsite::class,
+            'microsite' => Microsite::class,
             'doctor' => Doctor::class,
             'chemist' => Chemist::class,
         ]);
+
+        Gate::guessPolicyNamesUsing(function (string $modelClass) {
+            return str_replace('Models', 'Policies', $modelClass) . 'Policy';
+        });
     }
 }

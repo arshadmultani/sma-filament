@@ -53,9 +53,9 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
 
     protected static ?string $model = KofolEntry::class;
 
-    protected static ?string $navigationGroup = 'Kofol Swarna Varsha';
+    protected static ?string $navigationGroup = 'Activities';
 
-    protected static ?string $modelLabel = 'Campaign Entries';
+    protected static ?string $modelLabel = 'KSV Booking';
 
     public static function form(Form $form): Form
     {
@@ -65,12 +65,15 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                 // campaign name
                 Select::make('campaign_id')
                     ->label('Campaign')
-                    ->options(Campaign::query()->pluck('name', 'id'))
+                    ->options(function () {
+                        return Campaign::query()
+                            ->where('allowed_entry_type', 'kofol_entry')
+                            ->pluck('name', 'id');
+                    })
                     ->required()
+                    ->preload()
                     ->searchable()
-                    ->native(false)
-                    ->required(),
-
+                    ->native(false),
                 // customer details
                 MorphToSelect::make('customer')
                     ->types([

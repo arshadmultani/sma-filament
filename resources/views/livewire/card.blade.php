@@ -10,15 +10,15 @@
             <div class="p-4 md:p-6 relative">
                 
                 <div class="flex m-4 justify-between items-center">
-                <p class="text-xs">{{ $this->countdownMessage }}</p>    
-                <p class="text-xs">  {!! $this->campaignStatus !!}
+                <p class="text-xs"></p>    
+                <p class="text-xs"> 
                 </p>
                 <!-- <x-heroicon-o-circle-stack class="w-4 h-4 ping"/> -->
                 </div>
 
                 <div class="mt-4 flex flex-col md:flex-row items-center justify-between">
                     <div>
-                        <h2 class="text-md md:text-2xl font-bold text-info-900">{{ $campaign->name }}</h2>
+                        <h2 class="text-md md:text-2xl font-bold text-info-900">{}</h2>
                         <!-- <p class="text-xs md:text-sm text-gray-600">
                             {{ $campaign->is_active ? 'Active Campaign' : 'Inactive Campaign' }} &bull; Healthcare
                         </p> -->
@@ -38,7 +38,7 @@
                     </div>    
                 <div class="flex justify-between gap-x-4 gap-y-2">
                         <div class="text-xs md:text-sm text-gray-800">
-                            <span class="font-semibold">{{ $this->getAmount() }}</span>
+                            <span class="font-semibold"></span>
                         </div>
                         <div class="text-xs md:text-sm text-gray-500 hidden md:block">&bull;</div>
                         <div class="text-xs md:text-sm text-gray-800">

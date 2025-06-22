@@ -23,8 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('kofol_entries', function (Blueprint $table) {
-            $table->foreignId('kofol_campaign_id')->constrained('kofol_campaigns');
-            
+            $table->foreignId('kofol_campaign_id')->nullable()->constrained('kofol_campaigns');
         });
     }
 };

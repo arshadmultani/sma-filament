@@ -73,6 +73,9 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make()
                     ->label('Territory')
                     ->icon('heroicon-o-map-pin'),
+                NavigationGroup::make()
+                    ->label('Activities')
+                    ->icon('heroicon-o-chart-bar'),
             ])
             ->sidebarWidth('15rem')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
