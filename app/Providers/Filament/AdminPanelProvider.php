@@ -52,7 +52,6 @@ class AdminPanelProvider extends PanelProvider
             ->darkMode(false)
             ->defaultThemeMode(ThemeMode::Light)
             ->passwordReset()
-            ->spa()
             ->profile(isSimple: false)
             ->brandName('StepUp')
             ->favicon(asset('public/logo.svg'))
