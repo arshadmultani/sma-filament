@@ -1,5 +1,5 @@
 <x-filament-panels::page>
     @livewire('greeting')
-    @livewire('card')
+    @livewire('campaign-card')
 </x-filament-panels::page>
 
