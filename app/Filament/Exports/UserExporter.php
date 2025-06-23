@@ -15,6 +15,14 @@ class UserExporter extends Exporter
     {
         return [
             ExportColumn::make('name'),
+            ExportColumn::make('email'),
+            ExportColumn::make('phone_number')->label('Phone'),
+            ExportColumn::make('roles.name')->label('Role'),
+            ExportColumn::make('division.name')->label('Division'),
+            ExportColumn::make('zone_name')->label('Zone'),
+            ExportColumn::make('region_name')->label('Region'),
+            ExportColumn::make('area_name')->label('Area'),
+            ExportColumn::make('headquarter_name')->label('Headquarter'),
         ];
     }
 

@@ -119,6 +119,64 @@ class User extends Authenticatable implements FilamentUser
         return $this->morphTo();
     }
 
+    // Accessor for Zone ID
+    public function getZoneIdAttribute()
+    {
+        $location = $this->location;
+        if ($location instanceof \App\Models\Zone) {
+            return $location->id;
+        }
+        if ($location instanceof \App\Models\Region) {
+            return $location->zone_id;
+        }
+        if ($location instanceof \App\Models\Area) {
+            return $location->region?->zone_id;
+        }
+        if ($location instanceof \App\Models\Headquarter) {
+            return $location->area?->region?->zone_id;
+        }
+        return null;
+    }
+
+    // Accessor for Region ID
+    public function getRegionIdAttribute()
+    {
+        $location = $this->location;
+        if ($location instanceof \App\Models\Region) {
+            return $location->id;
+        }
+        if ($location instanceof \App\Models\Area) {
+            return $location->region_id;
+        }
+        if ($location instanceof \App\Models\Headquarter) {
+            return $location->area?->region_id;
+        }
+        return null;
+    }
+
+    // Accessor for Area ID
+    public function getAreaIdAttribute()
+    {
+        $location = $this->location;
+        if ($location instanceof \App\Models\Area) {
+            return $location->id;
+        }
+        if ($location instanceof \App\Models\Headquarter) {
+            return $location->area_id;
+        }
+        return null;
+    }
+
+    // Accessor for Headquarter ID
+    public function getHeadquarterIdAttribute()
+    {
+        $location = $this->location;
+        if ($location instanceof \App\Models\Headquarter) {
+            return $location->id;
+        }
+        return null;
+    }
+
     // Accessor for Zone Name
     public function getZoneNameAttribute()
     {
