@@ -48,17 +48,7 @@ use App\Contracts\IsCampaignEntry;
 #[ScopedBy(TeamHierarchyScope::class)]
 class KofolEntry extends Model implements IsCampaignEntry
 {
-    protected $fillable = [
-        'kofol_campaign_id',
-        'user_id',
-        'invoice_image',
-        'products',
-        'customer_type',
-        'customer_id',
-        'invoice_amount',
-        'status',
-    ];
-
+    protected $guarded = [];
     protected $casts = [
         'products' => 'array',
     ];

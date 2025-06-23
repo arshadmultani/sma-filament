@@ -10,6 +10,13 @@ class CreateChemist extends CreateRecord
 {
     protected static string $resource = ChemistResource::class;
 
+    protected static bool $canCreateAnother = false;
+
+    public function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['user_id'] = Auth::id();
