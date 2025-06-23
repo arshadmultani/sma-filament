@@ -16,7 +16,7 @@ class MicrositeSeeder extends Seeder
     public function run(): void
     {
         $users = User::role('DSA')->get();
-        $campaigns = Campaign::all();
+        $campaigns = Campaign::where('allowed_entry_type', 'microsite')->get();
 
         foreach ($users as $user) {
             // Get doctors from the same headquarter as the user
@@ -28,7 +28,7 @@ class MicrositeSeeder extends Seeder
                 }
 
                 $doctor = $doctors->random();
-                $campaign = $campaigns->random();
+                $campaign = $campaigns->first();
 
                 // Generate a unique URL for the microsite
                 $firstName = explode(' ', $doctor->name)[0];
@@ -42,7 +42,8 @@ class MicrositeSeeder extends Seeder
                     'doctor_id' => $doctor->id,
                     'url' => $url,
                     'is_active' => false,
-                    'status' => 'active',
+                    'status' => 'Pending',
+                    'user_id' => $user->id,
                 ]);
 
                 // Create the CampaignEntry link
