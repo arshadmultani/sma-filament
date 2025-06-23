@@ -108,13 +108,13 @@
             class="nav-item {{ request()->routeIs('filament.admin.pages.campaign-page') ? 'active' : '' }}"
             aria-label="Campaigns">
             <span class="nav-icon">
-                @if(request()->routeIs('filament.admin.pages.campaigns'))
+                @if(request()->routeIs('filament.admin.pages.campaign-page'))
                     <x-heroicon-s-bolt />
                 @else
                     <x-heroicon-o-bolt />
                 @endif
             </span>
-            @if(request()->routeIs('filament.admin.pages.campaigns'))
+            @if(request()->routeIs('filament.admin.pages.campaign-page'))
                 <span class="nav-label">Campaigns</span>
             @endif
         </a>
