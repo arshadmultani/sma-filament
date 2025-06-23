@@ -15,8 +15,7 @@ class DownloadQrAction
     public static function makeInfolist(): InfolistAction
     {
         return InfolistAction::make('download_qr')
-        ->modalWidth('sm')
-
+            ->modalWidth('sm')
             ->label('QR Code')
             ->icon('heroicon-o-qr-code')
             ->modalHeading('Download QR')
@@ -45,4 +44,4 @@ class DownloadQrAction
                 }, Str::slug($name) . '-qr.pdf');
             });
     }
-} 
+}

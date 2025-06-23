@@ -32,7 +32,9 @@ class ViewMicrosite extends ViewRecord
                 ->url(route('filament.admin.resources.microsites.edit', $this->record))
                 ->color('primary'),
             SiteUrlAction::makeInfolist()->color('primary'),
-            DownloadQrAction::makeInfolist()->color('primary'),
+            DownloadQrAction::makeInfolist()
+            ->visible(fn ($record) => $record->is_active && $record->status === 'Approved')
+            ->color('primary'),
         ])->icon('heroicon-m-bars-3-bottom-right');
 
         return $actions;
