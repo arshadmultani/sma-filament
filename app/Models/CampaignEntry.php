@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class CampaignEntry extends Model
 {
-    protected $fillable = ['campaign_id', 'customer_id','customer_type','entry_id','entry_type'];
+    protected $fillable = ['campaign_id', 'customer_id','customer_type','entryable_id','entryable_type'];
 
     public function campaign()
     {
@@ -18,8 +18,8 @@ class CampaignEntry extends Model
         return $this->morphTo();
     }
 
-    public function entry()
+    public function entryable()
     {
-        return $this->morphTo();
+        return $this->morphTo('entryable');
     }
 }

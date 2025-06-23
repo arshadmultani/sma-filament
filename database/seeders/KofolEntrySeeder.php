@@ -20,7 +20,9 @@ class KofolEntrySeeder extends Seeder
         $products = Product::whereHas('brand', function ($query) {
             $query->where('name', 'Kofol');
         })->get();
-        $campaigns = Campaign::all();
+        $campaigns = Campaign::where('is_active', true)
+            ->where('allowed_entry_type', 'kofol_entry')
+            ->get();
         $status = 'Pending';
         $usedCouponCodes = [];
 
