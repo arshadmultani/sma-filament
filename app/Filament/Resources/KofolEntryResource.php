@@ -74,6 +74,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ->required()
                     ->preload()
                     ->searchable()
+                    ->dehydrated(false)
                     ->native(false),
                 // customer details
                 MorphToSelect::make('customer')
@@ -197,6 +198,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('id', 'desc')
             ->paginated([25, 50, 100, 250])
             ->columns([
                 TextColumn::make('id')->label('ID')

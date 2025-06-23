@@ -13,6 +13,9 @@ use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 class Microsite extends Model implements IsCampaignEntry
 {
     protected $guarded = [];
+    protected $casts = [
+        'reviews' => 'array',
+    ];
 
     public function doctor()
     {
