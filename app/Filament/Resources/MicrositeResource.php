@@ -54,6 +54,7 @@ class MicrositeResource extends Resource implements HasShieldPermissions
                     ->required()
                     ->preload()
                     ->searchable()
+                    ->dehydrated(false)
                     ->native(false),
                 Forms\Components\Select::make('doctor_id')
                     ->relationship('doctor', 'name')
@@ -66,14 +67,14 @@ class MicrositeResource extends Resource implements HasShieldPermissions
                     ->label('Doctor Video Message (Optional)')
                     ->acceptedFileTypes(['video/*'])
                     ->maxSize(10240),
-                Repeater::make('doctor.reviews')
-                ->columnSpanFull()
+                Repeater::make('reviews')
+                    ->columnSpanFull()
                     ->schema([
                         Forms\Components\TextInput::make('reviewer_name')
                             ->required(),
                         Forms\Components\FileUpload::make('video')
                             ->required(),
-                    ])
+                    ]),
             ]);
     }
 

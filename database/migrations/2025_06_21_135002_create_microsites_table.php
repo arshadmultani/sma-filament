@@ -15,6 +15,7 @@ return new class extends Migration {
             $table->foreignId('doctor_id')->constrained('doctors');
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
             $table->string('message')->nullable();
+            $table->json('reviews')->nullable();
             $table->string('url');
             $table->boolean('is_active');
             $table->string('status');
