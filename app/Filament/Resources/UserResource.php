@@ -193,6 +193,7 @@ class UserResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('created_at', 'desc')
             ->deferLoading()
             ->striped()
             ->paginated([10,25,50,100])
@@ -338,7 +339,7 @@ class UserResource extends Resource
         return parent::getEloquentQuery()
             ->with(['roles', 'division', 'location'])
             ->whereDoesntHave('roles', function ($query) {
-                $query->whereIn('name', ['admin', 'super_admin']);
+                $query->whereIn('name', ['super_admin']);
             });
     }
 }

@@ -14,6 +14,8 @@ use Filament\Resources\Components\Tab;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\Auth;
 
+
+
 class ListUsers extends ListRecords
 {
     use HasResizableColumn;
@@ -44,10 +46,10 @@ class ListUsers extends ListRecords
     public function getTabs(): array
     {
         $tabs = [];
-        if (Auth::user()->hasRole('super_admin')) {
-            $tabs['all'] = Tab::make('All')->badge(User::whereDoesntHave('roles', function ($query) {
-                $query->where('name', 'super_admin');
-            })->count());
+        $user = Auth::user();
+        /** @var \App\Models\User $user */
+        if ($user->can('view_user')) {
+            $tabs['all'] = Tab::make('All')->badge(User::count());
             $tabs['archived'] = Tab::make('Archived')->badge(User::onlyTrashed()->whereDoesntHave('roles', function ($query) {
                 $query->where('name', 'super_admin');
             })->count())->modifyQueryUsing(function ($query) {
