@@ -12,11 +12,16 @@ use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 
 class Microsite extends Model implements IsCampaignEntry
 {
-    protected $fillable = ['doctor_id', 'url', 'is_active', 'status'];
+    protected $guarded = [];
 
     public function doctor()
     {
         return $this->belongsTo(Doctor::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class)->withTrashed();
     }
 
     // public function reviews()
@@ -33,6 +38,10 @@ class Microsite extends Model implements IsCampaignEntry
     {
         static::deleting(function ($microsite) {
             $microsite->campaignEntry()->delete();
+        });
+
+        static::saving(function ($model) {
+            $model->is_active = $model->status === 'Approved';
         });
     }
 }
