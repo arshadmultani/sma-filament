@@ -8,9 +8,11 @@
     "require": {
         "php": "^8.2",
         "asmit/resized-column": "^1.0",
+        "barryvdh/laravel-dompdf": "^3.1",
         "bezhansalleh/filament-shield": "^3.3",
         "blade-ui-kit/blade-heroicons": "^2.6",
         "eightynine/filament-advanced-widgets": "^3.0",
+        "endroid/qr-code": "^6.0",
         "filament/filament": "^3.3",
         "icetalker/filament-table-repeatable-entry": "^1.1",
         "laravel/framework": "^12.0",

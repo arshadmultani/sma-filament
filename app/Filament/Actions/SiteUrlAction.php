@@ -10,7 +10,7 @@ class SiteUrlAction
     public static function makeInfolist(): InfolistAction
     {
         return InfolistAction::make('Site')
-            ->label('Site')
+            ->label('Visit Site')
             ->icon('heroicon-o-link')
             ->visible(fn($record) => $record->is_active)
             ->url(fn($record) => url('/doctor/' . $record->url))
