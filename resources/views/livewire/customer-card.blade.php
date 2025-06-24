@@ -10,7 +10,7 @@
     }
 </style>
 <div class="">
-    <div class="text-lg font-semibold mb-2">Customers</div>
+    <div class="text-lg font-semibold mb-2 mt-3">Customers</div>
     <div class="border-2 rounded-lg p-3 border-secondary-500 shadow-lg flex flex-col">
         <div class="flex flex-row gap-2 justify-between">
             <div class="bg-gray-100 w-1/2 rounded-lg p-2 flex flex-col gap-2 items-center ">

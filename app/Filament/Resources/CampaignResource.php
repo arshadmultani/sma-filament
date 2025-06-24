@@ -47,7 +47,7 @@ class CampaignResource extends Resource
                             })
                             ->native(false)
                             ->searchable()
-                            ->helperText('Optional. If selected, this campaign will only accept entries of this type.'),
+                            ->required(),
 
                     ]),
                 Section::make()

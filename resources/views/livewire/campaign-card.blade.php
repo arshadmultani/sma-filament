@@ -1,5 +1,5 @@
 <div>
-    <h1 class="text-lg font-semibold mb-2">Active Campaigns</h1>
+    <h1 class="text-lg font-semibold mb-2 mt-3">Active Campaigns</h1>
     @if($campaigns->isEmpty())
         <p>No active campaigns at the moment.</p>
     @else

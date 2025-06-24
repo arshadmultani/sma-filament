@@ -14,12 +14,15 @@
         <template x-if="!isMobile">
             <div>
                 @livewire('greeting')
+
+
                 @livewire('heading', ['title' => 'Active Campaigns'])
                 @livewire(App\Filament\Widgets\CampaignOverview::class)
+
                 @livewire('heading', ['title' => 'Customers'])
                 @livewire(App\Filament\Widgets\CustomerOverview::class)
+
             </div>
         </template>
     </div>
 </x-filament-panels::page>
-
