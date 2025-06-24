@@ -142,7 +142,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                         FileUpload::make('invoice_image')
                             ->image()
                             ->downloadable()
-                            ->maxSize(2048)
+                            ->maxSize(5120)
                             ->required(),
 
                     ]),
