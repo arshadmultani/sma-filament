@@ -335,7 +335,6 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                                     ->label('Product')
                                     ->formatStateUsing(fn($state) => Product::find($state)?->name ?? ''),
                                 TextEntry::make('quantity')->columnSpan(1),
-                                TextEntry::make('price')->money('INR')->columnSpan(1),
                             ]),
                         RepeatableEntry::make('products')  // repeater for mobile
                             ->extraAttributes(['class' => 'block sm:hidden']) // Visible only on mobile
@@ -345,7 +344,6 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                                     ->label('Product')
                                     ->formatStateUsing(fn($state) => Product::find($state)?->name ?? ''),
                                 TextEntry::make('quantity'),
-                                TextEntry::make('price')->money('INR'),
                             ]),
                     ]),
                 Components\Section::make()
