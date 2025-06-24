@@ -245,8 +245,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ->visible(fn($record) => $record && isset($record->coupons) && $record->coupons && $record->coupons->isNotEmpty()),
                 TextColumn::make('coupon_count')
                     ->label('Coupons')
-                    ->state(fn($record) => $record && $record->coupons ? $record->coupons->count() : '0')
-                    ->sortable(),
+                    ->state(fn($record) => $record && $record->coupons ? $record->coupons->count() : '0'),
                 TextColumn::make('created_at')->label('Submission')
                     ->since()
                     ->sortable()
