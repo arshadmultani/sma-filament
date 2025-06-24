@@ -21,6 +21,21 @@ class CustomerCard extends Component
         $this->pendingChemists = Chemist::where('status', 'pending')->count();
     }
 
+    public function openModal()
+    {
+        $this->dispatch('open-modal', id: 'new-customer-modal');
+    }
+
+    public function goToDoctorCreate()
+    {
+        return redirect()->route('filament.admin.resources.doctors.create');
+    }
+
+    public function goToChemistCreate()
+    {
+        return redirect()->route('filament.admin.resources.chemists.create');
+    }
+
     public function render()
     {
         return view('livewire.customer-card');

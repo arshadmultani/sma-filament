@@ -9,7 +9,7 @@
         color: white;
     }
 </style>
-<div>
+<div class="">
     <div class="text-lg font-semibold mb-2">Customers</div>
     <div class="border-2 rounded-lg p-3 border-secondary-500 shadow-lg flex flex-col">
         <div class="flex flex-row gap-2 justify-between">
@@ -23,9 +23,19 @@
             </div>
         </div>
         <div>
-            <button wire:navigate href="{{ route('filament.admin.resources.kofol-entries.create') }}"
+            <button x-on:click="$dispatch('open-modal', { id: 'new-customer-modal' })"
                 class="bg-warning-500 text-white px-4 py-2 my-2 rounded-md w-full">New Customer</button>
         </div>
+        
+        <x-filament::modal id="new-customer-modal">
+            <x-slot name="heading">
+                Add New
+            </x-slot>
+            <div class="flex flex-col gap-4">
+                <div wire:navigate href="{{ route('filament.admin.resources.doctors.create') }}" class="bg-primary-500 text-white px-4 py-2 rounded-md w-full">New Doctor</div>
+                <div wire:navigate href="{{ route('filament.admin.resources.chemists.create') }}" class="bg-primary-500 text-white px-4 py-2 rounded-md w-full">New Chemist</div>
+            </div>
+        </x-filament::modal>
         <x-filament::section collapsible collapsed compact>
 
                         <x-slot name="description">
