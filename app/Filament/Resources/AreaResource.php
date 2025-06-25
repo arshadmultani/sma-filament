@@ -43,13 +43,12 @@ class AreaResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-        ->defaultSort('created_at', 'desc')
+            ->query(Area::query()->with('region.zone.division'))
+            ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('name')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('region.name')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('region.zone.name')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('division.name')->searchable()->sortable(),
-
             ])
             ->filters([
                 //
