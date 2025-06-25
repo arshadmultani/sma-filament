@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('kofol_entries', function (Blueprint $table) {
-            $table->dropColumn('coupon_code');
+            // $table->dropColumn('coupon_code');
         });
     }
 
