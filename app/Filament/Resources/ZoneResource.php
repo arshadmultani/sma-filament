@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ZoneResource\Pages;
 use App\Models\Zone;
+use App\Models\Division;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -24,15 +25,22 @@ class ZoneResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('name')->required(),
+                \Filament\Forms\Components\Select::make('division_id')
+                    ->label('Division')
+                    ->options(Division::all()->pluck('name', 'id'))
+                    ->required(),
+                TextInput::make('name')->required()->unique(ignoreRecord: true),
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
+            ->query(Zone::query()->with('division'))
+            ->defaultSort('created_at', 'desc')
             ->columns([
-                TextColumn::make('name'),
+                TextColumn::make('name')->searchable()->sortable(),
+                TextColumn::make('division.name')->searchable()->sortable(),
             ])
             ->filters([
                 //
