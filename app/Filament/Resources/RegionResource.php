@@ -44,7 +44,6 @@ class RegionResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->defaultSort('create_at', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('name')->searchable(),
                 Tables\Columns\TextColumn::make('zone.name')->searchable()->sortable(),
