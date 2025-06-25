@@ -49,6 +49,7 @@ class RegionResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('zone.name')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('division.name')->searchable()->sortable(),
             ])
             ->filters([
                 //
