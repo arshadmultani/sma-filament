@@ -9,6 +9,7 @@ use App\Filament\Resources\UserResource\UserFilters;
 use App\Models\Area;
 use App\Models\Headquarter;
 use App\Models\Region;
+use App\Models\Zone;
 use App\Models\User;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -76,46 +77,44 @@ class UserResource extends Resource
                         Select::make('division_id')
                             ->native(false)
                             ->relationship('division', 'name')
-                            ->helperText(function (Get $get) {
-                                $roleId = $get('roles');
-                                if (!$roleId) return '';
-                                $role = \Spatie\Permission\Models\Role::find($roleId);
-                                if (!$role) return 'Division is required';
-                                if ($role->hasPermissionTo('view_user')) {
-                                    return 'Leave empty if the HO user has access to all divisions.';
-                                }
-                                return '';
-                            })
-                            ->required(function (Get $get) {
-                                $roleId = $get('roles');
-                                if (!$roleId) return true; // fallback to required if no role selected
-                                $role = \Spatie\Permission\Models\Role::find($roleId);
-                                if (!$role) return true;
-                                // Check if the role has 'view_user' permission
-                                if ($role->hasPermissionTo('view_user')) {
-                                    return false;
-                                }
-                                return true;
-                            }),
+                            ->helperText(fn(Get $get) => static::needsDivision($get)
+                                ? __('Leave empty if the HO user has access to all divisions.') : null)
+                            ->required(fn(Get $get) => static::needsDivision($get)),
+
+                        Select::make('zone_id')
+                            ->label('Zone')
+                            ->native(false)
+                            ->preload()
+                            ->searchable()
+                            ->options(fn(Get $get) => Zone::where('division_id', $get('division_id'))->pluck('name', 'id'))
+                            ->afterStateUpdated(fn(Set $set) => $set('area_id', null))
+                            ->reactive()
+                            ->required(fn(Get $get) => static::getRole($get) === 'ZSM')
+                            ->visible(fn(Get $get) => in_array(static::getRole($get), ['ASM', 'RSM', 'DSA', 'ZSM']))
+                            ->hidden(fn(Get $get) => in_array(static::getRole($get), ['admin', 'super_admin'])),
 
                         Select::make('region_id')
                             ->label('Region')
                             ->native(false)
                             ->preload()
                             ->searchable()
-                            ->options(Region::all()->pluck('name', 'id'))
+                            ->options(function (Get $get) {
+                                $divisionId = $get('division_id');
+                                if ($divisionId) {
+                                    return \App\Models\Region::where('division_id', $divisionId)->pluck('name', 'id');
+                                }
+                                return [];
+                            })
                             ->afterStateUpdated(fn(Set $set) => $set('area_id', null))
                             ->reactive()
                             ->required(function (Get $get) {
                                 $roleId = $get('roles');
-                                $roleName = $roleId ? Role::find($roleId)?->name : null;
-
+                                $roleName = $roleId ? \Spatie\Permission\Models\Role::find($roleId)?->name : null;
                                 return $roleName === 'RSM';
                             })
                             ->hidden(function (Get $get) {
                                 $roleId = $get('roles');
-                                $roleName = $roleId ? Role::find($roleId)?->name : null;
-
+                                $roleName = $roleId ? \Spatie\Permission\Models\Role::find($roleId)?->name : null;
                                 return !in_array($roleName, ['ASM', 'RSM', 'DSA']) || in_array($roleName, ['admin', 'super_admin']);
                             }),
 
@@ -126,25 +125,28 @@ class UserResource extends Resource
                             ->searchable()
                             ->options(function (Get $get) {
                                 $regionId = $get('region_id');
+                                $divisionId = $get('division_id');
+                                $query = \App\Models\Area::query();
                                 if ($regionId) {
-                                    return Area::where('region_id', (int) $regionId)->pluck('name', 'id');
+                                    $query->where('region_id', (int) $regionId);
                                 }
-
-                                return [];
+                                if ($divisionId) {
+                                    $query->whereHas('region', function ($q) use ($divisionId) {
+                                        $q->where('division_id', $divisionId);
+                                    });
+                                }
+                                return $query->pluck('name', 'id');
                             })
                             ->required(function (Get $get) {
                                 $roleId = $get('roles');
-                                $roleName = $roleId ? Role::find($roleId)?->name : null;
-
+                                $roleName = $roleId ? \Spatie\Permission\Models\Role::find($roleId)?->name : null;
                                 return $roleName === 'ASM';
                             })
                             ->hidden(function (Get $get) {
                                 $roleId = $get('roles');
-                                $roleName = $roleId ? Role::find($roleId)?->name : null;
-
+                                $roleName = $roleId ? \Spatie\Permission\Models\Role::find($roleId)?->name : null;
                                 return !in_array($roleName, ['ASM', 'DSA']) || in_array($roleName, ['admin', 'super_admin']);
                             })
-                            // ->afterStateUpdated(fn(Set $set) => $set('area_id', null))
                             ->reactive(),
 
                         Select::make('headquarter_id')
@@ -154,25 +156,28 @@ class UserResource extends Resource
                             ->searchable()
                             ->options(function (Get $get) {
                                 $areaId = $get('area_id');
+                                $divisionId = $get('division_id');
+                                $query = \App\Models\Headquarter::query();
                                 if ($areaId) {
-                                    return Headquarter::where('area_id', (int) $areaId)->pluck('name', 'id');
+                                    $query->where('area_id', (int) $areaId);
                                 }
-
-                                return [];
+                                if ($divisionId) {
+                                    $query->whereHas('area.region', function ($q) use ($divisionId) {
+                                        $q->where('division_id', $divisionId);
+                                    });
+                                }
+                                return $query->pluck('name', 'id');
                             })
                             ->required(function (Get $get) {
                                 $roleId = $get('roles');
-                                $roleName = $roleId ? Role::find($roleId)?->name : null;
-
+                                $roleName = $roleId ? \Spatie\Permission\Models\Role::find($roleId)?->name : null;
                                 return $roleName === 'DSA';
                             })
                             ->hidden(function (Get $get) {
                                 $roleId = $get('roles');
-                                $roleName = $roleId ? Role::find($roleId)?->name : null;
-
+                                $roleName = $roleId ? \Spatie\Permission\Models\Role::find($roleId)?->name : null;
                                 return $roleName !== 'DSA' || in_array($roleName, ['admin', 'super_admin']);
                             })
-                            // ->afterStateUpdated(fn(Set $set) => $set('headquarter_id', null))
                             ->reactive(),
                     ]),
 
@@ -209,6 +214,20 @@ class UserResource extends Resource
                     ]),
 
             ]);
+    }
+    protected static function getRole(Get $get): ?string
+    {
+        return Role::find($get('roles'))?->name;
+    }
+
+    protected static function needsDivision(Get $get): bool
+    {
+        $roleName = Role::find($get('roles'))?->name;
+        if ( ! $roleName) {
+            return true;
+        }
+    
+        return ! Role::where('name', $roleName)->first()?->hasPermissionTo('view_user');
     }
 
     public static function table(Table $table): Table
