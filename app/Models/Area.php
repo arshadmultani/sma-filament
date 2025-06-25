@@ -32,7 +32,12 @@ class Area extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'region_id'];
+    protected $fillable = ['name', 'region_id', 'division_id'];
+
+    public function division()
+    {
+        return $this->belongsTo(Division::class);
+    }
 
     public function region()
     {

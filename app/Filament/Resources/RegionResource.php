@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\RegionResource\Pages;
 use App\Models\Region;
 use App\Models\Zone;
+use App\Models\Division;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
@@ -26,6 +27,10 @@ class RegionResource extends Resource
     {
         return $form
             ->schema([
+                \Filament\Forms\Components\Select::make('division_id')
+                    ->label('Division')
+                    ->options(Division::all()->pluck('name', 'id'))
+                    ->required(),
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),

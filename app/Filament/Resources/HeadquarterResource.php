@@ -6,6 +6,7 @@ use App\Filament\Resources\HeadquarterResource\Pages;
 use App\Models\Area;
 use App\Models\Headquarter;
 use App\Models\Region;
+use App\Models\Division;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -28,6 +29,10 @@ class HeadquarterResource extends Resource
     {
         return $form
             ->schema([
+                \Filament\Forms\Components\Select::make('division_id')
+                    ->label('Division')
+                    ->options(Division::all()->pluck('name', 'id'))
+                    ->required(),
                 Forms\Components\TextInput::make('name')
                     ->label('Headquarter Name')
                     ->required(),
@@ -39,7 +44,6 @@ class HeadquarterResource extends Resource
                     ->relationship('area', 'name')
                     ->required()
                     ->reactive(),
-
             ]);
     }
 
