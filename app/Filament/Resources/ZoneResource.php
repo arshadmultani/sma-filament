@@ -29,18 +29,17 @@ class ZoneResource extends Resource
                     ->label('Division')
                     ->options(Division::all()->pluck('name', 'id'))
                     ->required(),
-                TextInput::make('name')->required()->unique(ignoreRecord: true),
+                TextInput::make('name')->required(),
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
-            ->query(Zone::query()->with('division'))
             ->defaultSort('created_at', 'desc')
             ->columns([
                 TextColumn::make('name')->searchable()->sortable(),
-                TextColumn::make('division.name')->searchable()->sortable(),
+                TextColumn::make('division.name')->sortable()->searchable(),
             ])
             ->filters([
                 //
