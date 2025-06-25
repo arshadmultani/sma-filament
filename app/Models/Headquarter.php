@@ -34,7 +34,12 @@ class Headquarter extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'area_id'];
+    protected $fillable = ['name', 'area_id', 'division_id'];
+
+    public function division()
+    {
+        return $this->belongsTo(Division::class);
+    }
 
     public function area()
     {

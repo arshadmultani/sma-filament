@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\AreaResource\Pages;
 use App\Models\Area;
+use App\Models\Division;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -24,6 +25,10 @@ class AreaResource extends Resource
     {
         return $form
             ->schema([
+                \Filament\Forms\Components\Select::make('division_id')
+                    ->label('Division')
+                    ->options(Division::all()->pluck('name', 'id'))
+                    ->required(),
                 Forms\Components\Select::make('region_id')
                     ->label('Region')
                     ->options(\App\Models\Region::all()->pluck('name', 'id')->toArray())
