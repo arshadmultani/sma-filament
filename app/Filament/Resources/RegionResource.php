@@ -44,11 +44,12 @@ class RegionResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->query(Region::query()->with('zone.division'))
-            ->defaultSort('created_at', 'desc')
+            ->defaultSort('create_at', 'desc')
             ->columns([
-                Tables\Columns\TextColumn::make('name')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('name')->searchable(),
                 Tables\Columns\TextColumn::make('zone.name')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('division.name')->searchable()->sortable(),
+
             ])
             ->filters([
                 //

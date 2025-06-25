@@ -26,14 +26,15 @@ use Filament\Notifications\Notification;
 use Filament\Forms\Get;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Log;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
+
 
 class LocationMaster extends Page implements HasTable, HasForms
 {
-    use InteractsWithForms, InteractsWithTable;
+    use InteractsWithForms, InteractsWithTable, HasPageShield;
 
     protected static ?string $navigationGroup = 'Territory';
-
-
+    protected static ?string $navigationLabel = 'Location Master';
     protected static string $view = 'filament.pages.location-master';
     protected static ?int $navigationSort = 0;
 
@@ -271,7 +272,7 @@ class LocationMaster extends Page implements HasTable, HasForms
             ]);
             Log::info('Area result', ['id' => $area->id, 'wasRecentlyCreated' => $area->wasRecentlyCreated]);
 
-            $hqName = $this->data['headquarter_name'] ?? '';
+            $hqName = Headquarter::find($this->data['headquarter_id'])->name ?? '';
             Log::info('Headquarter lookup', ['name' => $hqName, 'area_id' => $area->id, 'division_id' => $divisionId]);
             $hq = Headquarter::firstOrCreate([
                 'name' => $hqName,
@@ -311,11 +312,11 @@ class LocationMaster extends Page implements HasTable, HasForms
         return $table
             ->query(Headquarter::query()->with(['area.region.zone', 'division']))
             ->columns([
-                TextColumn::make('division.name')->label('Division'),
-                TextColumn::make('area.region.zone.name')->label('Zone')->searchable(),
-                TextColumn::make('area.region.name')->label('Region')->searchable(),
-                TextColumn::make('area.name')->label('Area')->searchable(),
-                TextColumn::make('name')->label('Headquarter')->searchable(),
+                TextColumn::make('division.name')->label('Division')->sortable()->searchable(),
+                TextColumn::make('area.region.zone.name')->label('Zone')->sortable()->searchable(),
+                TextColumn::make('area.region.name')->label('Region')->sortable()->searchable(),
+                TextColumn::make('area.name')->label('Area')->sortable()->searchable(),
+                TextColumn::make('name')->label('Headquarter')->sortable()->searchable(),
             ])
             ->defaultPaginationPageOption(10);
     }
