@@ -57,6 +57,7 @@ class HeadquarterResource extends Resource
                 Tables\Columns\TextColumn::make('area.name')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('area.region.name')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('area.region.zone.name')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('division.name')->searchable()->sortable(),
             ])
             ->filters([
                 SelectFilter::make('area.region')
@@ -96,8 +97,8 @@ class HeadquarterResource extends Resource
     {
         return [
             'index' => Pages\ListHeadquarters::route('/'),
-            'create' => Pages\CreateHeadquarter::route('/create'),
-            'edit' => Pages\EditHeadquarter::route('/{record}/edit'),
+            // 'create' => Pages\CreateHeadquarter::route('/create'),
+            // 'edit' => Pages\EditHeadquarter::route('/{record}/edit'),
         ];
     }
     //     public static function getNavigationBadge(): ?string

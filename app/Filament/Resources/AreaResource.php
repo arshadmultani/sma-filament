@@ -49,6 +49,7 @@ class AreaResource extends Resource
                 Tables\Columns\TextColumn::make('name')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('region.name')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('region.zone.name')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('division.name')->searchable()->sortable(),
             ])
             ->filters([
                 //
@@ -74,8 +75,8 @@ class AreaResource extends Resource
     {
         return [
             'index' => Pages\ListAreas::route('/'),
-            'create' => Pages\CreateArea::route('/create'),
-            'edit' => Pages\EditArea::route('/{record}/edit'),
+            // 'create' => Pages\CreateArea::route('/create'),
+            // 'edit' => Pages\EditArea::route('/{record}/edit'),
         ];
     }
     //     public static function getNavigationBadge(): ?string
