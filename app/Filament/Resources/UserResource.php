@@ -193,6 +193,21 @@ class UserResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->query(
+                User::query()
+                    ->with([
+                        'roles',
+                        'division',
+                        'location' => function ($morphTo) {
+                            $morphTo->morphWith([
+                                \App\Models\Zone::class => [],
+                                \App\Models\Region::class => [],
+                                \App\Models\Area::class => ['region'],
+                                \App\Models\Headquarter::class => ['area.region'],
+                            ]);
+                        },
+                    ])
+            )
             ->defaultSort('created_at', 'desc')
             ->deferLoading()
             ->striped()
@@ -337,7 +352,18 @@ class UserResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->with(['roles', 'division', 'location'])
+            ->with([
+                'roles',
+                'division',
+                'location' => function ($morphTo) {
+                    $morphTo->morphWith([
+                        \App\Models\Zone::class => [],
+                        \App\Models\Region::class => [],
+                        \App\Models\Area::class => ['region'],
+                        \App\Models\Headquarter::class => ['area.region'],
+                    ]);
+                },
+            ])
             ->whereDoesntHave('roles', function ($query) {
                 $query->whereIn('name', ['super_admin']);
             });

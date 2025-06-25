@@ -43,6 +43,8 @@ class AreaResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->query(Area::query()->with('region.zone.division'))
+            ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('name')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('region.name')->searchable()->sortable(),
