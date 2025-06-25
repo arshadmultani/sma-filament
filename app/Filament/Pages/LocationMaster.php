@@ -39,7 +39,7 @@ class LocationMaster extends Page implements HasTable, HasForms
 
     public static function shouldRegisterNavigation(): bool
     {
-        return true;
+        return false;
     }
 
     public ?array $data = [];
