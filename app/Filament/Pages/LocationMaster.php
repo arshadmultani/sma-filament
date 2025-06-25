@@ -242,68 +242,15 @@ class LocationMaster extends Page implements HasTable, HasForms
 
     public function create(): void
     {
-        $anyCreated = false;
-        $anyExists = false;
+        // At this point, all entities are already created via the dropdowns.
+        // You can perform any additional logic here if needed, using the selected IDs.
+        // For now, just show a success notification.
 
-        foreach ($this->data['division_ids'] as $divisionId) {
-            $zoneName = Zone::find($this->data['zone_id'])->name ?? '';
-            Log::info('Zone lookup', ['name' => $zoneName, 'division_id' => $divisionId]);
-            $zone = Zone::firstOrCreate([
-                'name' => $zoneName,
-                'division_id' => $divisionId,
-            ]);
-            Log::info('Zone result', ['id' => $zone->id, 'wasRecentlyCreated' => $zone->wasRecentlyCreated]);
+        Notification::make()
+            ->title('Location hierarchy selected successfully!')
+            ->success()
+            ->send();
 
-            $regionName = Region::find($this->data['region_id'])->name ?? '';
-            Log::info('Region lookup', ['name' => $regionName, 'zone_id' => $zone->id, 'division_id' => $divisionId]);
-            $region = Region::firstOrCreate([
-                'name' => $regionName,
-                'zone_id' => $zone->id,
-                'division_id' => $divisionId,
-            ]);
-            Log::info('Region result', ['id' => $region->id, 'wasRecentlyCreated' => $region->wasRecentlyCreated]);
-
-            $areaName = Area::find($this->data['area_id'])->name ?? '';
-            Log::info('Area lookup', ['name' => $areaName, 'region_id' => $region->id, 'division_id' => $divisionId]);
-            $area = Area::firstOrCreate([
-                'name' => $areaName,
-                'region_id' => $region->id,
-                'division_id' => $divisionId,
-            ]);
-            Log::info('Area result', ['id' => $area->id, 'wasRecentlyCreated' => $area->wasRecentlyCreated]);
-
-            $hqName = Headquarter::find($this->data['headquarter_id'])->name ?? '';
-            Log::info('Headquarter lookup', ['name' => $hqName, 'area_id' => $area->id, 'division_id' => $divisionId]);
-            $hq = Headquarter::firstOrCreate([
-                'name' => $hqName,
-                'area_id' => $area->id,
-                'division_id' => $divisionId,
-            ]);
-            Log::info('Headquarter result', ['id' => $hq->id, 'wasRecentlyCreated' => $hq->wasRecentlyCreated]);
-
-            if ($hq->wasRecentlyCreated) {
-                $anyCreated = true;
-                Log::info('Headquarter was recently created', ['id' => $hq->id]);
-            } else {
-                $anyExists = true;
-                Log::info('Headquarter already existed', ['id' => $hq->id]);
-            }
-        }
-
-        Log::info('Final flags', ['anyCreated' => $anyCreated, 'anyExists' => $anyExists]);
-
-        if ($anyCreated) {
-            Notification::make()
-                ->title('Location hierarchy created successfully!')
-                ->success()
-                ->send();
-        }
-        if ($anyExists) {
-            Notification::make()
-                ->title('This location hierarchy already exists!')
-                ->warning()
-                ->send();
-        }
         $this->form->fill();
     }
 
