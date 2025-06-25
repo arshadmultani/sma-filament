@@ -60,7 +60,7 @@ class UserResource extends Resource
                                 $query = Role::query();
                                 /** @var \App\Models\User|null $user */
                                 $user = Auth::user();
-                                if (! $user?->hasRole('super_admin')) {
+                                if (!$user?->hasRole('super_admin')) {
                                     $query->where('name', '!=', 'super_admin');
                                 }
 
@@ -71,8 +71,32 @@ class UserResource extends Resource
                             ->native(false)
                             ->reactive()
                             ->required()
-                            ->dehydrated(fn ($state) => filled($state))
-                            ->required(fn (string $context): bool => $context === 'create'),
+                            ->dehydrated(fn($state) => filled($state))
+                            ->required(fn(string $context): bool => $context === 'create'),
+                        Select::make('division_id')
+                            ->native(false)
+                            ->relationship('division', 'name')
+                            ->helperText(function (Get $get) {
+                                $roleId = $get('roles');
+                                if (!$roleId) return '';
+                                $role = \Spatie\Permission\Models\Role::find($roleId);
+                                if (!$role) return 'Division is required';
+                                if ($role->hasPermissionTo('view_user')) {
+                                    return 'Leave empty if the HO user has access to all divisions.';
+                                }
+                                return '';
+                            })
+                            ->required(function (Get $get) {
+                                $roleId = $get('roles');
+                                if (!$roleId) return true; // fallback to required if no role selected
+                                $role = \Spatie\Permission\Models\Role::find($roleId);
+                                if (!$role) return true;
+                                // Check if the role has 'view_user' permission
+                                if ($role->hasPermissionTo('view_user')) {
+                                    return false;
+                                }
+                                return true;
+                            }),
 
                         Select::make('region_id')
                             ->label('Region')
@@ -80,7 +104,7 @@ class UserResource extends Resource
                             ->preload()
                             ->searchable()
                             ->options(Region::all()->pluck('name', 'id'))
-                            ->afterStateUpdated(fn (Set $set) => $set('area_id', null))
+                            ->afterStateUpdated(fn(Set $set) => $set('area_id', null))
                             ->reactive()
                             ->required(function (Get $get) {
                                 $roleId = $get('roles');
@@ -92,7 +116,7 @@ class UserResource extends Resource
                                 $roleId = $get('roles');
                                 $roleName = $roleId ? Role::find($roleId)?->name : null;
 
-                                return ! in_array($roleName, ['ASM', 'RSM', 'DSA']) || in_array($roleName, ['admin', 'super_admin']);
+                                return !in_array($roleName, ['ASM', 'RSM', 'DSA']) || in_array($roleName, ['admin', 'super_admin']);
                             }),
 
                         Select::make('area_id')
@@ -118,7 +142,7 @@ class UserResource extends Resource
                                 $roleId = $get('roles');
                                 $roleName = $roleId ? Role::find($roleId)?->name : null;
 
-                                return ! in_array($roleName, ['ASM', 'DSA']) || in_array($roleName, ['admin', 'super_admin']);
+                                return !in_array($roleName, ['ASM', 'DSA']) || in_array($roleName, ['admin', 'super_admin']);
                             })
                             // ->afterStateUpdated(fn(Set $set) => $set('area_id', null))
                             ->reactive(),
@@ -165,16 +189,13 @@ class UserResource extends Resource
                         TextInput::make('phone_number')
                             ->required()
                             ->tel(),
-                        Select::make('division_id')
-                            ->native(false)
-                            ->relationship('division', 'name')
-                            ->required(),
+
                         TextInput::make('password')
                             ->visibleOn('create')
                             ->password()
                             ->revealable()
-                            ->default(fn () => Str::random(8))
-                            ->placeholder(fn ($context) => $context === 'edit' ? 'Enter a new password to change' : null)
+                            ->default(fn() => Str::random(8))
+                            ->placeholder(fn($context) => $context === 'edit' ? 'Enter a new password to change' : null)
                             ->maxLength(255)
                             ->dehydrateStateUsing(function ($state, $livewire) {
                                 // Store plain password in temporary variable
@@ -183,8 +204,8 @@ class UserResource extends Resource
                                 // Return hashed password to be stored in DB
                                 return Hash::make($state);
                             })
-                            ->dehydrated(fn ($state) => filled($state))
-                            ->required(fn (string $context): bool => $context === 'create'),
+                            ->dehydrated(fn($state) => filled($state))
+                            ->required(fn(string $context): bool => $context === 'create'),
                     ]),
 
             ]);
@@ -211,12 +232,12 @@ class UserResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->deferLoading()
             ->striped()
-            ->paginated([10,25,50,100])
+            ->paginated([10, 25, 50, 100])
             ->columns([
                 TextColumn::make('name')->searchable(),
                 TextColumn::make('roles.name')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'RSM' => 'danger',
                         'ASM' => 'warning',
                         'DSA' => 'info',
@@ -304,7 +325,7 @@ class UserResource extends Resource
                 Components\Section::make()
                     ->columns(3)
                     ->schema([
-                        
+
                         TextEntry::make('roles.name')
                             ->badge()
                             ->color(fn(string $state): string => match ($state) {
@@ -316,7 +337,7 @@ class UserResource extends Resource
                                 default => 'primary'
                             })
                             ->label('Desgn.'),
-                            TextEntry::make('email')->copyable(),
+                        TextEntry::make('email')->copyable(),
                         TextEntry::make('phone_number')->copyable(),
                         TextEntry::make('division.name'),
                         TextEntry::make('zone_name')->label('Zone'),
