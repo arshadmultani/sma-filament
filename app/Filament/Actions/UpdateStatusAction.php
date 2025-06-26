@@ -26,8 +26,8 @@ class UpdateStatusAction
                     ->label('Status')
                     ->options(fn ($record) => collect([
                         'Pending' => 'Pending',
-                        'Approved' => 'Approved',
-                        'Rejected' => 'Rejected',
+                        'Approved' => 'Approve',
+                        'Rejected' => 'Reject',
                     ])->except($record?->status)->toArray())
                     ->required(),
             ])

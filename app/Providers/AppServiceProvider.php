@@ -16,6 +16,10 @@ use App\Models\KofolEntry;
 use App\Models\Microsite;
 use App\Models\Doctor;
 use App\Models\Chemist;
+use App\Models\Headquarter;
+use App\Models\Area;
+use App\Models\Region;
+use App\Models\Zone;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -52,6 +56,10 @@ class AppServiceProvider extends ServiceProvider
             'microsite' => Microsite::class,
             'doctor' => Doctor::class,
             'chemist' => Chemist::class,
+            'headquarter' => Headquarter::class,
+            'area' => Area::class,
+            'region' => Region::class,
+            'zone' => Zone::class,
         ]);
 
         Gate::guessPolicyNamesUsing(function (string $modelClass) {
