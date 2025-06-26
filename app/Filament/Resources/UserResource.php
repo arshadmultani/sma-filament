@@ -77,8 +77,8 @@ class UserResource extends Resource
                         Select::make('division_id')
                             ->native(false)
                             ->relationship('division', 'name')
-                            ->helperText(fn(Get $get) => static::needsDivision($get)
-                                ? __('Leave empty if the HO user has access to all divisions.') : null)
+                            // ->helperText(fn(Get $get) => static::needsDivision($get)
+                            //     ? __('Leave empty if the HO user has access to all divisions.') : null)
                             ->required(fn(Get $get) => static::needsDivision($get)),
 
                         Select::make('zone_id')

@@ -12,6 +12,8 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Forms\Get;
+use Illuminate\Support\Facades\Log;
 
 class RegionResource extends Resource
 {
@@ -26,18 +28,23 @@ class RegionResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
+            ->columns(3)
             ->schema([
                 \Filament\Forms\Components\Select::make('division_id')
                     ->label('Division')
                     ->options(Division::all()->pluck('name', 'id'))
                     ->required(),
+                Select::make('zone_id')
+                    ->label('Zone')
+                    ->options(function (Get $get) {
+                        Log::info('Selected division_id for zone select:', ['division_id' => $get('division_id')]);
+                        return Zone::where('division_id', $get('division_id'))->pluck('name', 'id');
+                    })
+                    ->required(),
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
-                Select::make('zone_id')
-                    ->label('Zone')
-                    ->options(Zone::all()->pluck('name', 'id'))
-                    ->required(),
+
             ]);
     }
 

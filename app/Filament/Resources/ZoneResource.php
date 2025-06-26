@@ -29,7 +29,7 @@ class ZoneResource extends Resource
                     ->label('Division')
                     ->options(Division::all()->pluck('name', 'id'))
                     ->required(),
-                TextInput::make('name')->required()->unique(ignoreRecord: true),
+                TextInput::make('name')->required(),
             ]);
     }
 
