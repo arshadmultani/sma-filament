@@ -15,16 +15,15 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         try {
-            User::truncate();
 
             $divisions = \App\Models\Division::all()->keyBy(fn($d) => strtolower($d->name));
-            $zones = \App\Models\Zone::all()->keyBy(fn($z) => strtolower($z->name));
-            $regions = \App\Models\Region::all()->keyBy(fn($r) => strtolower($r->name));
-            $areas = \App\Models\Area::all()->keyBy(fn($a) => strtolower($a->name));
-            $headquarters = \App\Models\Headquarter::all()->keyBy(fn($h) => strtolower($h->name));
+            $zones = \App\Models\Zone::all()->groupBy('division_id');
+            $regions = \App\Models\Region::all()->groupBy('division_id');
+            $areas = \App\Models\Area::all()->groupBy('division_id');
+            $headquarters = \App\Models\Headquarter::all()->groupBy('division_id');
             $existingEmails = User::pluck('email')->map(fn($e) => strtolower($e))->toArray();
 
-            $csvFile = fopen(base_path('csv/phytonova/userseeder.csv'), 'r');
+            $csvFile = fopen(base_path('csv/phytonova/pharma-user.csv'), 'r');
             $usersToInsert = [];
             $batchSize = 1000;
             $missingDivisions = [];
@@ -35,25 +34,25 @@ class UserSeeder extends Seeder
             $header = fgetcsv($csvFile, 2000, ',', '"', '\\');
             while (($data = fgetcsv($csvFile, 2000, ',', '"', '\\')) !== false) {
                 $row = array_combine($header, $data);
-                $email = strtolower(trim($row['Email']));
-                if (in_array($email, $existingEmails)) {
+                $email = strtolower(trim($row['Email'] ?? ''));
+                if (empty($email) || in_array($email, $existingEmails)) {
                     $skippedEmails[] = $email;
                     continue;
                 }
                 $existingEmails[] = $email;
 
-                $divisionName = strtolower(trim($row['Division']));
+                $divisionName = strtolower(trim($row['Division'] ?? ''));
                 $division = $divisions[$divisionName] ?? null;
                 if (!$division) {
-                    $missingDivisions[] = $row['Division'];
+                    $missingDivisions[] = $row['Division'] ?? '';
                     continue;
                 }
 
-                $roleName = trim($row['Role']);
+                $roleName = trim($row['Role'] ?? '');
                 $roleConfig = [
-                    'ZSM' => ['model' => \App\Models\Zone::class, 'id_key' => 'ZONE', 'collection' => $zones],
+                    'ZSM' => ['model' => \App\Models\Zone::class, 'id_key' => 'Zone', 'collection' => $zones],
                     'RSM' => ['model' => \App\Models\Region::class, 'id_key' => 'Region', 'collection' => $regions],
-                    'ASM' => ['model' => \App\Models\Area::class, 'id_key' => 'AREA', 'collection' => $areas],
+                    'ASM' => ['model' => \App\Models\Area::class, 'id_key' => 'Area', 'collection' => $areas],
                     'DSA' => ['model' => \App\Models\Headquarter::class, 'id_key' => 'Headquarter', 'collection' => $headquarters],
                 ];
                 if (!isset($roleConfig[$roleName])) {
@@ -61,18 +60,54 @@ class UserSeeder extends Seeder
                     continue;
                 }
                 $config = $roleConfig[$roleName];
-                $locationName = strtolower(trim($row[$config['id_key']]));
-                $location = $config['collection'][$locationName] ?? null;
+                $divisionId = $division->id;
+                $locationName = '';
+                // Fallback logic for ASM and RSM
+                if ($roleName === 'ASM') {
+                    $locationName = strtolower(trim($row['Area'] ?? ''));
+                    if (empty($locationName) && !empty($row['Region'])) {
+                        $locationName = strtolower(trim($row['Region']));
+                        if (isset($regions[$divisionId])) {
+                            $location = $regions[$divisionId]->first(fn($loc) => strtolower($loc->name) === $locationName);
+                            if ($location) {
+                                $config['model'] = \App\Models\Region::class;
+                                $config['collection'] = $regions;
+                                $config['id_key'] = 'Region';
+                            }
+                        }
+                    }
+                } elseif ($roleName === 'RSM') {
+                    $locationName = strtolower(trim($row['Region'] ?? ''));
+                    if (empty($locationName) && !empty($row['Zone'])) {
+                        $locationName = strtolower(trim($row['Zone']));
+                        if (isset($zones[$divisionId])) {
+                            $location = $zones[$divisionId]->first(fn($loc) => strtolower($loc->name) === $locationName);
+                            if ($location) {
+                                $config['model'] = \App\Models\Zone::class;
+                                $config['collection'] = $zones;
+                                $config['id_key'] = 'Zone';
+                            }
+                        }
+                    }
+                } else {
+                    $locationName = strtolower(trim($row[$config['id_key']] ?? ''));
+                }
+                $location = null;
+                if (!empty($locationName) && isset($config['collection'][$divisionId])) {
+                    $location = $config['collection'][$divisionId]->first(function ($loc) use ($locationName) {
+                        return strtolower($loc->name) === $locationName;
+                    });
+                }
                 if (!$location) {
-                    $missingLocations[] = $row[$config['id_key']];
+                    $missingLocations[] = $row[$config['id_key']] ?? '';
                     continue;
                 }
 
                 $usersToInsert[] = [
                     'user' => [
-                        'name' => $row['Name'],
-                        'email' => $row['Email'],
-                        'phone_number' => $row['Phone Number'],
+                        'name' => $row['Name'] ?? '',
+                        'email' => $row['Email'] ?? '',
+                        'phone_number' => $row['Phone'] ?? '',
                         'division_id' => $division->id,
                         'location_type' => $config['model'],
                         'location_id' => $location->id,
@@ -130,17 +165,19 @@ class UserSeeder extends Seeder
     private function insertAndAssignRoles(array $usersWithRoles): void
     {
         try {
-            $userRows = array_map(fn($item) => $item['user'], $usersWithRoles);
-            User::insert($userRows);
-            // Assign roles after insert
             foreach ($usersWithRoles as $item) {
                 try {
+                    // Only insert if user does not exist
                     $user = User::where('email', $item['user']['email'])->first();
-                    if ($user && !empty($item['role'])) {
-                        $user->syncRoles([$item['role']]);
+                    if (!$user) {
+                        $user = User::create($item['user']);
+                    }
+                    // Only assign role if not already assigned
+                    if ($user && !empty($item['role']) && !$user->hasRole($item['role'])) {
+                        $user->assignRole($item['role']);
                     }
                 } catch (\Throwable $e) {
-                    logger()->error('Failed to assign role for user: ' . ($item['user']['email'] ?? 'unknown') . ' - ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+                    logger()->error('Failed to insert or assign role for user: ' . ($item['user']['email'] ?? 'unknown') . ' - ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
                 }
             }
         } catch (\Throwable $e) {

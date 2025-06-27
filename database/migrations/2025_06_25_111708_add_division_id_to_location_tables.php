@@ -44,7 +44,7 @@ return new class extends Migration
         });
         Schema::table('headquarters', function (Blueprint $table) {
             $table->foreignId('division_id')->nullable(false)->change();
-            $table->unique(['division_id', 'name']);
+            $table->unique(['division_id', 'area_id','name']);
         });
     }
 
@@ -63,7 +63,7 @@ return new class extends Migration
             $table->dropConstrainedForeignId('division_id');
         });
         Schema::table('headquarters', function (Blueprint $table) {
-            $table->dropUnique(['division_id', 'name']);
+            $table->dropUnique(['division_id', 'area_id','name']);
             $table->dropConstrainedForeignId('division_id');
         });
     }

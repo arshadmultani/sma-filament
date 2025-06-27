@@ -5,6 +5,7 @@ namespace App\Filament\Resources\UserResource;
 use App\Models\Area;
 use App\Models\Headquarter;
 use App\Models\Region;
+use App\Models\Division;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Schema;
@@ -14,6 +15,10 @@ class UserFilters
     public static function all(): array
     {
         return [
+            SelectFilter::make('division_id')
+                ->options(Division::all()->pluck('name', 'id'))
+                ->label('Division')
+                ->placeholder('Select Division'),
             SelectFilter::make('roles')
                 ->multiple()
                 ->relationship('roles', 'name', function ($query) {
