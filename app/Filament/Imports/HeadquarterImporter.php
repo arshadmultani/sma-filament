@@ -23,6 +23,12 @@ class HeadquarterImporter extends Importer
                 ->fillRecordUsing(function () {
                     // handled in resolveRecord
                 }),
+            ImportColumn::make('division_id')
+                ->label('Division')
+                ->requiredMapping()
+                ->fillRecordUsing(function () {
+                    // handled in resolveRecord
+                }),
         ];
     }
 
@@ -32,15 +38,22 @@ class HeadquarterImporter extends Importer
 
         $headquarter->name = $this->data['name'] ?? null;
 
-        if (!empty($this->data['area_id'])) {
-            $area = \App\Models\Area::whereRaw('LOWER(name) = ?', [strtolower($this->data['area_id'])])->first();
+        $divisionName = $this->data['division_id'] ?? null;
+        $areaName = $this->data['area_id'] ?? null;
+        if ($divisionName && $areaName) {
+            $division = \App\Models\Division::whereRaw('LOWER(name) = ?', [strtolower($divisionName)])->first();
+            if (!$division) {
+                return null;
+            }
+            $area = \App\Models\Area::whereRaw('LOWER(name) = ?', [strtolower($areaName)])
+                ->where('division_id', $division->id)
+                ->first();
             if (!$area) {
-                // Area not found, skip this row
                 return null;
             }
             $headquarter->area_id = $area->id;
+            $headquarter->division_id = $division->id;
         } else {
-            // area_id is empty, skip this row
             return null;
         }
 

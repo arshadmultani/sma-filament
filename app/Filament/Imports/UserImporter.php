@@ -72,9 +72,16 @@ class UserImporter extends Importer
 
     public function resolveRecord(): ?User
     {
+        // Check if user already exists by email (production safe)
+        $existingUser = User::where('email', $this->data['email'])->first();
+        if ($existingUser) {
+            // Skip import if user already exists
+            return null;
+        }
+
         $user = new User();
         $user->name = $this->data['name'];
-        $user->password = Hash::make(config('app.default_user_password'));
+        $user->password = $this->data['phone_number'];
         $user->email = $this->data['email'];
         $user->phone_number = $this->data['phone_number'];
 
@@ -92,10 +99,10 @@ class UserImporter extends Importer
         $user->division_id = $division->id;
 
         $roleConfig = [
-            'ZSM' => ['model' => Zone::class, 'id_key' => 'zone_id'],
-            'RSM' => ['model' => Region::class, 'id_key' => 'region_id'],
-            'ASM' => ['model' => Area::class, 'id_key' => 'area_id'],
-            'DSA' => ['model' => Headquarter::class, 'id_key' => 'headquarter_id'],
+            'ZSM' => ['model' => Zone::class, 'id_key' => 'zone_id', 'division_column' => 'division_id'],
+            'RSM' => ['model' => Region::class, 'id_key' => 'region_id', 'division_column' => 'division_id'],
+            'ASM' => ['model' => Area::class, 'id_key' => 'area_id', 'division_column' => 'division_id'],
+            'DSA' => ['model' => Headquarter::class, 'id_key' => 'headquarter_id', 'division_column' => 'division_id'],
         ];
         
         $roleName = $this->data['role'];
@@ -107,16 +114,19 @@ class UserImporter extends Importer
         $config = $roleConfig[$roleName];
         $locationModel = $config['model'];
         $locationIdKey = $config['id_key'];
+        $divisionColumn = $config['division_column'];
         $user->location_type = $locationModel;
         if (empty($this->data[$locationIdKey])) {
             throw ValidationException::withMessages([
                 $locationIdKey => [ucfirst(str_replace('_', ' ', $locationIdKey)) . ' is required for role ' . $roleName . '.'],
             ]);
         }
-        $location = $locationModel::whereRaw('LOWER(name) = ?', [strtolower($this->data[$locationIdKey])])->first();
+        $location = $locationModel::whereRaw('LOWER(name) = ?', [strtolower($this->data[$locationIdKey])])
+            ->where($divisionColumn, $division->id)
+            ->first();
         if (!$location) {
             throw ValidationException::withMessages([
-                $locationIdKey => [ucfirst(str_replace('_', ' ', $locationIdKey)) . ' not found: ' . $this->data[$locationIdKey]],
+                $locationIdKey => [ucfirst(str_replace('_', ' ', $locationIdKey)) . ' not found in division: ' . $this->data[$locationIdKey]],
             ]);
         }
         $user->location_id = $location->id;
