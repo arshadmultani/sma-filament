@@ -62,7 +62,7 @@
     <div class="error-title">404</div>
     <div class="error-message">
       The page you're looking for isn't here.<br>
-      Don't worry, StepUp is still on track, and so are you.
+      Don't worry, {{ config('app.name') }} is still on track, and so are you.
     </div>
     <a href="{{ route('filament.admin.pages.dashboard') }}" class="dashboard-btn">
       ← Back to Dashboard
