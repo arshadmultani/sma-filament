@@ -198,7 +198,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
     public static function table(Table $table): Table
     {
         return $table
-            ->defaultSort('id', 'desc')
+            ->defaultSort('created_at', 'desc')
             ->paginated([25, 50, 100, 250])
             ->columns([
                 TextColumn::make('id')->label('ID')
@@ -228,6 +228,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ->toggleable(),
                 TextColumn::make('user.name')->label('Submitted By')
                     ->searchable()
+                    ->sortable()
                     ->toggleable(),
                 TextColumn::make('status')->label('Status')
                     ->badge()

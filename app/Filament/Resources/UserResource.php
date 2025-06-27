@@ -402,7 +402,7 @@ class UserResource extends Resource
                 },
             ])
             ->whereDoesntHave('roles', function ($query) {
-                $query->whereIn('name', ['super_admin']);
+                $query->whereIn('name', ['super_admin', 'admin']);
             });
     }
 }
