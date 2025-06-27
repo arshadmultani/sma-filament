@@ -22,6 +22,12 @@ class RegionImporter extends Importer
                 ->fillRecordUsing(function () {
                     // handled in resolveRecord
                 }),
+            ImportColumn::make('division_id')
+                ->label('Division')
+                ->requiredMapping()
+                ->fillRecordUsing(function () {
+                    // handled in resolveRecord
+                }),
         ];
     }
 
@@ -33,6 +39,11 @@ class RegionImporter extends Importer
         if (! empty($this->data['zone_id'])) {
             $zone = \App\Models\Zone::whereRaw('LOWER(name) = ?', [strtolower($this->data['zone_id'])])->first();
             $region->zone_id = $zone ? $zone->id : null;
+        }
+
+        if (! empty($this->data['division_id'])) {
+            $division = \App\Models\Division::whereRaw('LOWER(name) = ?', [strtolower($this->data['division_id'])])->first();
+            $region->division_id = $division ? $division->id : null;
         }
 
         return $region;

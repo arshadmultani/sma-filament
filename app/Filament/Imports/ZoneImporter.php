@@ -16,17 +16,26 @@ class ZoneImporter extends Importer
         return [
             ImportColumn::make('name')
                 ->requiredMapping(),
+            ImportColumn::make('division_id')
+                ->label('Division')
+                ->requiredMapping()
+                ->fillRecordUsing(function () {
+                    // handled in resolveRecord
+                }),
         ];
     }
 
     public function resolveRecord(): ?Zone
     {
-        // return Zone::firstOrNew([
-        //     // Update existing records, matching them by `$this->data['column_name']`
-        //     'email' => $this->data['email'],
-        // ]);
+        $zone = new Zone();
+        $zone->name = $this->data['name'] ?? null;
 
-        return new Zone();
+        if (! empty($this->data['division_id'])) {
+            $division = \App\Models\Division::whereRaw('LOWER(name) = ?', [strtolower($this->data['division_id'])])->first();
+            $zone->division_id = $division ? $division->id : null;
+        }
+
+        return $zone;
     }
 
     public static function getCompletedNotificationBody(Import $import): string

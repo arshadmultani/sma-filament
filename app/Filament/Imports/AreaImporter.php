@@ -23,6 +23,12 @@ class AreaImporter extends Importer
                 ->fillRecordUsing(function () {
                     // handled in resolveRecord
                 }),
+            ImportColumn::make('division_id')
+                ->label('Division')
+                ->requiredMapping()
+                ->fillRecordUsing(function () {
+                    // handled in resolveRecord
+                }),
         ];
     }
 
@@ -32,10 +38,23 @@ class AreaImporter extends Importer
 
         $area->name = Str::title($this->data['name'] ?? null);
 
-        if (! empty($this->data['region_id'])) {
-            $region = \App\Models\Region::whereRaw('LOWER(name) = ?', [strtolower($this->data['region_id'])])->first();
-            $area->region_id = $region ? $region->id : null;
+        if (empty($this->data['region_id'])) {
+            throw new \Exception('Region is required for area: ' . ($this->data['name'] ?? ''));
         }
+        $region = \App\Models\Region::whereRaw('LOWER(name) = ?', [strtolower($this->data['region_id'])])->first();
+        if (!$region) {
+            throw new \Exception('Region not found: ' . $this->data['region_id']);
+        }
+        $area->region_id = $region->id;
+
+        if (empty($this->data['division_id'])) {
+            throw new \Exception('Division is required for area: ' . ($this->data['name'] ?? ''));
+        }
+        $division = \App\Models\Division::whereRaw('LOWER(name) = ?', [strtolower($this->data['division_id'])])->first();
+        if (!$division) {
+            throw new \Exception('Division not found: ' . $this->data['division_id']);
+        }
+        $area->division_id = $division->id;
 
         return $area;
     }

@@ -32,11 +32,8 @@ use Spatie\Permission\Models\Role;
 use Filament\Tables\Actions\ForceDeleteBulkAction;
 use STS\FilamentImpersonate\Tables\Actions\Impersonate;
 use Filament\Tables\Grouping\Group;
-
-
-
-
-
+use Filament\Tables\Filters\SelectFilter;
+use App\Models\Division;
 
 
 class UserResource extends Resource
@@ -223,11 +220,11 @@ class UserResource extends Resource
     protected static function needsDivision(Get $get): bool
     {
         $roleName = Role::find($get('roles'))?->name;
-        if ( ! $roleName) {
+        if (!$roleName) {
             return true;
         }
-    
-        return ! Role::where('name', $roleName)->first()?->hasPermissionTo('view_user');
+
+        return !Role::where('name', $roleName)->first()?->hasPermissionTo('view_user');
     }
 
     public static function table(Table $table): Table
@@ -316,7 +313,7 @@ class UserResource extends Resource
                         return '-';
                     }),
                 // TextColumn::make('phone_number'),
-                // TextColumn::make('division.name'),
+                TextColumn::make('division.name'),
 
             ])
             ->filtersFormColumns(2)
