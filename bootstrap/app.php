@@ -5,12 +5,10 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Spatie\DiscordAlerts\Facades\DiscordAlert;
 use Spatie\DiscordAlerts\DiscordAlert as DiscordAlertClass;
-use Illuminate\Validation\ValidationException;
-use Illuminate\Auth\AuthenticationException;
-use Illuminate\Http\Exceptions\NotFoundHttpException as LaravelNotFoundHttpException;
-use Throwable;
 use Illuminate\Support\Facades\Auth;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException as SymfonyNotFoundHttpException;
+use BezhanSalleh\FilamentExceptions\FilamentExceptions;
+
+
 
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -21,6 +19,11 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         //
+    })
+    ->withExceptions(function (Exceptions $exceptions) {
+        $exceptions->reportable(function (Exception|Throwable $e) {
+            FilamentExceptions::report($e);
+        });
     })
     ->withExceptions(function (Exceptions $exceptions) {
 
@@ -79,5 +82,6 @@ return Application::configure(basePath: dirname(__DIR__))
                 ]
             );
         });
+
 
     })->create();
