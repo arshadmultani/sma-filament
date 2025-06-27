@@ -110,4 +110,9 @@ class KofolEntryPolicy
     {
         return $user->can('update_status_kofol::entry');
     }
+
+    public function sendCoupon(User $user): bool
+    {
+        return $user->can('send_coupon_kofol::entry');
+    }
 }

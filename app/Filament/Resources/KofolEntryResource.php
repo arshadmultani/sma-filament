@@ -48,6 +48,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
             'delete',
             'delete_any',
             'update_status',
+            'send_coupon',
         ];
     }
 

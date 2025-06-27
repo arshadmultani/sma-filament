@@ -103,6 +103,8 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->breadcrumbs(false)
             ->plugins([
+                \BezhanSalleh\FilamentExceptions\FilamentExceptionsPlugin::make()
+                ->navigationIcon('heroicon-o-bug-ant'),
                 FilamentShieldPlugin::make()->gridColumns([
                     'default' => 1,
                     'sm' => 2,

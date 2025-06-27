@@ -39,7 +39,7 @@ class ViewKofolEntry extends ViewRecord
 
         /** @var \App\Models\User|null $user */
         $user = Auth::user();
-        if ($user && $user->hasRole(['admin', 'super_admin'])) {
+        if (Gate::allows('sendCoupon', $this->record)) {
             $actions[] = SendKofolCouponAction::make()->visible(fn ($record) => $record->status == 'Approved');
         }
         if (Gate::allows('update', $this->record) && Auth::id() === $this->record->user_id) {
