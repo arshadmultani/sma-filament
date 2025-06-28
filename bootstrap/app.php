@@ -28,6 +28,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions) {
 
         $exceptions->report(function (Throwable $e) {
+            $webhookUrl = config('discord-alerts.webhook_urls.default');
+            if (empty($webhookUrl)) {
+                return;
+            }
             DiscordAlert::message(
                 "🚨 An Exception Occurred!",
                 [
