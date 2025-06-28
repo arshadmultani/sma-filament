@@ -24,6 +24,7 @@
         "league/flysystem-aws-s3-v3": "^3.0",
         "predis/predis": "^2.0",
         "rickdbcn/filament-email": "^1.10",
+        "saade/filament-laravel-log": "^3.0",
         "shuvroroy/filament-spatie-laravel-health": "^2.3",
         "solution-forest/filament-simplelightbox": "^0.0.11",
         "spatie/laravel-backup": "^9.3",
