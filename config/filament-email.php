@@ -9,7 +9,7 @@ return [
         'class' => EmailResource::class,
         'model' => Email::class,
         'cluster' => null,
-        'group' => null,
+        'group' => 'System',
         'sort' => null,
         'icon' => null,
         'default_sort_column' => 'created_at',
@@ -25,7 +25,7 @@ return [
         'has_title_case_model_label' => false,
     ],
 
-    'keep_email_for_days' => 150,
+    'keep_email_for_days' => 90,
 
     'label' => null,
 
@@ -34,7 +34,7 @@ return [
     'prune_crontab' => '0 0 * * *',
 
     'can_access' => [
-        'role' => [],
+        'role' => ['super_admin', 'admin'],
     ],
 
     'pagination_page_options' => [

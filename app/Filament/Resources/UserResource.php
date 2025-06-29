@@ -231,27 +231,14 @@ class UserResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->query(
-                User::query()
-                    ->with([
-                        'roles',
-                        'division',
-                        'location' => function ($morphTo) {
-                            $morphTo->morphWith([
-                                \App\Models\Zone::class => [],
-                                \App\Models\Region::class => [],
-                                \App\Models\Area::class => ['region'],
-                                \App\Models\Headquarter::class => ['area.region'],
-                            ]);
-                        },
-                    ])
-            )
-            ->defaultSort('created_at', 'desc')
+            ->query(static::getEloquentQuery())
+            ->defaultSort('name', 'asc')
             ->deferLoading()
+            ->searchPlaceholder('Search User Name')
             ->striped()
             ->paginated([10, 25, 50, 100])
             ->columns([
-                TextColumn::make('name')->searchable(),
+                TextColumn::make('name')->searchable()->sortable(),
                 TextColumn::make('roles.name')
                     ->badge()
                     ->color(fn(string $state): string => match ($state) {
@@ -270,13 +257,7 @@ class UserResource extends Resource
                 // Add computed columns for Region, Area, Headquarter
                 TextColumn::make('zone_name')
                     ->label('Zone')
-                    ->toggleable()
-                    ->getStateUsing(function ($record) {
-                        if ($record->location instanceof \App\Models\Zone) {
-                            return $record->location->name;
-                        }
-                        return '-';
-                    }),
+                    ->toggleable(),
                 TextColumn::make('region_name')
                     ->label('Region')
                     ->toggleable()
@@ -305,22 +286,22 @@ class UserResource extends Resource
                     }),
                 TextColumn::make('headquarter_name')
                     ->label('Headquarter')
-                    ->toggleable()
-                    ->getStateUsing(function ($record) {
-                        if ($record->location instanceof \App\Models\Headquarter) {
-                            return $record->location->name;
-                        }
+                    ->toggleable(),
+                    // ->getStateUsing(function ($record) {
+                    //     if ($record->location instanceof \App\Models\Headquarter) {
+                    //         return $record->location->name;
+                    //     }
 
-                        return '-';
-                    }),
+                    //     return '-';
+                    // }),
                 // TextColumn::make('phone_number'),
-                TextColumn::make('division.name'),
+                TextColumn::make('division.name')->sortable(),
 
             ])
             ->filtersFormColumns(2)
-            ->filters(
-                UserFilters::all()
-            )
+            // ->filters(
+                // UserFilters::all()
+            // )
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Impersonate::make(),

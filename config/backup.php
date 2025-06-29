@@ -9,7 +9,6 @@ return [
          */
         'name' => env('APP_NAME', 'laravel-backup'),
 
-        'database_dump_file_timestamp_format' => 'Y-m-d-H-i-s',
 
         'source' => [
             'files' => [
@@ -236,7 +235,7 @@ return [
         ],
 
         'discord' => [
-            'webhook_url' => env('DISCORD_WEBHOOK_URL'),
+            'webhook_url' => env('DISCORD_ALERT_WEBHOOK'),
 
             /*
              * If this is an empty string, the name field on the webhook will be used.

@@ -28,6 +28,8 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use ShuvroRoy\FilamentSpatieLaravelHealth\FilamentSpatieLaravelHealthPlugin;
 use SolutionForest\FilamentSimpleLightBox\SimpleLightBoxPlugin;
+use Saade\FilamentLaravelLog\FilamentLaravelLogPlugin;
+
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -103,8 +105,11 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->breadcrumbs(false)
             ->plugins([
-                \BezhanSalleh\FilamentExceptions\FilamentExceptionsPlugin::make()
-                ->navigationIcon('heroicon-o-bug-ant'),
+                // FilamentLaravelLogPlugin::make()
+                // ->navigationGroup('System'),
+                // \BezhanSalleh\FilamentExceptions\FilamentExceptionsPlugin::make()
+                // ->navigationIcon('heroicon-o-bug-ant')
+                // ->navigationGroup('System'),
                 FilamentShieldPlugin::make()->gridColumns([
                     'default' => 1,
                     'sm' => 2,
