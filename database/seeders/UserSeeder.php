@@ -22,7 +22,7 @@ class UserSeeder extends Seeder
             foreach ($divisions as $division) {
                 $headquarters = \App\Models\Headquarter::where('division_id', $division->id)->get();
                 foreach ($headquarters as $headquarter) {
-                    for ($i = 0; $i < 5; $i++) {
+                    for ($i = 0; $i < 3; $i++) {
                         $fakeUser = User::factory()->make();
                         $email = strtolower($fakeUser->email);
                         if (in_array($email, $existingEmails)) {
@@ -33,7 +33,6 @@ class UserSeeder extends Seeder
                         $existingEmails[] = $email;
                         $usersToInsert[] = [
                             'user' => [
-                                'name' => $fakeUser->name,
                                 'email' => $fakeUser->email,
                                 'phone_number' => $fakeUser->phone_number,
                                 'division_id' => $division->id,
@@ -42,6 +41,7 @@ class UserSeeder extends Seeder
                                 'password' => $fakeUser->password,
                                 'created_at' => now(),
                                 'updated_at' => now(),
+                                'name' => $division->name.'-'.$headquarter->name.' DSA',
                             ],
                             'role' => 'DSA',
                         ];
@@ -64,7 +64,6 @@ class UserSeeder extends Seeder
                 $existingEmails[] = $email;
                 $usersToInsert[] = [
                     'user' => [
-                        'name' => $fakeUser->name,
                         'email' => $fakeUser->email,
                         'phone_number' => $fakeUser->phone_number,
                         'division_id' => $area->division_id,
@@ -73,6 +72,7 @@ class UserSeeder extends Seeder
                         'password' => $fakeUser->password,
                         'created_at' => now(),
                         'updated_at' => now(),
+                        'name' => $division->name.'-'.$area->name.' ASM',
                     ],
                     'role' => 'ASM',
                 ];
@@ -93,7 +93,6 @@ class UserSeeder extends Seeder
                 $existingEmails[] = $email;
                 $usersToInsert[] = [
                     'user' => [
-                        'name' => $fakeUser->name,
                         'email' => $fakeUser->email,
                         'phone_number' => $fakeUser->phone_number,
                         'division_id' => $region->division_id,
@@ -102,6 +101,7 @@ class UserSeeder extends Seeder
                         'password' => $fakeUser->password,
                         'created_at' => now(),
                         'updated_at' => now(),
+                        'name' => $division->name.'-'.$region->name.' RSM',
                     ],
                     'role' => 'RSM',
                 ];
@@ -122,7 +122,6 @@ class UserSeeder extends Seeder
                 $existingEmails[] = $email;
                 $usersToInsert[] = [
                     'user' => [
-                        'name' => $fakeUser->name,
                         'email' => $fakeUser->email,
                         'phone_number' => $fakeUser->phone_number,
                         'division_id' => $zone->division_id,
@@ -131,6 +130,8 @@ class UserSeeder extends Seeder
                         'password' => $fakeUser->password,
                         'created_at' => now(),
                         'updated_at' => now(),
+                        'name' => $division->name.'-'.$zone->name.' ZSM',
+
                     ],
                     'role' => 'ZSM',
                 ];

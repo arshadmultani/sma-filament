@@ -31,7 +31,7 @@ class KofolEntrySeeder extends Seeder
             $doctors = Doctor::where('headquarter_id', $user->location_id)->get();
             $chemists = Chemist::where('headquarter_id', $user->location_id)->get();
 
-            for ($i = 0; $i < 10; $i++) {
+            for ($i = 0; $i < 2; $i++) {
                 $numProducts = rand(1, 3);
                 $entryProducts = [];
                 $invoiceAmount = 0;

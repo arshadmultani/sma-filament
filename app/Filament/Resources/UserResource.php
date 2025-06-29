@@ -231,21 +231,7 @@ class UserResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->query(
-                User::query()
-                    ->with([
-                        'roles',
-                        'division',
-                        'location' => function ($morphTo) {
-                            $morphTo->morphWith([
-                                \App\Models\Zone::class => [],
-                                \App\Models\Region::class => [],
-                                \App\Models\Area::class => ['region'],
-                                \App\Models\Headquarter::class => ['area.region'],
-                            ]);
-                        },
-                    ])
-            )
+            ->query(static::getEloquentQuery())
             ->defaultSort('name', 'asc')
             ->deferLoading()
             ->searchPlaceholder('Search User Name')
