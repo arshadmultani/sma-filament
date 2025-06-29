@@ -105,11 +105,11 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->breadcrumbs(false)
             ->plugins([
-                FilamentLaravelLogPlugin::make()
-                ->navigationGroup('System'),
-                \BezhanSalleh\FilamentExceptions\FilamentExceptionsPlugin::make()
-                ->navigationIcon('heroicon-o-bug-ant')
-                ->navigationGroup('System'),
+                // FilamentLaravelLogPlugin::make()
+                // ->navigationGroup('System'),
+                // \BezhanSalleh\FilamentExceptions\FilamentExceptionsPlugin::make()
+                // ->navigationIcon('heroicon-o-bug-ant')
+                // ->navigationGroup('System'),
                 FilamentShieldPlugin::make()->gridColumns([
                     'default' => 1,
                     'sm' => 2,
@@ -137,7 +137,7 @@ class AdminPanelProvider extends PanelProvider
                 // ->preserveOnDB(true),
                 // HooksHelperPlugin::make(),
 
-                \RickDBCN\FilamentEmail\FilamentEmail::make(),
+                // \RickDBCN\FilamentEmail\FilamentEmail::make(),
             ])
             ->discoverClusters(in: app_path('Filament/Clusters'), for: 'App\\Filament\\Clusters')
             ->databaseNotifications()
