@@ -51,6 +51,7 @@ class KofolEntry extends Model implements IsCampaignEntry
     protected $guarded = [];
     protected $casts = [
         'products' => 'array',
+        'invoice_image' => 'array',
     ];
 
     public function kofolCampaign()

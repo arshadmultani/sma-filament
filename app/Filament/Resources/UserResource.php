@@ -299,9 +299,9 @@ class UserResource extends Resource
 
             ])
             ->filtersFormColumns(2)
-            // ->filters(
-                // UserFilters::all()
-            // )
+            ->filters(
+                UserFilters::all()
+            )
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Impersonate::make(),

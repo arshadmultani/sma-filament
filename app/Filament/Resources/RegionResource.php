@@ -8,6 +8,7 @@ use App\Models\Zone;
 use App\Models\Division;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -30,18 +31,20 @@ class RegionResource extends Resource
         return $form
             ->columns(3)
             ->schema([
-                \Filament\Forms\Components\Select::make('division_id')
+                Select::make('division_id')
                     ->label('Division')
                     ->options(Division::all()->pluck('name', 'id'))
+                    ->native(false)
+                    ->reactive()
                     ->required(),
                 Select::make('zone_id')
                     ->label('Zone')
+                    ->native(false)
                     ->options(function (Get $get) {
-                        Log::info('Selected division_id for zone select:', ['division_id' => $get('division_id')]);
                         return Zone::where('division_id', $get('division_id'))->pluck('name', 'id');
                     })
                     ->required(),
-                Forms\Components\TextInput::make('name')
+                TextInput::make('name')
                     ->required()
                     ->maxLength(255),
 
@@ -52,7 +55,7 @@ class RegionResource extends Resource
     {
         return $table
             ->query(Region::query()->with('zone.division'))
-            ->defaultSort('created_at', 'desc')
+            ->defaultSort('name', 'asc')
             ->columns([
                 Tables\Columns\TextColumn::make('name')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('zone.name')->searchable()->sortable(),

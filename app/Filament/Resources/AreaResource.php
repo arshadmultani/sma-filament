@@ -5,11 +5,15 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\AreaResource\Pages;
 use App\Models\Area;
 use App\Models\Division;
+use App\Models\Region;
 use Filament\Forms;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Forms\Get;
 
 class AreaResource extends Resource
 {
@@ -24,17 +28,23 @@ class AreaResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
+            ->columns(3)
             ->schema([
-                \Filament\Forms\Components\Select::make('division_id')
+                Select::make('division_id')
                     ->label('Division')
+                    ->native(false)
                     ->options(Division::all()->pluck('name', 'id'))
-                    ->required(),
-                Forms\Components\Select::make('region_id')
-                    ->label('Region')
-                    ->options(\App\Models\Region::all()->pluck('name', 'id')->toArray())
                     ->reactive()
                     ->required(),
-                Forms\Components\TextInput::make('name')
+                Select::make('region_id')
+                    ->label('Region')
+                    ->native(false)
+                    ->reactive()
+                    ->options(function (Get $get) {
+                        return Region::where('division_id', $get('division_id'))->pluck('name', 'id');
+                    })
+                    ->required(),
+                TextInput::make('name')
                     ->label('Area Name')
                     ->required(),
             ]);
@@ -44,7 +54,7 @@ class AreaResource extends Resource
     {
         return $table
             ->query(Area::query()->with('region.zone.division'))
-            ->defaultSort('created_at', 'desc')
+            ->defaultSort('name', 'asc')
             ->columns([
                 Tables\Columns\TextColumn::make('name')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('region.name')->searchable()->sortable(),

@@ -37,7 +37,7 @@ class ZoneResource extends Resource
     {
         return $table
             ->query(Zone::query()->with('division'))
-            ->defaultSort('created_at', 'desc')
+            ->defaultSort('name', 'asc')
             ->columns([
                 TextColumn::make('name')->searchable()->sortable(),
                 TextColumn::make('division.name')->searchable()->sortable(),
