@@ -8,12 +8,15 @@ use App\Models\Headquarter;
 use App\Models\Region;
 use App\Models\Division;
 use Filament\Forms;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Forms\Get;
 
 class HeadquarterResource extends Resource
 {
@@ -28,22 +31,28 @@ class HeadquarterResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
+            ->columns(3)
             ->schema([
-                \Filament\Forms\Components\Select::make('division_id')
+                Select::make('division_id')
                     ->label('Division')
+                    ->native(false)
+                    ->reactive()
                     ->options(Division::all()->pluck('name', 'id'))
                     ->required(),
-                Forms\Components\TextInput::make('name')
-                    ->label('Headquarter Name')
-                    ->required(),
-                Forms\Components\Select::make('area_id')
+                Select::make('area_id')
                     ->label('Area')
                     ->searchable()
                     ->preload()
                     ->native(false)
-                    ->relationship('area', 'name')
+                    ->options(function (Get $get) {
+                        return Area::where('division_id', $get('division_id'))->pluck('name', 'id');
+                    })
                     ->required()
                     ->reactive(),
+                TextInput::make('name')
+                    ->label('Headquarter Name')
+                    ->required(),
+
             ]);
     }
 
@@ -51,7 +60,7 @@ class HeadquarterResource extends Resource
     {
         return $table
             ->query(Headquarter::query()->with('area.region.zone.division'))
-            ->defaultSort('created_at', 'desc')
+            ->defaultSort('name', 'asc')
             ->columns([
                 Tables\Columns\TextColumn::make('name')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('area.name')->searchable()->sortable(),
