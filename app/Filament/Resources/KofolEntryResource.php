@@ -140,12 +140,13 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                         TextInput::make('invoice_amount')
                             ->label('Invoice Amount')
                             ->prefix('₹')
-                            ->numeric()
+                            ->type('number')
                             ->required()
                             ->reactive(),
                         FileUpload::make('invoice_image')
                             ->image()
                             ->disk('s3')
+                            ->visibility('public')
                             ->directory('kofol-invoices')
                             ->downloadable()
                             ->maxSize(5120)
@@ -189,8 +190,8 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ->toggleable(),
                 ImageColumn::make('invoice_image')
                     ->label('Invoice')
-                    ->visibility('public')
-                    ->disk('s3')
+                    // ->visibility('public')
+                    // ->disk('s3')
                     ->circular()
                     ->simpleLightbox()
                     ->toggleable(),
@@ -319,8 +320,8 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                 Components\Section::make()
                     ->schema([
                         ImageEntry::make('invoice_image')->label('Invoice')
-                            ->visibility('public')
-                            ->disk('s3')
+                            // ->visibility('public')
+                            // ->disk('s3')
                             ->square()
                             ->simpleLightbox()
                             ->columnSpan(2),
