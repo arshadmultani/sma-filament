@@ -7,6 +7,8 @@ use Spatie\DiscordAlerts\Facades\DiscordAlert;
 use Spatie\DiscordAlerts\DiscordAlert as DiscordAlertClass;
 use Illuminate\Support\Facades\Auth;
 use BezhanSalleh\FilamentExceptions\FilamentExceptions;
+use Illuminate\Database\QueryException;
+use Filament\Notifications\Notification;
 
 
 

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\DoctorResource\Pages;
 
+use App\Filament\Exports\DoctorExporter;
 use App\Filament\Resources\DoctorResource;
 use Asmit\ResizedColumn\HasResizableColumn;
 use Filament\Actions;
@@ -17,6 +18,10 @@ class ListDoctors extends ListRecords
     {
         return [
             Actions\CreateAction::make(),
+            Actions\ExportAction::make()
+            ->exporter(DoctorExporter::class)
+            ->label('Download All Doctors')
+            ->color('primary'),
         ];
     }
 }

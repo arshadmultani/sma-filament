@@ -89,4 +89,9 @@ class Doctor extends BaseModel
     {
         return $this->hasOne(Microsite::class);
     }
+
+    public function getHeadquarterNameAttribute()
+    {
+        return $this->headquarter?->name;
+    }
 }

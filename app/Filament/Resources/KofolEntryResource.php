@@ -36,6 +36,7 @@ use Icetalker\FilamentTableRepeatableEntry\Infolists\Components\TableRepeatableE
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 
+
 class KofolEntryResource extends Resource implements HasShieldPermissions
 {
     public static function getPermissionPrefixes(): array
@@ -88,7 +89,6 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                             ->modifyOptionsQueryUsing(fn($query) => $query->where('status', 'Approved')),
                     ])
                     ->native(false)
-                    ->preload()
                     ->searchable()
                     ->required(),
 
@@ -142,7 +142,6 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                             ->reactive(),
                         FileUpload::make('invoice_image')
                             ->image()
-                            ->visibility('public')
                             ->disk('s3')
                             ->directory('kofol-invoices')
                             ->downloadable()
@@ -160,44 +159,6 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
             ->pluck('name', 'id');
     }
 
-    // private static function updateInvoiceTotal($state, callable $set): void
-    // {
-    //     $total = collect($state)
-    //         ->pluck('price')
-    //         ->map(fn($price) => (float) $price)
-    //         ->sum();
-
-    //     $set('invoice_amount', $total);
-    // }
-
-    // private static function updateProductPrice($state, callable $set, callable $get): void
-    // {
-    //     $quantity = $get('quantity') ?: 1;
-    //     $product = $state ? Product::find($state) : null;
-    //     $set('price', $product ? $product->price * $quantity : '');
-
-    //     static::recalculateTotal($set, $get);
-    // }
-
-    // private static function updateQuantityPrice($state, callable $set, callable $get): void
-    // {
-    //     $productId = $get('product_id');
-    //     $product = $productId ? Product::find($productId) : null;
-    //     $set('price', $product ? $product->price * ($state ?: 1) : '');
-
-    //     static::recalculateTotal($set, $get);
-    // }
-
-    // private static function recalculateTotal(callable $set, callable $get): void
-    // {
-    //     $products = $get('../../products');
-    //     $total = collect($products)
-    //         ->pluck('price')
-    //         ->map(fn($price) => (float) $price)
-    //         ->sum();
-
-    //     $set('../../invoice_amount', $total);
-    // }
 
     public static function table(Table $table): Table
     {
@@ -276,7 +237,6 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                 ]),
             ]);
     }
-
     // // infolist on view page
 
     public static function infolist(Infolist $infolist): Infolist

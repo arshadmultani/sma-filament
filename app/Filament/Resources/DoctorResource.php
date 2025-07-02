@@ -25,6 +25,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class DoctorResource extends Resource implements HasShieldPermissions
 {
@@ -122,7 +123,8 @@ class DoctorResource extends Resource implements HasShieldPermissions
     public static function table(Table $table): Table
     {
         return $table
-            ->defaultSort('created_at', 'desc')
+            ->paginated([25,50,100,250])
+            ->defaultSort('name', 'asc')
             ->columns([
                 ImageColumn::make('profile_photo')
                     ->circular()
@@ -257,6 +259,10 @@ class DoctorResource extends Resource implements HasShieldPermissions
             'edit' => Pages\EditDoctor::route('/{record}/edit'),
             'view' => Pages\ViewDoctor::route('/{record}'),
         ];
+    }
+    public function throwValidationException(array $errors): void
+    {
+        throw new ValidationException($errors);
     }
     // public static function getNavigationBadge(): ?string
     // {
