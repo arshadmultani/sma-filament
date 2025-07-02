@@ -59,4 +59,9 @@ class Chemist extends BaseModel
     {
         return $this->belongsTo(User::class)->withTrashed();
     }
+
+    public function getRelationsToCheckForDelete()
+    {
+        return ['kofolEntries'];
+    }
 }

@@ -19,9 +19,12 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
+use App\Traits\HandlesDeleteExceptions;
 
 class ChemistResource extends Resource implements HasShieldPermissions
 {
+    use HandlesDeleteExceptions;
+
     protected static ?string $model = Chemist::class;
 
     protected static ?string $navigationGroup = 'Customer';
@@ -102,15 +105,15 @@ class ChemistResource extends Resource implements HasShieldPermissions
                     }),
                 TextColumn::make('headquarter.name')
                     ->toggleable()
-                    ->label('Location')
+                    ->label('HQ')
                     ->searchable(),
-                TextColumn::make('town')->toggleable(),
-                TextColumn::make('type')->toggleable(),
-                TextColumn::make('address'),
-                TextColumn::make('phone')->toggleable(),
-                TextColumn::make('email')->toggleable(),
-                TextColumn::make('user.name')->label('Created By'),
-                TextColumn::make('created_at')->since()->toggleable()->sortable(),
+                // TextColumn::make('town')->toggleable(),
+                // TextColumn::make('type')->toggleable(),
+                // TextColumn::make('address'),
+                // TextColumn::make('phone')->toggleable(),
+                // TextColumn::make('email')->toggleable(),
+                // TextColumn::make('user.name')->label('Created By'),
+                // TextColumn::make('created_at')->since()->toggleable()->sortable(),
                 TextColumn::make('updated_at')->since()->toggleable()->sortable(),
             ])
             ->filters([
@@ -127,7 +130,9 @@ class ChemistResource extends Resource implements HasShieldPermissions
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     UpdateStatusAction::makeBulk(),
-                    // Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->before(fn($action, $records) => collect($records)->each(fn($record) => (new static())->tryDeleteRecord($record, $action))),
+                        
                 ]),
             ]);
     }

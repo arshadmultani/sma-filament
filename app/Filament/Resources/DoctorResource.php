@@ -26,9 +26,12 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use App\Traits\HandlesDeleteExceptions;
 
 class DoctorResource extends Resource implements HasShieldPermissions
 {
+    use HandlesDeleteExceptions;
+
     public static function getPermissionPrefixes(): array
     {
         return [
@@ -126,10 +129,10 @@ class DoctorResource extends Resource implements HasShieldPermissions
             ->paginated([25,50,100,250])
             ->defaultSort('name', 'asc')
             ->columns([
-                ImageColumn::make('profile_photo')
-                    ->circular()
-                    ->toggleable()
-                    ->label('Photo'),
+                // ImageColumn::make('profile_photo')
+                //     ->circular()
+                //     ->toggleable()
+                //     ->label('Photo'),
 
                 TextColumn::make('name')->weight(FontWeight::Bold)->label('Dr.')->searchable(),
 
@@ -146,7 +149,7 @@ class DoctorResource extends Resource implements HasShieldPermissions
                         'Rejected' => 'danger',
                         default => 'secondary',
                     }),
-                TextColumn::make('town')->toggleable(),
+                // TextColumn::make('town')->toggleable(),
                 TextColumn::make('headquarter.name')
                     ->toggleable()
                     ->label('HQ')
@@ -156,18 +159,18 @@ class DoctorResource extends Resource implements HasShieldPermissions
                     ->toggleable()
                     ->label('Area')
                     ->searchable(),
-                TextColumn::make('headquarter.area.region.name')
-                    ->toggleable()
-                    ->label('Region')
-                    ->searchable(),
+                // TextColumn::make('headquarter.area.region.name')
+                //     ->toggleable()
+                //     ->label('Region')
+                //     ->searchable(),
 
-                TextColumn::make('type')->toggleable(),
-                TextColumn::make('support_type')->toggleable()->label('Support'),
-                TextColumn::make('email')->toggleable(),
-                TextColumn::make('qualification.name')->toggleable(),
-                TextColumn::make('phone'),
+                // TextColumn::make('type')->toggleable(),
+                // TextColumn::make('support_type')->toggleable()->label('Support'),
+                // TextColumn::make('email')->toggleable(),
+                // TextColumn::make('qualification.name')->toggleable(),
+                // TextColumn::make('phone'),
                 TextColumn::make('user.name')->label('Created By'),
-                TextColumn::make('created_at')->since()->toggleable()->sortable(),
+                // TextColumn::make('created_at')->since()->toggleable()->sortable(),
                 TextColumn::make('updated_at')->since()->toggleable()->sortable(),
 
             ])
@@ -180,13 +183,13 @@ class DoctorResource extends Resource implements HasShieldPermissions
                     ]),
             ])
             ->actions([
-
                 Tables\Actions\ViewAction::make(),
-            ])
+                 ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     UpdateStatusAction::makeBulk(),
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->before(fn($action, $records) => collect($records)->each(fn($record) => (new static())->tryDeleteRecord($record, $action))),
                 ]),
             ]);
     }

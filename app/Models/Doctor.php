@@ -85,7 +85,7 @@ class Doctor extends BaseModel
         return $this->belongsTo(Specialty::class);
     }
 
-    public function microsites()
+    public function microsite()
     {
         return $this->hasOne(Microsite::class);
     }
@@ -93,5 +93,10 @@ class Doctor extends BaseModel
     public function getHeadquarterNameAttribute()
     {
         return $this->headquarter?->name;
+    }
+
+    public function getRelationsToCheckForDelete()
+    {
+        return ['microsites', 'kofolEntries'];
     }
 }

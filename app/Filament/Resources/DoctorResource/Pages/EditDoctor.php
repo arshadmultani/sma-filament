@@ -6,32 +6,24 @@ use App\Filament\Resources\DoctorResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Notifications\Notification;
+use App\Traits\HandlesDeleteExceptions;
 
 class EditDoctor extends EditRecord
 {
+    use HandlesDeleteExceptions;
+
     protected static string $resource = DoctorResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            Actions\DeleteAction::make()
+                ->before(fn($action, $record) => (new static())->tryDeleteRecord($record, $action)),
         ];
     }
 
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('index');
-    }
-
-    public function beforeDelete(): void
-    {
-        try{
-        }catch(\Exception $e){
-            Notification::make()
-                ->title('Error')
-                ->body('You cannot delete this doctor.')
-                ->danger()
-                ->send();
-        }
     }
 }

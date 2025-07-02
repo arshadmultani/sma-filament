@@ -377,9 +377,9 @@ class UserResource extends Resource
                 'location' => function ($morphTo) {
                     $morphTo->morphWith([
                         \App\Models\Zone::class => [],
-                        \App\Models\Region::class => [],
-                        \App\Models\Area::class => ['region'],
-                        \App\Models\Headquarter::class => ['area.region'],
+                        \App\Models\Region::class => ['zone'],
+                        \App\Models\Area::class => ['region.zone'],
+                        \App\Models\Headquarter::class => ['area.region.zone'],
                     ]);
                 },
             ])

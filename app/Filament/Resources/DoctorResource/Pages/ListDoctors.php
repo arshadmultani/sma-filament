@@ -7,6 +7,7 @@ use App\Filament\Resources\DoctorResource;
 use Asmit\ResizedColumn\HasResizableColumn;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Support\Facades\Auth;
 
 class ListDoctors extends ListRecords
 {
@@ -20,6 +21,7 @@ class ListDoctors extends ListRecords
             Actions\CreateAction::make(),
             Actions\ExportAction::make()
             ->exporter(DoctorExporter::class)
+            ->visible(Auth::user()->can('force_delete_any_user'))
             ->label('Download All Doctors')
             ->color('primary'),
         ];

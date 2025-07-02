@@ -90,6 +90,8 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ])
                     ->native(false)
                     ->searchable()
+                    ->optionsLimit(10)
+                    // ->preload() // this is causing the issue for admin in 5L+ entries are there.. fix this later
                     ->required(),
 
                 // products
@@ -138,6 +140,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                         TextInput::make('invoice_amount')
                             ->label('Invoice Amount')
                             ->prefix('₹')
+                            ->numeric()
                             ->required()
                             ->reactive(),
                         FileUpload::make('invoice_image')
