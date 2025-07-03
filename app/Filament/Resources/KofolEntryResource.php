@@ -190,8 +190,8 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ->toggleable(),
                 ImageColumn::make('invoice_image')
                     ->label('Invoice')
-                    // ->visibility('public')
-                    // ->disk('s3')
+                    ->visibility('public')
+                    ->disk('s3')
                     ->circular()
                     ->simpleLightbox()
                     ->toggleable(),
@@ -320,8 +320,8 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                 Components\Section::make()
                     ->schema([
                         ImageEntry::make('invoice_image')->label('Invoice')
-                            // ->visibility('public')
-                            // ->disk('s3')
+                            ->visibility('public')
+                            ->disk('s3')
                             ->square()
                             ->simpleLightbox()
                             ->columnSpan(2),
