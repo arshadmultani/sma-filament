@@ -370,7 +370,7 @@ class UserResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()
+        $query = parent::getEloquentQuery()
             ->with([
                 'roles',
                 'division',
@@ -382,9 +382,24 @@ class UserResource extends Resource
                         \App\Models\Headquarter::class => ['area.region.zone'],
                     ]);
                 },
-            ])
-            ->whereDoesntHave('roles', function ($query) {
+            ]);
+
+        return static::applyRoleVisibilityFilter($query);
+    }
+
+    protected static function applyRoleVisibilityFilter($query)
+    {
+        /** @var \App\Models\User $currentUser */
+        $currentUser = Auth::user();
+
+        if ($currentUser && method_exists($currentUser, 'hasRole') && $currentUser->hasRole('super_admin')) {
+            // super_admin can see everyone
+            return $query;
+        } else {
+            // others cannot see admin or super_admin
+            return $query->whereDoesntHave('roles', function ($query) {
                 $query->whereIn('name', ['super_admin', 'admin']);
             });
+        }
     }
 }
