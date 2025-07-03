@@ -8,6 +8,7 @@ use Filament\Notifications\Notification;
 use Filament\Tables\Actions\BulkAction;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use App\Notifications\KofolCouponNotification;
 
 class SendKofolCouponAction
 {
@@ -37,10 +38,11 @@ class SendKofolCouponAction
                         throw new \Exception('No coupon codes found for this record.');
                     }
 
-                    Mail::to($record->customer->email)->queue(
-                        new KofolCoupon(
+                    $record->customer->notify(
+                        new KofolCouponNotification(
                             $record->customer,
-                            $couponCodes
+                            $record->coupons->pluck('coupon_code')->toArray(),
+                            $record->id
                         )
                     );
 
@@ -99,10 +101,11 @@ class SendKofolCouponAction
                             continue;
                         }
 
-                        Mail::to($record->customer->email)->queue(
-                            new KofolCoupon(
+                        $record->customer->notify(
+                            new KofolCouponNotification(
                                 $record->customer,
-                                $couponCodes
+                                $record->coupons->pluck('coupon_code')->toArray(),
+                                $record->id
                             )
                         );
                         $successCount++;

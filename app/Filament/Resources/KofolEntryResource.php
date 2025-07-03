@@ -226,6 +226,19 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ->since()
                     ->sortable()
                     ->toggleable(),
+                TextColumn::make('notification_status')
+                    ->label('Notification')
+                    ->state(function ($record) {
+                        $customer = $record->customer;
+                        if (!$customer) return 'No customer';
+
+                        return $customer->notifications()
+                            ->where('type', \App\Notifications\KofolCouponNotification::class)
+                            ->where('data->kofol_entry_id', $record->id)
+                            ->exists() ? 'Sent' : 'Not Sent';
+                    })
+                    ->badge()
+                    ->color(fn($state) => $state === 'Sent' ? 'info' : 'gray'),
             ])
             ->filters([
                 // Removed coupon_code filter

@@ -36,14 +36,14 @@ class KofolCoupon extends Mailable
         $this->customerTown = $customer->town ?? '';
         $this->headquarterName = $customer->headquarter->name ?? '';
         $this->couponCodes = $couponCodes;
-        $this->expiryDate = now()->addMonths(3)->format('F d, Y');
-        $this->redeemUrl = config('app.url').'/redeem-coupon';
+        // $this->expiryDate = now()->addMonths(3)->format('F d, Y');
+        // $this->redeemUrl = config('app.url').'/redeem-coupon';
     }
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Your Coupon for Kofol Campaign',
+            subject: 'Your Coupon for Kofol Order',
         );
     }
 

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Notifications\Notifiable;
 
 /**
  * @property int $id
@@ -42,7 +43,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class Chemist extends BaseModel
 {
-    use HasFactory;
+    use HasFactory,Notifiable;
     protected $fillable = ['name', 'phone', 'email', 'town', 'user_id', 'address', 'headquarter_id', 'type'];
 
     public function headquarter()

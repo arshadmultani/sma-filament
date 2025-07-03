@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Notifications\Notifiable;
 
 /**
  * @property int $id
@@ -51,7 +52,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class Doctor extends BaseModel
 {
-    use HasFactory;
+    use HasFactory,Notifiable;
 
     protected $fillable = ['name', 'email', 'phone', 'qualification_id', 'profile_photo', 'user_id', 'headquarter_id', 'attachment', 'address', 'type', 'support_type', 'town', 'specialty_id'];
 
