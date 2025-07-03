@@ -27,14 +27,14 @@ return [
 
     'keep_email_for_days' => 90,
 
-    'label' => null,
+    'label' => 'Sent Emails',
 
     'prune_enabled' => true,
 
     'prune_crontab' => '0 0 * * *',
 
     'can_access' => [
-        'role' => ['super_admin', 'admin'],
+        'role' => ['super_admin', 'admin','PMT'],
     ],
 
     'pagination_page_options' => [
@@ -42,7 +42,7 @@ return [
     ],
 
     'attachments_disk' => 'local',
-    'store_attachments' => true,
+    'store_attachments' => false,
 
     // Use this option for customize tenant model class
     // 'tenant_model' => \App\Models\Team::class,

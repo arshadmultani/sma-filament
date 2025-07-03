@@ -91,7 +91,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ->native(false)
                     ->searchable()
                     ->optionsLimit(10)
-                    // ->preload() // this is causing the issue for admin in 5L+ entries are there.. fix this later
+                     ->preload() // this is causing the issue for admin in 5L+ entries are there.. fix this later
                     ->required(),
 
                 // products
