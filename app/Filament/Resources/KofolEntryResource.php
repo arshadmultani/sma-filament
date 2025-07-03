@@ -33,6 +33,7 @@ use Filament\Tables\Table;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Icetalker\FilamentTableRepeatableEntry\Infolists\Components\TableRepeatableEntry;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 
@@ -211,7 +212,10 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ->label('Amount')
                     ->sortable()
                     ->money('INR'),
+                // Notification status column
                 TextColumn::make('notification_status')
+                    ->toggleable()
+                    ->visible(fn($record) => Auth::user()->can('send_coupon_kofol::entry'))
                     ->label('Notification')
                     ->state(function ($record) {
                         $customer = $record->customer;
@@ -289,7 +293,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                                 default => 'secondary'
                             }),
                         TextEntry::make('notification_status')
-                            ->visible(fn($record) => $record->status === 'Approved')
+                            ->visible(fn($record) => $record->status === 'Approved' && (Auth::user()->can('send_coupon_kofol::entry')))
                             ->label('Notification')
                             ->state(function ($record) {
                                 $customer = $record->customer;
