@@ -33,7 +33,13 @@ class CampaignOverview extends BaseWidget
                 ->url(route('filament.admin.resources.kofol-entries.index', [
                     'activetab' => 'approved'
                 ])),
-            Stat::make('Coupons Generated',KofolEntryCoupon::count())
+            Stat::make(
+                'Coupons Generated',
+                KofolEntryCoupon::whereIn(
+                    'kofol_entry_id',
+                    KofolEntry::query()->pluck('id')
+                )->count()
+            )
             ->icon('heroicon-s-ticket')
             ->iconColor('primary')
             ->textColor('primary', '', descriptionColor: 'primary'),
