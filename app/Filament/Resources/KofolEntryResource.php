@@ -355,6 +355,18 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
         return parent::getEloquentQuery()
-            ->with(['customer.headquarter', 'coupons', 'campaignEntry.campaign']);
+            ->with([
+                'coupons',
+                'campaignEntry.campaign',
+                'user.division',
+            ])
+            ->with([
+                'customer' => function ($morphTo) {
+                    $morphTo->morphWith([
+                        \App\Models\Doctor::class => ['headquarter'],
+                        \App\Models\Chemist::class => ['headquarter'],
+                    ]);
+                }
+            ]);
     }
 }
