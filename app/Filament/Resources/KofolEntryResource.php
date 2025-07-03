@@ -147,7 +147,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                             ->image()
                             ->disk('s3')
                             ->visibility('private')
-                            // ->directory('kofol-invoices')
+                            ->directory('kofol-invoices')
                             ->downloadable()
                             ->maxSize(5120)
                             ->required(),
