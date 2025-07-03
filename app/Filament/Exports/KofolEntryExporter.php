@@ -87,6 +87,16 @@ class KofolEntryExporter extends Exporter
                 }),
             ExportColumn::make('created_at')->label('Created At'),
             ExportColumn::make('updated_at')->label('Updated At'),
+            ExportColumn::make('notification_status')
+                ->label('Notification')
+                ->formatStateUsing(function ($state, $record) {
+                    $customer = $record->customer;
+                    if (!$customer) return 'No customer';
+                    return $customer->notifications()
+                        ->where('type', \App\Notifications\KofolCouponNotification::class)
+                        ->where('data->kofol_entry_id', $record->id)
+                        ->exists() ? 'Sent' : 'Not Sent';
+                }),
         ];
     }
 

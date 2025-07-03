@@ -91,7 +91,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ->native(false)
                     ->searchable()
                     ->optionsLimit(10)
-                     ->preload() // this is causing the issue for admin in 5L+ entries are there.. fix this later
+                    ->preload() // this is causing the issue for admin in 5L+ entries are there.. fix this later
                     ->required(),
 
                 // products
@@ -211,6 +211,21 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ->label('Amount')
                     ->sortable()
                     ->money('INR'),
+                TextColumn::make('notification_status')
+                    ->label('Notification')
+                    ->state(function ($record) {
+                        $customer = $record->customer;
+                        if (!$customer)
+                            return 'No customer';
+
+                        return $customer->notifications()
+                            ->where('type', \App\Notifications\KofolCouponNotification::class)
+                            ->where('data->kofol_entry_id', $record->id)
+                            ->exists() ? 'Sent' : 'Not Sent';
+                    })
+                    ->badge()
+                    ->color(fn($state) => $state === 'Sent' ? 'info' : 'gray'),
+
                 TextColumn::make('coupon_codes_list')
                     ->label('Coupon Codes')
                     ->formatStateUsing(fn($state, $record) => ($record && isset($record->coupons) && $record->coupons ? $record->coupons->pluck('coupon_code')->implode(', ') : ''))
@@ -226,19 +241,6 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ->since()
                     ->sortable()
                     ->toggleable(),
-                TextColumn::make('notification_status')
-                    ->label('Notification')
-                    ->state(function ($record) {
-                        $customer = $record->customer;
-                        if (!$customer) return 'No customer';
-
-                        return $customer->notifications()
-                            ->where('type', \App\Notifications\KofolCouponNotification::class)
-                            ->where('data->kofol_entry_id', $record->id)
-                            ->exists() ? 'Sent' : 'Not Sent';
-                    })
-                    ->badge()
-                    ->color(fn($state) => $state === 'Sent' ? 'info' : 'gray'),
             ])
             ->filters([
                 // Removed coupon_code filter
@@ -261,20 +263,20 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
         return $infolist
             ->schema([
                 Components\Section::make('Customer Details')
-                ->collapsible()
-                ->compact()
+                    ->collapsible()
+                    ->compact()
                     ->columns(4)
                     ->schema([
                         TextEntry::make('customer.name'),
                         TextEntry::make('customer_type')->formatStateUsing(fn($state) => class_basename($state)),
                         TextEntry::make('customer.headquarter.name')
                             ->label('Headquarter'),
-                            TextEntry::make('user.name')->label('Submitted By'),
+                        TextEntry::make('user.name')->label('Submitted By'),
                     ]),
                 Components\Section::make('Status')
-                ->collapsible()
-                ->compact()
-                    ->columns(3)
+                    ->collapsible()
+                    ->compact()
+                    ->columns(4)
                     ->schema([
                         TextEntry::make('campaignEntry.campaign.name'),
                         TextEntry::make('created_at')->label(label: 'Submission')->dateTime('d-m-y @ H:i'),
@@ -286,10 +288,24 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                                 'Rejected' => 'danger',
                                 default => 'secondary'
                             }),
+                        TextEntry::make('notification_status')
+                            ->visible(fn($record) => $record->status === 'Approved')
+                            ->label('Notification')
+                            ->state(function ($record) {
+                                $customer = $record->customer;
+                                if (!$customer)
+                                    return 'No customer';
+                                return $customer->notifications()
+                                    ->where('type', \App\Notifications\KofolCouponNotification::class)
+                                    ->where('data->kofol_entry_id', $record->id)
+                                    ->exists() ? 'Sent' : 'Not Sent';
+                            })
+                            ->badge()
+                            ->color(fn($state) => $state === 'Sent' ? 'info' : 'gray'),
                     ]),
                 Components\Section::make('Coupons')
-                ->collapsed()
-                ->compact()
+                    ->collapsed()
+                    ->compact()
                     ->visible(fn($record) => $record && $record->coupons && $record->coupons->isNotEmpty())
                     ->columns(2)
                     ->schema([
@@ -306,8 +322,8 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                             ->visible(fn($record) => $record && $record->coupons && $record->coupons->isNotEmpty()),
                     ]),
                 Components\Section::make('Products')
-                ->collapsible()
-                ->compact()
+                    ->collapsible()
+                    ->compact()
                     ->schema([
                         TableRepeatableEntry::make('products') // repeater for desktop
                             ->columnSpan(2)
