@@ -50,7 +50,7 @@ class ChemistResource extends Resource implements HasShieldPermissions
                 TextInput::make('name')->required(),
                 TextInput::make('phone')->required()->tel(),
                 TextInput::make('email')->email(),
-                TextInput::make('address'),
+                TextInput::make('address')->required(),
                 TextInput::make('town')
                     ->required(),
                 Select::make('type')
