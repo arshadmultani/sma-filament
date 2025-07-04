@@ -54,6 +54,19 @@ class TeamHierarchyScope implements Scope
             return;
         }
 
+        // ZSM: records of users under all regions in his zone and same division
+        if (method_exists($user, 'hasRole') && $user->hasRole('ZSM')) {
+            $regionIds = \App\Models\Region::where('zone_id', $user->location_id)->pluck('id');
+            $areaIds = \App\Models\Area::whereIn('region_id', $regionIds)->pluck('id');
+            $headquarterIds = \App\Models\Headquarter::whereIn('area_id', $areaIds)->pluck('id');
+            $userIds = \App\Models\User::where('location_type', \App\Models\Headquarter::class)
+                ->whereIn('location_id', $headquarterIds)
+                ->where('division_id', $user->division_id)
+                ->pluck('id');
+            $builder->whereIn('user_id', $userIds);
+            return;
+        }
+
         // PMT: records created by DSA, ASM, RSM under his division
         if (method_exists($user, 'hasRole') && $user->hasRole('PMT')) {
             $userIds = \App\Models\User::where('division_id', $user->division_id)
