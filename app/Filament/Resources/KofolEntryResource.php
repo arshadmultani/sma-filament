@@ -368,7 +368,6 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                         //     ->html(), 
 
                         ImageEntry::make('invoice_image')->label('Invoice')
-                            ->visibility('private')
                             ->disk('s3')
                             ->visibility('public')
                             ->square()
