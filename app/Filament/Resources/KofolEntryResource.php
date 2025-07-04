@@ -189,13 +189,13 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ->searchable()
                     ->formatStateUsing(fn($state) => class_basename($state))
                     ->toggleable(),
-                ImageColumn::make('invoice_image')
-                    ->label('Invoice')
-                    ->visibility('private')
-                    ->disk('s3')
-                    ->circular()
-                    ->simpleLightbox()
-                    ->toggleable(),
+                // ImageColumn::make('invoice_image')
+                //     ->label('Invoice')
+                //     ->visibility('private')
+                //     ->disk('s3')
+                //     ->circular()
+                //     ->simpleLightbox()
+                //     ->toggleable(),
                 TextColumn::make('user.name')->label('Submitted By')
                     ->searchable()
                     ->sortable()
@@ -356,6 +356,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                             ->visibility('private')
                             ->disk('s3')
                             ->square()
+                            ->checkFileExistence(false)
                             ->simpleLightbox()
                             ->columnSpan(2),
                         TextEntry::make('invoice_amount')->label('Total Amount')->money('INR')->weight(FontWeight::SemiBold),
