@@ -255,7 +255,6 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                 // Tables\Actions\ViewAction::make(),
                 Tables\Actions\Action::make('view_invoice')
                     ->label('')
-                    ->disk('s3')
                     ->icon('heroicon-o-document-text')
                     ->url(fn($record) => Storage::disk('s3')->url($record->invoice_image)),
             ],position:ActionsPosition::BeforeColumns)
