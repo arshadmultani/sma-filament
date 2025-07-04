@@ -36,6 +36,7 @@ use Icetalker\FilamentTableRepeatableEntry\Infolists\Components\TableRepeatableE
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
+use Filament\Tables\Enums\ActionsPosition;
 
 
 class KofolEntryResource extends Resource implements HasShieldPermissions
@@ -147,7 +148,8 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                         FileUpload::make('invoice_image')
                             ->image()
                             ->disk('s3')
-                            ->visibility('private')
+                            // ->visibility('private')
+                            ->visibility('public')
                             ->directory('kofol-invoices')
                             ->downloadable()
                             ->maxSize(5120)
@@ -189,13 +191,13 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ->searchable()
                     ->formatStateUsing(fn($state) => class_basename($state))
                     ->toggleable(),
-                ImageColumn::make('invoice_image')
-                    ->label('Invoice')
-                    ->visibility('private')
-                    ->disk('s3')
-                    ->circular()
-                    ->simpleLightbox()
-                    ->toggleable(),
+                // ImageColumn::make('invoice_image')
+                //     ->label('Invoice')
+                //     ->visibility('private')
+                //     ->disk('s3')
+                //     ->circular()
+                //     ->simpleLightbox()
+                //     ->toggleable(),
                 TextColumn::make('user.name')->label('Submitted By')
                     ->searchable()
                     ->sortable()
@@ -250,12 +252,16 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                 // Removed coupon_code filter
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-            ])
+                // Tables\Actions\ViewAction::make(),
+                Tables\Actions\Action::make('view_invoice')
+                    ->label('')
+                    ->disk('s3')
+                    ->icon('heroicon-o-document-text')
+                    ->url(fn($record) => Storage::disk('s3')->url($record->invoice_image)),
+            ],position:ActionsPosition::BeforeColumns)
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
-                    // UpdateKofolStatusAction::makeBulk(), // Removed as bulk actions are commented out
                     SendKofolCouponAction::makeBulk(),
                 ]),
             ]);
@@ -352,9 +358,20 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ]),
                 Components\Section::make()
                     ->schema([
+                        // TextEntry::make('invoice_image')
+                        //     ->label('Invoice')
+                        //     ->state(function ($record) {
+                        //         $url = Storage::disk('s3')->temporaryUrl($record->invoice_image, now()->addMinutes(5));
+                        //         return view('components.image-lightbox', [
+                        //             'url' => $url,
+                        //         ])->render();
+                        //     })
+                        //     ->html(), 
+
                         ImageEntry::make('invoice_image')->label('Invoice')
                             ->visibility('private')
                             ->disk('s3')
+                            ->visibility('public')
                             ->square()
                             ->simpleLightbox()
                             ->columnSpan(2),
