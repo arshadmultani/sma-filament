@@ -148,8 +148,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                         FileUpload::make('invoice_image')
                             ->image()
                             ->disk('s3')
-                            // ->visibility('private')
-                            ->visibility('public')
+                            ->visibility('private')
                             ->directory('kofol-invoices')
                             ->downloadable()
                             ->maxSize(5120)
@@ -253,10 +252,10 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
             ])
             ->actions([
                 // Tables\Actions\ViewAction::make(),
-                Tables\Actions\Action::make('view_invoice')
-                    ->label('')
-                    ->icon('heroicon-o-document-text')
-                    ->url(fn($record) => $record->invoice_image ? Storage::disk('s3')->url($record->invoice_image) : 'https://picsum.photos/id/1025/600/900'),
+                // Tables\Actions\Action::make('view_invoice')
+                //     ->label('')
+                //     ->icon('heroicon-o-document-text')
+                //     ->url(fn($record) => $record->invoice_image ? Storage::disk('s3')->url($record->invoice_image) : 'https://picsum.photos/id/1025/600/900'),
             ],position:ActionsPosition::BeforeColumns)
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -369,9 +368,10 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
 
                         ImageEntry::make('invoice_image')->label('Invoice')
                             ->disk('s3')
-                            ->visibility('public')
+                            ->visibility('private')
                             ->square()
                             ->simpleLightbox()
+                            // ->checkFileExistence(false)
                             ->columnSpan(2),
                         TextEntry::make('invoice_amount')->label('Total Amount')->money('INR')->weight(FontWeight::SemiBold),
                     ]),
