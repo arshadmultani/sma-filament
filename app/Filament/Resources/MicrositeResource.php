@@ -39,7 +39,10 @@ class MicrositeResource extends Resource implements HasShieldPermissions
     protected static ?string $navigationGroup = 'Activities';
     protected static ?string $modelLabel = 'Doctor Website';
 
-
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
 
     public static function form(Form $form): Form
     {
