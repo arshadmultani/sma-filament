@@ -15,31 +15,39 @@ class CreateUser extends CreateRecord
     protected function handleRecordCreation(array $data): \Illuminate\Database\Eloquent\Model
     {
         $plainPassword = $this->plainPassword;
-        $roleID = $data['roles'];
-        $roleName = Role::find($roleID)->name;
+        $roleId = $data['roles'] ?? null;
 
-        if ($roleName === 'RSM') {
-            $data['location_type'] = \App\Models\Region::class;
-            $data['location_id'] = $data['region_id'] ?? null;
-        } elseif ($roleName === 'ASM') {
-            $data['location_type'] = \App\Models\Area::class;
-            $data['location_id'] = $data['area_id'] ?? null;
-        } elseif ($roleName === 'DSA') {
-            $data['location_type'] = \App\Models\Headquarter::class;
-            $data['location_id'] = $data['headquarter_id'] ?? null;
-        } else {
-            $data['location_type'] = null;
-            $data['location_id'] = null;
+        if ($roleId) {
+            $roleName = Role::find($roleId)->name;
+
+            if ($roleName === 'RSM') {
+                $data['location_type'] = \App\Models\Region::class;
+                $data['location_id'] = $data['region_id'] ?? null;
+            } elseif ($roleName === 'ASM') {
+                $data['location_type'] = \App\Models\Area::class;
+                $data['location_id'] = $data['area_id'] ?? null;
+            } elseif ($roleName === 'DSA') {
+                $data['location_type'] = \App\Models\Headquarter::class;
+                $data['location_id'] = $data['headquarter_id'] ?? null;
+            }else if ($roleName === 'ZSM') {
+                $data['location_type'] = \App\Models\Zone::class;
+                $data['location_id'] = $data['zone_id'] ?? null;
+            }
+            else {
+                $data['location_type'] = null;
+                $data['location_id'] = null;
+            }
         }
 
         // Remove these keys so they are not inserted as columns
-        unset($data['region_id'], $data['area_id'], $data['headquarter_id']);
+        unset($data['roles'], $data['zone_id'], $data['region_id'], $data['area_id'], $data['headquarter_id']);
+
 
         $user = static::getModel()::create($data);
 
         // Assign roles if present
-        if (isset($data['roles'])) {
-            $user->roles()->sync($data['roles']);
+        if ($roleId) {
+            $user->roles()->sync($roleId);
         }
 
         // Send notification with the plain password

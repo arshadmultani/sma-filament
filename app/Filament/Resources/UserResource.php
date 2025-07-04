@@ -61,12 +61,12 @@ class UserResource extends Resource
                                 if (!$user?->hasRole('super_admin')) {
                                     $query->where('name', '!=', 'super_admin');
                                 }
-
                                 return $query->pluck('name', 'id');
                             })
                             ->preload()
                             ->live()
                             ->native(false)
+                            ->label('Designation')
                             ->reactive()
                             ->required()
                             ->dehydrated(fn($state) => filled($state))
@@ -97,10 +97,15 @@ class UserResource extends Resource
                             ->searchable()
                             ->options(function (Get $get) {
                                 $divisionId = $get('division_id');
+                                $zoneId = $get('zone_id');
+                                $query = \App\Models\Region::query();
                                 if ($divisionId) {
-                                    return \App\Models\Region::where('division_id', $divisionId)->pluck('name', 'id');
+                                    $query->where('division_id', $divisionId);
                                 }
-                                return [];
+                                if ($zoneId) {
+                                    $query->where('zone_id', $zoneId);
+                                }
+                                return $query->pluck('name', 'id');
                             })
                             ->afterStateUpdated(fn(Set $set) => $set('area_id', null))
                             ->reactive()
@@ -287,13 +292,13 @@ class UserResource extends Resource
                 TextColumn::make('headquarter_name')
                     ->label('Headquarter')
                     ->toggleable(),
-                    // ->getStateUsing(function ($record) {
-                    //     if ($record->location instanceof \App\Models\Headquarter) {
-                    //         return $record->location->name;
-                    //     }
+                // ->getStateUsing(function ($record) {
+                //     if ($record->location instanceof \App\Models\Headquarter) {
+                //         return $record->location->name;
+                //     }
 
-                    //     return '-';
-                    // }),
+                //     return '-';
+                // }),
                 // TextColumn::make('phone_number'),
                 TextColumn::make('division.name')->sortable(),
 

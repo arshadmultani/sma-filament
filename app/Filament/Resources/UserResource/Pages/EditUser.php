@@ -104,23 +104,62 @@ class EditUser extends EditRecord
         } elseif ($roleName === 'DSA') {
             $data['location_type'] = \App\Models\Headquarter::class;
             $data['location_id'] = $data['headquarter_id'] ?? null;
+        } elseif ($roleName === 'ZSM') {
+            $data['location_type'] = \App\Models\Zone::class;
+            $data['location_id'] = $data['zone_id'] ?? null;
         } else {
             $data['location_type'] = null;
             $data['location_id'] = null;
         }
-        unset($data['region_id'], $data['area_id'], $data['headquarter_id']);
+        unset($data['zone_id'], $data['region_id'], $data['area_id'], $data['headquarter_id']);
 
-        $record->update($data);
         // Assign roles if present
         if (isset($data['roles'])) {
             $record->roles()->sync($data['roles']);
+            unset($data['roles']); // Remove roles before update
         }
+        $record->update($data);
         // Send notification if email or password changed
         if ($emailChanged || $passwordChanged) {
             Mail::to($record->email)->send(new SendUserCredentials($record->email, $plainPassword ?? 'Your password was not changed.'));
         }
 
         return $record;
+    }
+
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        // Only set 'roles' for edit, not create
+        if ($this->record && $this->record->exists) {
+            $data['roles'] = $this->record->roles()->pluck('id')->first();
+
+            // Hierarchical location prefill (as before)
+            $data['division_id'] = $this->record->division_id;
+            $data['zone_id'] = null;
+            $data['region_id'] = null;
+            $data['area_id'] = null;
+            $data['headquarter_id'] = null;
+
+            if ($this->record->location_type === \App\Models\Zone::class) {
+                $data['zone_id'] = $this->record->location_id;
+            } elseif ($this->record->location_type === \App\Models\Region::class) {
+                $region = \App\Models\Region::find($this->record->location_id);
+                $data['region_id'] = $region?->id;
+                $data['zone_id'] = $region?->zone_id;
+            } elseif ($this->record->location_type === \App\Models\Area::class) {
+                $area = \App\Models\Area::find($this->record->location_id);
+                $data['area_id'] = $area?->id;
+                $data['region_id'] = $area?->region_id;
+                $data['zone_id'] = $area?->region?->zone_id;
+            } elseif ($this->record->location_type === \App\Models\Headquarter::class) {
+                $hq = \App\Models\Headquarter::find($this->record->location_id);
+                $data['headquarter_id'] = $hq?->id;
+                $data['area_id'] = $hq?->area_id;
+                $data['region_id'] = $hq?->area?->region_id;
+                $data['zone_id'] = $hq?->area?->region?->zone_id;
+            }
+        }
+        return $data;
     }
 
     public function saved()
