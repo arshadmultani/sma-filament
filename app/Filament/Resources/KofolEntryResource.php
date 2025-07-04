@@ -200,6 +200,10 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ->searchable()
                     ->sortable()
                     ->toggleable(),
+                TextColumn::make('user.division.name')->label('Division')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('status')->label('Status')
                     ->badge()
                     ->color(fn(string $state): string => match ($state) {
@@ -241,10 +245,10 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ->since()
                     ->sortable()
                     ->toggleable(),
-                TextColumn::make('updated_at')->label('Last Update')
-                    ->since()
-                    ->sortable()
-                    ->toggleable(),
+                // TextColumn::make('updated_at')->label('Last Update')
+                //     ->since()
+                //     ->sortable()
+                //     ->toggleable(),
             ])
             ->filters([
                 // Removed coupon_code filter
