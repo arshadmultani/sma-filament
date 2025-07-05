@@ -36,6 +36,8 @@ use Icetalker\FilamentTableRepeatableEntry\Infolists\Components\TableRepeatableE
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
+use Njxqlus\Filament\Components\Infolists\LightboxImageEntry;
+
 
 
 class KofolEntryResource extends Resource implements HasShieldPermissions
@@ -356,12 +358,21 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ]),
                 Components\Section::make()
                     ->schema([
-                        ImageEntry::make('invoice_image')->label('Invoice')
-                            // ->visibility('private')
+                        // ImageEntry::make('invoice_image')->label('Invoice')
+                        //     // ->visibility('private')
+                        //     ->disk('s3')
+                        //     ->square()
+                        //     ->checkFileExistence(false)
+                        //     ->simpleLightbox()
+                        //     ->columnSpan(2),
+                        LightboxImageEntry::make('invoice_image')->label('Invoice')
+                            ->href(fn($record) => Storage::disk('s3')->temporaryUrl($record->invoice_image, now()->addMinutes(5)))
                             ->disk('s3')
+                            ->visibility('private')
+                            ->slideZoomable(true)
+                            ->slideDraggable(true)
                             ->square()
                             ->checkFileExistence(false)
-                            ->simpleLightbox()
                             ->columnSpan(2),
                         TextEntry::make('invoice_amount')->label('Total Amount')->money('INR')->weight(FontWeight::SemiBold),
                     ]),
