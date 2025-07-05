@@ -27,6 +27,9 @@ use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use App\Traits\HandlesDeleteExceptions;
+use Njxqlus\Filament\Components\Infolists\LightboxImageEntry;
+use Illuminate\Support\Facades\Storage;
+
 
 class DoctorResource extends Resource implements HasShieldPermissions
 {
@@ -203,9 +206,8 @@ class DoctorResource extends Resource implements HasShieldPermissions
                 Section::make()
                     ->columns(3)
                     ->schema([
-                        ImageEntry::make('profile_photo')
-                            ->simpleLightbox()
-
+                        LightboxImageEntry::make('profile_photo')
+                            ->href(fn($record) => Storage::disk('s3')->temporaryUrl($record->profile_photo, now()->addMinutes(5)))
                             ->visible(fn($state) => !is_null($state))
                             ->label('Photo')->circular(),
 
@@ -239,7 +241,6 @@ class DoctorResource extends Resource implements HasShieldPermissions
                     ->columns(3)
                     ->schema([
                         ImageEntry::make('attachment')
-                            ->simpleLightbox()
                             ->label('Visiting Card/Rx. Pad'),
 
                     ]),

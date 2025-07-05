@@ -154,6 +154,10 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                             ->directory('kofol-invoices')
                             ->downloadable()
                             ->maxSize(5120)
+                            ->imageResizeMode('cover')
+                            ->imageCropAspectRatio('16:9')
+                            ->imageResizeTargetWidth('1920')
+                            ->imageResizeTargetHeight('1080')
                             ->required(),
 
                     ]),
@@ -357,7 +361,9 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                             ->href(fn($record) => Storage::disk('s3')->temporaryUrl($record->invoice_image, now()->addMinutes(5)))
                             ->disk('s3')
                             ->visibility('private')
-                            ->slideZoomable(true)
+                            // ->slideZoomable(true)
+                            ->slideHeight('1920px')
+                            ->slideWidth('1080px')
                             ->slideDraggable(true)
                             ->square()
                             ->checkFileExistence(false)
