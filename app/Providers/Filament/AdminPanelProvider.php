@@ -126,7 +126,6 @@ class AdminPanelProvider extends PanelProvider
                         'sm' => 2,
                     ]),
 
-                SimpleLightBoxPlugin::make(),
                 FilamentSpatieLaravelHealthPlugin::make()->authorize(function (): bool {
                     /** @var \App\Models\User|null $user */
                     $user = Auth::user();

@@ -37,7 +37,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Njxqlus\Filament\Components\Infolists\LightboxImageEntry;
-
+use Filament\Tables\Columns\Column;
+use Illuminate\Support\Facades\View;
 
 
 class KofolEntryResource extends Resource implements HasShieldPermissions
@@ -191,13 +192,6 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ->searchable()
                     ->formatStateUsing(fn($state) => class_basename($state))
                     ->toggleable(),
-                // ImageColumn::make('invoice_image')
-                //     ->label('Invoice')
-                //     ->visibility('private')
-                //     ->disk('s3')
-                //     ->circular()
-                //     ->simpleLightbox()
-                //     ->toggleable(),
                 TextColumn::make('user.name')->label('Submitted By')
                     ->searchable()
                     ->sortable()
@@ -222,7 +216,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                 TextColumn::make('notification_status')
                     ->toggleable()
                     ->visible(fn($record) => Auth::user()->can('send_coupon_kofol::entry'))
-                    ->label('Notification')
+                    ->label('CustomerEmail')
                     ->state(function ($record) {
                         $customer = $record->customer;
                         if (!$customer)
@@ -358,14 +352,8 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ]),
                 Components\Section::make()
                     ->schema([
-                        // ImageEntry::make('invoice_image')->label('Invoice')
-                        //     // ->visibility('private')
-                        //     ->disk('s3')
-                        //     ->square()
-                        //     ->checkFileExistence(false)
-                        //     ->simpleLightbox()
-                        //     ->columnSpan(2),
-                        LightboxImageEntry::make('invoice_image')->label('Invoice')
+                        LightboxImageEntry::make('invoice_image')
+                            ->label('Invoice')
                             ->href(fn($record) => Storage::disk('s3')->temporaryUrl($record->invoice_image, now()->addMinutes(5)))
                             ->disk('s3')
                             ->visibility('private')
