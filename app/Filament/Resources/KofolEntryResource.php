@@ -148,7 +148,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                         FileUpload::make('invoice_image')
                             ->image()
                             ->disk('s3')
-                            ->visibility('private')
+                            // ->visibility('private')
                             ->directory('kofol-invoices')
                             ->downloadable()
                             ->maxSize(5120)
@@ -368,7 +368,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
 
                         ImageEntry::make('invoice_image')->label('Invoice')
                             ->disk('s3')
-                            ->visibility('private')
+                            // ->visibility('private')
                             ->square()
                             ->simpleLightbox()
                             // ->checkFileExistence(false)
