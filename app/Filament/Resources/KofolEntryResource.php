@@ -260,7 +260,8 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                     // UpdateKofolStatusAction::makeBulk(), // Removed as bulk actions are commented out
-                    SendKofolCouponAction::makeBulk(),
+                    SendKofolCouponAction::makeBulk()
+                    ->visible(fn() => Auth::user()->can('send_coupon_kofol::entry')),
                 ]),
             ]);
     }

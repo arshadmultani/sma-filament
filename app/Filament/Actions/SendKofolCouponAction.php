@@ -18,12 +18,6 @@ class SendKofolCouponAction
         return Action::make('sendKofolCoupon')
             ->label('Send Mail')
             ->icon('heroicon-m-envelope')
-            ->visible(function () {
-                /** @var \App\Models\User|null $user */
-                $user = Auth::user();
-
-                return $user && $user->hasRole(['admin', 'super_admin']);
-            })
             ->requiresConfirmation()
             ->modalHeading('Send Kofol Coupon')
             ->modalDescription('Are you sure you want to send the coupon email?')
