@@ -54,9 +54,9 @@ class AppServiceProvider extends ServiceProvider
 
 
 
-        Storage::disk('s3')->buildTemporaryUrlsUsing(fn ($path) =>
-            Storage::disk('s3')->temporaryUrl($path, now()->addDays(7))
-        );
+        // Storage::disk('s3')->buildTemporaryUrlsUsing(fn ($path) =>
+        //     Storage::disk('s3')->temporaryUrl($path, now()->addDays(7))
+        // );
         Health::checks([
             OptimizedAppCheck::new(),
             DebugModeCheck::new(),
