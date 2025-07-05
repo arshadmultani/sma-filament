@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\HeadquarterResource\Pages;
 
+use App\Filament\Exports\HeadquarterExporter;
 use App\Filament\Imports\HeadquarterImporter;
 use App\Filament\Resources\HeadquarterResource;
 use Filament\Actions;
@@ -23,6 +24,10 @@ class ListHeadquarters extends ListRecords
                     ->importer(HeadquarterImporter::class)
                     ->label('Import Headquarters')
                     ->maxRows(2000)
+                    ->color('primary'),
+                Actions\ExportAction::make()
+                    ->exporter(HeadquarterExporter::class)
+                    ->label('Export Headquarters')
                     ->color('primary'),
             ])->icon('heroicon-m-bars-3-bottom-right'),
         ];
