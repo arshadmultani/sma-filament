@@ -45,4 +45,14 @@ class Campaign extends Model
     {
         return $this->hasMany(CampaignEntry::class);
     }
+
+    public function divisions()
+    {
+        return $this->belongsToMany(\App\Models\Division::class, 'campaign_division');
+    }
+
+    public function roles()
+    {
+        return $this->belongsToMany(\Spatie\Permission\Models\Role::class, 'campaign_role');
+    }
 }

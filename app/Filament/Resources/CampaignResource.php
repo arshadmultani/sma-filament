@@ -48,7 +48,18 @@ class CampaignResource extends Resource
                             ->native(false)
                             ->searchable()
                             ->required(),
-
+                        Forms\Components\Select::make('divisions')
+                            ->label('Divisions')
+                            ->multiple()
+                            ->relationship('divisions', 'name')
+                            ->preload()
+                            ->required(),
+                        Forms\Components\Select::make('roles')
+                            ->label('User Roles')
+                            ->multiple()
+                            ->relationship('roles', 'name')
+                            ->preload()
+                            ->required(),
                     ]),
                 Section::make()
                 ->compact()
