@@ -16,9 +16,12 @@ use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use App\Traits\HandlesDeleteExceptions;
 
 class CampaignResource extends Resource
 {
+    use HandlesDeleteExceptions;
+
     protected static ?string $model = Campaign::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-calendar-date-range';
@@ -132,7 +135,8 @@ class CampaignResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->before(fn($action, $records) => collect($records)->each(fn($record) => (new static())->tryDeleteRecord($record, $action))),
                 ]),
             ]);
     }

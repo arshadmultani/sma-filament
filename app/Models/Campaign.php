@@ -60,4 +60,10 @@ class Campaign extends Model
     {
         return $this->belongsToMany(\Spatie\Permission\Models\Role::class, 'campaign_role');
     }
+
+    public function getRelationsToCheckForDelete(): array
+    {
+        // Only check for campaign entries, not divisions or roles
+        return ['entries'];
+    }
 }
