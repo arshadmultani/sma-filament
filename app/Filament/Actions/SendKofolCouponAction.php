@@ -9,6 +9,7 @@ use Filament\Tables\Actions\BulkAction;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Notifications\KofolCouponNotification;
+use Illuminate\Support\Facades\Log;
 
 class SendKofolCouponAction
 {
@@ -56,6 +57,7 @@ class SendKofolCouponAction
                     if (empty($couponCodes)) {
                         throw new \Exception('No coupon codes found for this record.');
                     }
+                    Log::info('Sending KofolCouponNotification', ['customer_id' => $record->customer->id]);
 
                     $record->customer->notify(
                         new KofolCouponNotification(
@@ -76,6 +78,11 @@ class SendKofolCouponAction
                         ->body('Failed to send coupon email: '.$e->getMessage())
                         ->danger()
                         ->send();
+                        Log::error('Failed to send coupon email', [
+                            'customer_id' => $record->customer->id ?? null,
+                            'error' => $e->getMessage(),
+                            'trace' => $e->getTraceAsString(),
+                        ]);
                 }
             });
     }
