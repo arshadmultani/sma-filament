@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
+use Spatie\Permission\Models\Role;
 
 /**
  * @property int $id
@@ -108,7 +109,11 @@ class User extends Authenticatable implements FilamentUser
             'password' => 'hashed',
         ];
     }
-
+    // Add head office role names here for DRY purposes
+    public static function headOfficeRoleIds(): array
+    {
+        return Role::whereIn('name', ['admin', 'super_admin','PMT','GM','ZTM','Sales Manager'])->pluck('id')->toArray();
+    }
     public function division()
     {
         return $this->belongsTo(Division::class);
@@ -295,4 +300,5 @@ class User extends Authenticatable implements FilamentUser
         }
         return $managers;
     }
+
 }

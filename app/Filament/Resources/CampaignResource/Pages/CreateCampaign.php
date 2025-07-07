@@ -3,8 +3,10 @@
 namespace App\Filament\Resources\CampaignResource\Pages;
 
 use App\Filament\Resources\CampaignResource;
+use App\Models\User;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Support\Facades\Auth;
 
 class CreateCampaign extends CreateRecord
 {
@@ -20,7 +22,18 @@ class CreateCampaign extends CreateRecord
 
         return $data;
     }
-
+    protected function afterCreate(): void
+    {
+        $record = $this->record;
+        $selectedRoles = $this->data['roles'] ?? [];
+    
+        // Get head office role IDs (should return array of IDs)
+        $headOfficeRoleIds = User::headOfficeRoleIds();
+    
+        // Merge and sync
+        $allRoles = array_unique(array_merge($selectedRoles, $headOfficeRoleIds));
+        $record->roles()->sync($allRoles);
+    }
     public function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('index');

@@ -14,9 +14,14 @@ use Filament\Tables\Table;
 use Filament\Forms\Components\Section;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Auth;
+use App\Models\User;
+use App\Traits\HandlesDeleteExceptions;
 
 class CampaignResource extends Resource
 {
+    use HandlesDeleteExceptions;
+
     protected static ?string $model = Campaign::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-calendar-date-range';
@@ -48,7 +53,20 @@ class CampaignResource extends Resource
                             ->native(false)
                             ->searchable()
                             ->required(),
-
+                        Forms\Components\Select::make('divisions')
+                            ->label('Divisions')
+                            ->multiple()
+                            ->relationship('divisions', 'name')
+                            ->preload()
+                            ->required(),
+                        Forms\Components\Select::make('roles')
+                            ->label('Participants')
+                            ->multiple()
+                            ->relationship('roles', 'name', function ($query) {
+                                $query->whereNotIn('roles.id', User::headOfficeRoleIds());
+                            })
+                            ->preload()
+                            ->required(),
                     ]),
                 Section::make()
                 ->compact()
@@ -73,12 +91,26 @@ class CampaignResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name'),
+                TextColumn::make('divisions.name')
+                    ->visible(fn (): bool => Auth::user()->can('view_user'))
+                    ->label('Divisions'),
+                TextColumn::make('roles.name')
+                    ->badge()
+                    ->color('gray')
+                    ->visible(fn (): bool => Auth::user()->can('view_user'))
+                    ->label('Participants')
+                    ->formatStateUsing(function ($state) {
+                        $roles = is_array($state) ? $state : [$state];
+                        $headOfficeRoleNames = \Spatie\Permission\Models\Role::whereIn('id', User::headOfficeRoleIds())->pluck('name')->toArray();
+                        return collect($roles)->reject(fn($role) => in_array($role, $headOfficeRoleNames))->implode(', ');
+                    }),
                 TextColumn::make('start_date')
                     ->date('d F Y'),
                 TextColumn::make('end_date')
                     ->date('d F Y'),
                 TextColumn::make('allowed_entry_type')
                     ->label('Activity')
+                    ->visible(fn (): bool => Auth::user()->can('view_user'))
                     ->formatStateUsing(fn (string $state): string => ucfirst(str_replace('_', ' ', $state))),
                 TextColumn::make('status')
                     ->badge()
@@ -103,7 +135,8 @@ class CampaignResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->before(fn($action, $records) => collect($records)->each(fn($record) => (new static())->tryDeleteRecord($record, $action))),
                 ]),
             ]);
     }

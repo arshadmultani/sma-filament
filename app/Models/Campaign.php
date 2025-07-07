@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use App\Models\Scopes\CampaignVisibilityScope;
+
 
 class Campaign extends Model
 {
@@ -17,7 +19,10 @@ class Campaign extends Model
         'start_date' => 'datetime',
         'end_date' => 'datetime',
     ];
-
+    protected static function booted()
+    {
+        static::addGlobalScope(new CampaignVisibilityScope);
+    }
     protected function status(): Attribute
     {
         return Attribute::make(
@@ -44,5 +49,21 @@ class Campaign extends Model
     public function entries()
     {
         return $this->hasMany(CampaignEntry::class);
+    }
+
+    public function divisions()
+    {
+        return $this->belongsToMany(\App\Models\Division::class, 'campaign_division');
+    }
+
+    public function roles()
+    {
+        return $this->belongsToMany(\Spatie\Permission\Models\Role::class, 'campaign_role');
+    }
+
+    public function getRelationsToCheckForDelete(): array
+    {
+        // Only check for campaign entries, not divisions or roles
+        return ['entries'];
     }
 }
