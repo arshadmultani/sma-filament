@@ -25,25 +25,20 @@ class SendKofolCouponAction
                 $to = $record->customer?->email ?? 'N/A';
                 $cc = [];
                 $owner = $record->customer->user ?? null;
+                
                 if ($owner) {
-                    if ($owner->hasRole('DSA')) {
-                        $managers = $owner->getManagers();
-                        if (isset($managers['ASM'])) {
-                            $cc[] = $managers['ASM']->email;
+                    // Always CC the owner
+                    // -------------------------Later remove DSA from CC ---------------------------
+                    $cc[] = $owner->email;
+                    $managers = $owner->getManagers();
+                    // Only add manager CCs if there is at least one manager (i.e., not DSA)
+                    if (count($managers) > 0) {
+                        foreach (array_slice($managers, 0, 2) as $manager) {
+                            $cc[] = $manager->email;
                         }
-                        if (isset($managers['RSM'])) {
-                            $cc[] = $managers['RSM']->email;
-                        }
-                    } elseif ($owner->hasRole('ASM')) {
-                        $cc[] = $owner->email;
-                        $managers = $owner->getManagers();
-                        if (isset($managers['RSM'])) {
-                            $cc[] = $managers['RSM']->email;
-                        }
-                    } elseif ($owner->hasRole('RSM')) {
-                        $cc[] = $owner->email;
                     }
                 }
+                Log::info('CC Emails', ['cc' => $cc]);
                 $ccString = $cc ? ("\n    " . implode(",\n    ", $cc)) : 'None';
                 return "Are you sure you want to send the coupon email?\n\nTo:    {$to}\nCC:   {$ccString}";
             })
@@ -88,6 +83,7 @@ class SendKofolCouponAction
     }
 
     // Bulk Action
+    // This is not working as expected, only the first record is being sent, rest are not being sent. FIX IT LATER
     public static function makeBulk(): BulkAction
     {
         return BulkAction::make('sendKofolCoupon')
@@ -127,16 +123,45 @@ class SendKofolCouponAction
                             continue;
                         }
 
+                        // Determine CC emails based on the record owner role
+                        $ccEmails = [];
+                        $owner = $record->customer->user ?? null;
+                        if ($owner) {
+                            if ($owner->hasRole('DSA')) {
+                                $managers = $owner->getManagers();
+                                if (isset($managers['ASM'])) {
+                                    $ccEmails[] = $managers['ASM']->email;
+                                }
+                                if (isset($managers['RSM'])) {
+                                    $ccEmails[] = $managers['RSM']->email;
+                                }
+                            } elseif ($owner->hasRole('ASM')) {
+                                $ccEmails[] = $owner->email;
+                                $managers = $owner->getManagers();
+                                if (isset($managers['RSM'])) {
+                                    $ccEmails[] = $managers['RSM']->email;
+                                }
+                            } elseif ($owner->hasRole('RSM')) {
+                                $ccEmails[] = $owner->email;
+                            }
+                        }
+                        Log::info('Sending KofolCouponNotification (bulk)', ['customer_id' => $record->customer->id, 'cc' => $ccEmails]);
                         $record->customer->notify(
                             new KofolCouponNotification(
                                 $record->customer,
                                 $record->coupons->pluck('coupon_code')->toArray(),
-                                $record->id
+                                $record->id,
+                                $ccEmails
                             )
                         );
                         $successCount++;
                     } catch (\Exception $e) {
                         $errorCount++;
+                        Log::error('Failed to send coupon email (bulk)', [
+                            'customer_id' => $record->customer->id ?? null,
+                            'error' => $e->getMessage(),
+                            'trace' => $e->getTraceAsString(),
+                        ]);
                     }
                 }
 

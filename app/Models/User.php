@@ -225,14 +225,9 @@ class User extends Authenticatable implements FilamentUser
         return null;
     }
 
-    // Get managers (ASM, RSM, ZSM) for a DSA user based on their location
+    // Get managers (ASM, RSM, ZSM) for a user based on their location and role
     public function getManagers()
     {
-        // Only relevant for DSA users
-        if (!$this->hasRole('DSA')) {
-            return [];
-        }
-
         $managers = [];
         $divisionId = $this->division_id;
         $headquarterId = $this->getHeadquarterIdAttribute();
@@ -240,36 +235,64 @@ class User extends Authenticatable implements FilamentUser
         $regionId = $this->getRegionIdAttribute();
         $zoneId = $this->getZoneIdAttribute();
 
-        // ASM: assigned to the same area and division
-        $asm = self::whereHas('roles', fn($q) => $q->where('name', 'ASM'))
-            ->where('location_type', 'App\\Models\\Area')
-            ->where('location_id', $areaId)
-            ->where('division_id', $divisionId)
-            ->first();
-        if ($asm) {
-            $managers['ASM'] = $asm;
+        if ($this->hasRole('DSA')) {
+            // ASM: assigned to the same area and division
+            $asm = self::whereHas('roles', fn($q) => $q->where('name', 'ASM'))
+                ->where('location_type', 'App\\Models\\Area')
+                ->where('location_id', $areaId)
+                ->where('division_id', $divisionId)
+                ->first();
+            if ($asm) {
+                $managers['ASM'] = $asm;
+            }
+            // RSM: assigned to the same region and division
+            $rsm = self::whereHas('roles', fn($q) => $q->where('name', 'RSM'))
+                ->where('location_type', 'App\\Models\\Region')
+                ->where('location_id', $regionId)
+                ->where('division_id', $divisionId)
+                ->first();
+            if ($rsm) {
+                $managers['RSM'] = $rsm;
+            }
+            // ZSM: assigned to the same zone and division
+            $zsm = self::whereHas('roles', fn($q) => $q->where('name', 'ZSM'))
+                ->where('location_type', 'App\\Models\\Zone')
+                ->where('location_id', $zoneId)
+                ->where('division_id', $divisionId)
+                ->first();
+            if ($zsm) {
+                $managers['ZSM'] = $zsm;
+            }
+        } elseif ($this->hasRole('ASM')) {
+            // RSM: assigned to the same region and division
+            $rsm = self::whereHas('roles', fn($q) => $q->where('name', 'RSM'))
+                ->where('location_type', 'App\\Models\\Region')
+                ->where('location_id', $regionId)
+                ->where('division_id', $divisionId)
+                ->first();
+            if ($rsm) {
+                $managers['RSM'] = $rsm;
+            }
+            // ZSM: assigned to the same zone and division
+            $zsm = self::whereHas('roles', fn($q) => $q->where('name', 'ZSM'))
+                ->where('location_type', 'App\\Models\\Zone')
+                ->where('location_id', $zoneId)
+                ->where('division_id', $divisionId)
+                ->first();
+            if ($zsm) {
+                $managers['ZSM'] = $zsm;
+            }
+        } elseif ($this->hasRole('RSM')) {
+            // ZSM: assigned to the same zone and division
+            $zsm = self::whereHas('roles', fn($q) => $q->where('name', 'ZSM'))
+                ->where('location_type', 'App\\Models\\Zone')
+                ->where('location_id', $zoneId)
+                ->where('division_id', $divisionId)
+                ->first();
+            if ($zsm) {
+                $managers['ZSM'] = $zsm;
+            }
         }
-
-        // RSM: assigned to the same region and division
-        $rsm = self::whereHas('roles', fn($q) => $q->where('name', 'RSM'))
-            ->where('location_type', 'App\\Models\\Region')
-            ->where('location_id', $regionId)
-            ->where('division_id', $divisionId)
-            ->first();
-        if ($rsm) {
-            $managers['RSM'] = $rsm;
-        }
-
-        // ZSM: assigned to the same zone and division
-        $zsm = self::whereHas('roles', fn($q) => $q->where('name', 'ZSM'))
-            ->where('location_type', 'App\\Models\\Zone')
-            ->where('location_id', $zoneId)
-            ->where('division_id', $divisionId)
-            ->first();
-        if ($zsm) {
-            $managers['ZSM'] = $zsm;
-        }
-
         return $managers;
     }
 }
