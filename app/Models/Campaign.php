@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use App\Models\Scopes\CampaignVisibilityScope;
+
 
 class Campaign extends Model
 {
@@ -17,7 +19,10 @@ class Campaign extends Model
         'start_date' => 'datetime',
         'end_date' => 'datetime',
     ];
-
+    protected static function booted()
+    {
+        static::addGlobalScope(new CampaignVisibilityScope);
+    }
     protected function status(): Attribute
     {
         return Attribute::make(

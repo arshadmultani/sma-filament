@@ -14,6 +14,8 @@ use Filament\Tables\Table;
 use Filament\Forms\Components\Section;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 
 class CampaignResource extends Resource
 {
@@ -55,9 +57,11 @@ class CampaignResource extends Resource
                             ->preload()
                             ->required(),
                         Forms\Components\Select::make('roles')
-                            ->label('User Roles')
+                            ->label('Participants')
                             ->multiple()
-                            ->relationship('roles', 'name')
+                            ->relationship('roles', 'name', function ($query) {
+                                $query->whereNotIn('roles.id', User::headOfficeRoleIds());
+                            })
                             ->preload()
                             ->required(),
                     ]),
@@ -84,12 +88,26 @@ class CampaignResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name'),
+                TextColumn::make('divisions.name')
+                    ->visible(fn (): bool => Auth::user()->can('view_user'))
+                    ->label('Divisions'),
+                TextColumn::make('roles.name')
+                    ->badge()
+                    ->color('gray')
+                    ->visible(fn (): bool => Auth::user()->can('view_user'))
+                    ->label('Participants')
+                    ->formatStateUsing(function ($state) {
+                        $roles = is_array($state) ? $state : [$state];
+                        $headOfficeRoleNames = \Spatie\Permission\Models\Role::whereIn('id', User::headOfficeRoleIds())->pluck('name')->toArray();
+                        return collect($roles)->reject(fn($role) => in_array($role, $headOfficeRoleNames))->implode(', ');
+                    }),
                 TextColumn::make('start_date')
                     ->date('d F Y'),
                 TextColumn::make('end_date')
                     ->date('d F Y'),
                 TextColumn::make('allowed_entry_type')
                     ->label('Activity')
+                    ->visible(fn (): bool => Auth::user()->can('view_user'))
                     ->formatStateUsing(fn (string $state): string => ucfirst(str_replace('_', ' ', $state))),
                 TextColumn::make('status')
                     ->badge()
