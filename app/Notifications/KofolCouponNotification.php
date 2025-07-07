@@ -55,7 +55,29 @@ class KofolCouponNotification extends Notification
      */
     public function toMail(object $notifiable): KofolCoupon
     {
-        return (new KofolCoupon($this->customer, $this->couponCodes))
+        // Determine CC emails based on the record owner role
+        $ccEmails = [];
+        $owner = $this->customer->user ?? null;
+        if ($owner) {
+            if ($owner->hasRole('DSA')) {
+                $managers = $owner->getManagers();
+                if (isset($managers['ASM'])) {
+                    $ccEmails[] = $managers['ASM']->email;
+                }
+                if (isset($managers['RSM'])) {
+                    $ccEmails[] = $managers['RSM']->email;
+                }
+            } elseif ($owner->hasRole('ASM')) {
+                $ccEmails[] = $owner->email;
+                $managers = $owner->getManagers();
+                if (isset($managers['RSM'])) {
+                    $ccEmails[] = $managers['RSM']->email;
+                }
+            } elseif ($owner->hasRole('RSM')) {
+                $ccEmails[] = $owner->email;
+            }
+        }
+        return (new KofolCoupon($this->customer, $this->couponCodes, $ccEmails))
             ->to($this->customer->email);
     }
 

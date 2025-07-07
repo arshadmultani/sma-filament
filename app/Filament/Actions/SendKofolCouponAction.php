@@ -20,7 +20,32 @@ class SendKofolCouponAction
             ->icon('heroicon-m-envelope')
             ->requiresConfirmation()
             ->modalHeading('Send Kofol Coupon')
-            ->modalDescription('Are you sure you want to send the coupon email?')
+            ->modalDescription(function ($record) {
+                $to = $record->customer?->email ?? 'N/A';
+                $cc = [];
+                $owner = $record->customer->user ?? null;
+                if ($owner) {
+                    if ($owner->hasRole('DSA')) {
+                        $managers = $owner->getManagers();
+                        if (isset($managers['ASM'])) {
+                            $cc[] = $managers['ASM']->email;
+                        }
+                        if (isset($managers['RSM'])) {
+                            $cc[] = $managers['RSM']->email;
+                        }
+                    } elseif ($owner->hasRole('ASM')) {
+                        $cc[] = $owner->email;
+                        $managers = $owner->getManagers();
+                        if (isset($managers['RSM'])) {
+                            $cc[] = $managers['RSM']->email;
+                        }
+                    } elseif ($owner->hasRole('RSM')) {
+                        $cc[] = $owner->email;
+                    }
+                }
+                $ccString = $cc ? ("\n    " . implode(",\n    ", $cc)) : 'None';
+                return "Are you sure you want to send the coupon email?\n\nTo:    {$to}\nCC:   {$ccString}";
+            })
             ->modalSubmitActionLabel('Yes, send it')
             ->action(function ($record) {
                 try {
