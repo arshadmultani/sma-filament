@@ -29,6 +29,7 @@ use Illuminate\Validation\ValidationException;
 use App\Traits\HandlesDeleteExceptions;
 use Njxqlus\Filament\Components\Infolists\LightboxImageEntry;
 use Illuminate\Support\Facades\Storage;
+use Filament\Infolists\Components\RepeatableEntry;
 
 
 class DoctorResource extends Resource implements HasShieldPermissions
@@ -207,7 +208,7 @@ class DoctorResource extends Resource implements HasShieldPermissions
                     ->columns(3)
                     ->schema([
                         LightboxImageEntry::make('profile_photo')
-                            ->href(fn($record) => Storage::disk('s3')->temporaryUrl($record->profile_photo, now()->addMinutes(5)))
+                            ->href(fn($record) => $record->profile_photo ? Storage::temporaryUrl($record->profile_photo, now()->addMinutes(5)) : '')
                             ->visible(fn($state) => !is_null($state))
                             ->label('Photo')->circular(),
 
@@ -240,8 +241,13 @@ class DoctorResource extends Resource implements HasShieldPermissions
                 Section::make()
                     ->columns(3)
                     ->schema([
-                        ImageEntry::make('attachment')
-                            ->label('Visiting Card/Rx. Pad'),
+                        RepeatableEntry::make('attachment')
+                            ->label('Visiting Card/Rx. Pad')
+                            ->schema([
+                                LightboxImageEntry::make('') // no key, since each item is a string
+                                    ->href(fn($state) => $state ? Storage::temporaryUrl($state, now()->addMinutes(5)) : '')
+                            ])
+                            ->visible(fn($record) => !empty($record->attachment)),
 
                     ]),
 

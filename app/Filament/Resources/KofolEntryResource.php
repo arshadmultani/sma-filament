@@ -359,7 +359,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ->schema([
                         LightboxImageEntry::make('invoice_image')
                             ->label('Invoice')
-                            ->href(fn($record) => Storage::disk('s3')->temporaryUrl($record->invoice_image, now()->addMinutes(5)))
+                            ->href(fn($record) => $record->invoice_image ? Storage::temporaryUrl($record->invoice_image, now()->addMinutes(5)) : '')
                             ->disk('s3')
                             ->visibility('private')
                             // ->slideZoomable(true)
