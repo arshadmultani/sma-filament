@@ -38,6 +38,8 @@ class TeamHierarchyScope implements Scope
                 ->whereIn('location_id', $headquarterIds)
                 ->where('division_id', $user->division_id)
                 ->pluck('id');
+            // Add own user_id
+            $userIds->push($user->id);
             $builder->whereIn('user_id', $userIds);
             return;
         }
@@ -50,6 +52,8 @@ class TeamHierarchyScope implements Scope
                 ->whereIn('location_id', $headquarterIds)
                 ->where('division_id', $user->division_id)
                 ->pluck('id');
+            // Add own user_id
+            $userIds->push($user->id);
             $builder->whereIn('user_id', $userIds);
             return;
         }
@@ -63,6 +67,8 @@ class TeamHierarchyScope implements Scope
                 ->whereIn('location_id', $headquarterIds)
                 ->where('division_id', $user->division_id)
                 ->pluck('id');
+            // Add own user_id
+            $userIds->push($user->id);
             $builder->whereIn('user_id', $userIds);
             return;
         }
@@ -71,7 +77,7 @@ class TeamHierarchyScope implements Scope
         if (method_exists($user, 'hasRole') && $user->hasRole('PMT')) {
             $userIds = \App\Models\User::where('division_id', $user->division_id)
                 ->whereHas('roles', function ($query) {
-                    $query->whereIn('name', ['DSA', 'ASM', 'RSM']);
+                    $query->whereIn('name', ['DSA', 'ASM', 'RSM', 'ZSM']);
                 })
                 ->pluck('id');
             $builder->whereIn('user_id', $userIds);
