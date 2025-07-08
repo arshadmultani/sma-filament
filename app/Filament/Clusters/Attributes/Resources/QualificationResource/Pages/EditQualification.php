@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\QualificationResource\Pages;
+namespace App\Filament\Clusters\Attributes\Resources\QualificationResource\Pages;
 
-use App\Filament\Resources\QualificationResource;
+use App\Filament\Clusters\Attributes\Resources\QualificationResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 

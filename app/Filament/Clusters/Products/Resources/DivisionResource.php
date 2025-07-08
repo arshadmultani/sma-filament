@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Clusters\Products\Resources;
 
 use App\Filament\Clusters\Products;
-use App\Filament\Resources\DivisionResource\Pages;
+use App\Filament\Clusters\Products\Resources\DivisionResource\Pages;
 use App\Models\Division;
 use Filament\Forms;
 use Filament\Forms\Form;

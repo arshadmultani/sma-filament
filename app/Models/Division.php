@@ -30,4 +30,9 @@ class Division extends Model
     {
         return $this->hasMany(Product::class);
     }
+
+    public function conversionActivities()
+    {
+        return $this->hasMany(ConversionActivity::class);
+    }
 }

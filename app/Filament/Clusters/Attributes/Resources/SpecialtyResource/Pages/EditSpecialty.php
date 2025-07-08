@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\SpecialtyResource\Pages;
+namespace App\Filament\Clusters\Attributes\Resources\SpecialtyResource\Pages;
 
-use App\Filament\Resources\SpecialtyResource;
+use App\Filament\Clusters\Attributes\Resources\SpecialtyResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 

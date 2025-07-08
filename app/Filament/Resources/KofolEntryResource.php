@@ -363,6 +363,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                             ->visibility('private')
                             ->url(fn($record) => $record->invoice_image ? Storage::temporaryUrl($record->invoice_image, now()->addMinutes(5)) : '')
                             ->checkFileExistence(false)
+                            ->extraAttributes(['style' => 'object-fit: contain; max-width: 100%; max-height: 80vh; width: auto; height: auto;'])
                             ->columnSpan(2),
                         TextEntry::make('invoice_amount')->label('Total Amount')->money('INR')->weight(FontWeight::SemiBold),
                     ]),

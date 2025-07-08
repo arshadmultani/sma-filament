@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Clusters\Attributes\Resources;
 
-use App\Filament\Resources\SpecialtyResource\Pages;
+use App\Filament\Clusters\Attributes\Resources\SpecialtyResource\Pages;
 use App\Models\Specialty;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -10,12 +10,14 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use App\Filament\Clusters\Attributes;
 
 class SpecialtyResource extends Resource
 {
     protected static ?string $model = Specialty::class;
 
-    protected static ?string $navigationGroup = 'Dr. Attributes';
+    protected static ?string $cluster = Attributes::class;
+    protected static ?string $navigationIcon = 'heroicon-o-book-open';
 
 
     public static function form(Form $form): Form

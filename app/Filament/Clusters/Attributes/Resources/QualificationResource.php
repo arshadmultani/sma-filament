@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Clusters\Attributes\Resources;
 
-use App\Filament\Resources\QualificationResource\Pages;
+use App\Filament\Clusters\Attributes\Resources\QualificationResource\Pages;
 use App\Models\Qualification;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -11,13 +11,14 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use App\Filament\Clusters\Attributes;
 
 class QualificationResource extends Resource
 {
     protected static ?string $model = Qualification::class;
+    protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
 
-    protected static ?string $navigationGroup = 'Dr. Attributes';
-
+    protected static ?string $cluster = Attributes::class;
     public static function form(Form $form): Form
     {
         return $form
