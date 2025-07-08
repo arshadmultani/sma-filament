@@ -52,4 +52,14 @@ class Product extends Model
     {
         return $this->hasMany(KofolEntry::class);
     }
+
+    public function doctors()
+    {
+        return $this->belongsToMany(Doctor::class);
+    }
+
+    public function getRelationsToCheckForDelete(): array
+    {
+        return ['doctors'];
+    }
 }

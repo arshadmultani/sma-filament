@@ -363,11 +363,12 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                             ->disk('s3')
                             ->visibility('private')
                             // ->slideZoomable(true)
-                            ->slideHeight('1920px')
-                            ->slideWidth('1080px')
+                             ->slideHeight('auto')
+                            ->slideWidth('auto')
                             ->slideDraggable(true)
-                            ->square()
+                            // ->square()
                             ->checkFileExistence(false)
+                            ->extraAttributes(['style' => 'object-fit: contain; max-width: 100%; max-height: 80vh; width: auto; height: auto;'])
                             ->columnSpan(2),
                         TextEntry::make('invoice_amount')->label('Total Amount')->money('INR')->weight(FontWeight::SemiBold),
                     ]),

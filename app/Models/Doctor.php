@@ -65,6 +65,10 @@ class Doctor extends BaseModel
     {
         return $this->belongsTo(User::class)->withTrashed();
     }
+    public function products()
+    {
+        return $this->belongsToMany(Product::class);
+    }
 
     public function headquarter()
     {

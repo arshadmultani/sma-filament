@@ -74,7 +74,7 @@ class TeamHierarchyScope implements Scope
         }
 
         // PMT: records created by DSA, ASM, RSM under his division
-        if (method_exists($user, 'hasRole') && $user->hasRole('PMT')) {
+        if (method_exists($user, 'hasRole') && $user->hasRole(['PMT','GM'])) {
             $userIds = \App\Models\User::where('division_id', $user->division_id)
                 ->whereHas('roles', function ($query) {
                     $query->whereIn('name', ['DSA', 'ASM', 'RSM', 'ZSM']);
