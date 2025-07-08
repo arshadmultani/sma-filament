@@ -4,6 +4,7 @@ namespace App\Filament\Clusters\Products\Resources;
 
 use App\Filament\Clusters\Products;
 use App\Filament\Clusters\Products\Resources\ProductResource\Pages;
+use App\Traits\HandlesDeleteExceptions;
 use App\Models\Product;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -13,6 +14,8 @@ use Filament\Tables\Table;
 
 class ProductResource extends Resource
 {
+    use HandlesDeleteExceptions;
+
     protected static ?string $model = Product::class;
 
     protected static ?string $cluster = Products::class;
@@ -69,7 +72,8 @@ class ProductResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                    ->before(fn($action, $records) => collect($records)->each(fn($record) => (new static())->tryDeleteRecord($record, $action))),
                 ]),
             ]);
     }
@@ -85,8 +89,8 @@ class ProductResource extends Resource
     {
         return [
             'index' => Pages\ListProducts::route('/'),
-            'create' => Pages\CreateProduct::route('/create'),
-            'edit' => Pages\EditProduct::route('/{record}/edit'),
+            // 'create' => Pages\CreateProduct::route('/create'),
+            // 'edit' => Pages\EditProduct::route('/{record}/edit'),
         ];
     }
     //     public static function getNavigationBadge(): ?string

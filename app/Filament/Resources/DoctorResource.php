@@ -112,6 +112,16 @@ class DoctorResource extends Resource implements HasShieldPermissions
                     ->hidden(fn() => Auth::user()->hasRole('DSA'))
                     ->preload()
                     ->required(),
+                Select::make('products')
+                    ->label('Focus Product')
+                    ->relationship('products', 'name')
+                    ->preload()
+                    ->searchable()
+                    // ->required()
+                    ->getOptionLabelFromRecordUsing(fn($record) => $record->name)
+                    ->multiple()
+                    ->minItems(1)
+                    ->maxItems(1),
                 FileUpload::make('attachment')
                     ->directory('doctors/attachments')
                     ->placeholder('Upload Both or Any One')
@@ -130,7 +140,7 @@ class DoctorResource extends Resource implements HasShieldPermissions
     public static function table(Table $table): Table
     {
         return $table
-            ->paginated([25,50,100,250])
+            ->paginated([25, 50, 100, 250])
             ->defaultSort('name', 'asc')
             ->columns([
                 // ImageColumn::make('profile_photo')
@@ -188,7 +198,7 @@ class DoctorResource extends Resource implements HasShieldPermissions
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
-                 ])
+            ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     UpdateStatusAction::makeBulk(),
@@ -238,7 +248,14 @@ class DoctorResource extends Resource implements HasShieldPermissions
                         // TextEntry::make('created_at')->since()->label('Created'),
                         // TextEntry::make('user.name'),
                     ]),
+                Section::make('')
+                    ->hidden(fn($record) => $record->products->isEmpty())
+                    ->columns(3)
+                    ->schema([
+                        TextEntry::make('products.name')->label('Focus Product'),
+                    ]),
                 Section::make()
+                    ->hidden(fn($record) => $record->attachment == null)
                     ->columns(3)
                     ->schema([
                         RepeatableEntry::make('attachment')
