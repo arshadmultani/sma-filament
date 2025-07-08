@@ -154,10 +154,10 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                             ->directory('kofol-invoices')
                             ->downloadable()
                             ->maxSize(5120)
-                            ->imageResizeMode('cover')
-                            ->imageCropAspectRatio('16:9')
-                            ->imageResizeTargetWidth('1920')
-                            ->imageResizeTargetHeight('1080')
+                            // ->imageResizeMode('cover')
+                            // ->imageCropAspectRatio('16:9')
+                            // ->imageResizeTargetWidth('1920')
+                            // ->imageResizeTargetHeight('1080')
                             ->required(),
 
                     ]),
@@ -357,16 +357,11 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ]),
                 Components\Section::make()
                     ->schema([
-                        LightboxImageEntry::make('invoice_image')
+                        ImageEntry::make('invoice_image')
                             ->label('Invoice')
-                            ->href(fn($record) => $record->invoice_image ? Storage::temporaryUrl($record->invoice_image, now()->addMinutes(5)) : '')
                             ->disk('s3')
                             ->visibility('private')
-                            // ->slideZoomable(true)
-                             ->slideHeight('auto')
-                            ->slideWidth('auto')
-                            ->slideDraggable(true)
-                            // ->square()
+                            ->url(fn($record) => $record->invoice_image ? Storage::temporaryUrl($record->invoice_image, now()->addMinutes(5)) : '')
                             ->checkFileExistence(false)
                             ->extraAttributes(['style' => 'object-fit: contain; max-width: 100%; max-height: 80vh; width: auto; height: auto;'])
                             ->columnSpan(2),
