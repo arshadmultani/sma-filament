@@ -26,4 +26,18 @@ class CreateDoctor extends CreateRecord
 
         return $data;
     }
+
+    protected function afterCreate(): void
+    {
+        $doctor = $this->record;
+        $tags = $this->data['tags'] ?? [];
+
+        if (!empty($tags)) {
+            $syncData = [];
+            foreach ($tags as $tagId) {
+                $syncData[$tagId] = ['user_id' => Auth::id()];
+            }
+            $doctor->tags()->sync($syncData);
+        }
+    }
 }

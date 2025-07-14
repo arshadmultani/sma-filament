@@ -16,15 +16,20 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Clusters\Attributes;
+use App\Traits\HandlesDeleteExceptions;
 
 class ConversionActivityResource extends Resource
 {
+    use HandlesDeleteExceptions;
     protected static ?string $model = ConversionActivity::class;
 
     protected static ?string $cluster = Attributes::class;
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
 
-
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
 
     public static function form(Form $form): Form
     {
@@ -52,11 +57,10 @@ class ConversionActivityResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make()
+                    ->before(fn($action, $record) => (new static())->tryDeleteRecord($record, $action)),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
             ]);
     }
 

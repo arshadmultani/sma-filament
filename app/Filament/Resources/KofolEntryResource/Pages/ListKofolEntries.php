@@ -10,6 +10,7 @@ use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Actions\ActionGroup;
 use App\Filament\Exports\KofolEntryExporter;
+use Illuminate\Support\Facades\Auth;
 
 class ListKofolEntries extends ListRecords
 {
@@ -30,8 +31,7 @@ class ListKofolEntries extends ListRecords
                     ->maxRows(30000)
                     ->modalWidth('2xl')
                     ->color('primary')
-                    /** @var \App\Models\User $user */
-                    ->visible(fn(): bool => auth()->user()->can('create_user')),
+                    ->visible(fn(): bool => Auth::user()->can('create_user')),
 
             ])->icon('heroicon-m-bars-3-bottom-right'),
         ];

@@ -79,6 +79,10 @@ class Doctor extends BaseModel
     {
         return $this->morphMany(KofolEntry::class, 'customer');
     }
+    public function microsite()
+    {
+        return $this->hasOne(Microsite::class);
+    }
 
     public function qualification()
     {
@@ -90,14 +94,17 @@ class Doctor extends BaseModel
         return $this->belongsTo(Specialty::class);
     }
 
-    public function microsite()
-    {
-        return $this->hasOne(Microsite::class);
-    }
-
     public function getHeadquarterNameAttribute()
     {
         return $this->headquarter?->name;
+    }
+    public function campaignEntries()
+    {
+        return $this->morphMany(CampaignEntry::class, 'customer');
+    }
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class, 'doctor_tag')->withTimestamps()->withPivot('user_id');
     }
 
     public function getRelationsToCheckForDelete()

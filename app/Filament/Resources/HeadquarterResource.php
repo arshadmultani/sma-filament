@@ -81,7 +81,7 @@ class HeadquarterResource extends Resource
                 //     }),
             ])
             ->actions([
-                // Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make(),
             ])
             ->deferLoading()
             // ->striped()

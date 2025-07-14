@@ -11,6 +11,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * @property int $id
@@ -66,6 +67,12 @@ class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, HasRoles,Notifiable,SoftDeletes;
+
+    // Location type constants
+    public const TYPE_ZONE = \App\Models\Zone::class;
+    public const TYPE_REGION = \App\Models\Region::class;
+    public const TYPE_AREA = \App\Models\Area::class;
+    public const TYPE_HEADQUARTER = \App\Models\Headquarter::class;
 
     /**
      * The attributes that are mass assignable.
@@ -124,63 +131,45 @@ class User extends Authenticatable implements FilamentUser
         return $this->morphTo();
     }
 
-    // Accessor for Zone ID
-    public function getZoneIdAttribute()
+    // Helper to get user IDs by location type, location IDs, and division
+    private function getUserIdsByLocation(string $locationType, $locationIds, $divisionId = null)
+    {
+        $query = self::where('location_type', $locationType)
+            ->whereIn('location_id', $locationIds);
+        if ($divisionId !== null) {
+            $query->where('division_id', $divisionId);
+        }
+        return $query->pluck('id');
+    }
+
+    // Generic accessor for location IDs by type
+    public function getLocationIdByType(string $type)
     {
         $location = $this->location;
-        if ($location instanceof \App\Models\Zone) {
-            return $location->id;
-        }
-        if ($location instanceof \App\Models\Region) {
-            return $location->zone_id;
-        }
-        if ($location instanceof \App\Models\Area) {
-            return $location->region?->zone_id;
-        }
-        if ($location instanceof \App\Models\Headquarter) {
-            return $location->area?->region?->zone_id;
+        switch ($type) {
+            case self::TYPE_ZONE:
+                return $location instanceof \App\Models\Zone ? $location->id :
+                       ($location instanceof \App\Models\Region ? $location->zone_id :
+                       ($location instanceof \App\Models\Area ? $location->region?->zone_id :
+                       ($location instanceof \App\Models\Headquarter ? $location->area?->region?->zone_id : null)));
+            case self::TYPE_REGION:
+                return $location instanceof \App\Models\Region ? $location->id :
+                       ($location instanceof \App\Models\Area ? $location->region_id :
+                       ($location instanceof \App\Models\Headquarter ? $location->area?->region_id : null));
+            case self::TYPE_AREA:
+                return $location instanceof \App\Models\Area ? $location->id :
+                       ($location instanceof \App\Models\Headquarter ? $location->area_id : null);
+            case self::TYPE_HEADQUARTER:
+                return $location instanceof \App\Models\Headquarter ? $location->id : null;
         }
         return null;
     }
 
-    // Accessor for Region ID
-    public function getRegionIdAttribute()
-    {
-        $location = $this->location;
-        if ($location instanceof \App\Models\Region) {
-            return $location->id;
-        }
-        if ($location instanceof \App\Models\Area) {
-            return $location->region_id;
-        }
-        if ($location instanceof \App\Models\Headquarter) {
-            return $location->area?->region_id;
-        }
-        return null;
-    }
-
-    // Accessor for Area ID
-    public function getAreaIdAttribute()
-    {
-        $location = $this->location;
-        if ($location instanceof \App\Models\Area) {
-            return $location->id;
-        }
-        if ($location instanceof \App\Models\Headquarter) {
-            return $location->area_id;
-        }
-        return null;
-    }
-
-    // Accessor for Headquarter ID
-    public function getHeadquarterIdAttribute()
-    {
-        $location = $this->location;
-        if ($location instanceof \App\Models\Headquarter) {
-            return $location->id;
-        }
-        return null;
-    }
+    // Accessors using the generic method
+    public function getZoneIdAttribute() { return $this->getLocationIdByType(self::TYPE_ZONE); }
+    public function getRegionIdAttribute() { return $this->getLocationIdByType(self::TYPE_REGION); }
+    public function getAreaIdAttribute() { return $this->getLocationIdByType(self::TYPE_AREA); }
+    public function getHeadquarterIdAttribute() { return $this->getLocationIdByType(self::TYPE_HEADQUARTER); }
 
     // Accessor for Zone Name
     public function getZoneNameAttribute()
@@ -301,4 +290,218 @@ class User extends Authenticatable implements FilamentUser
         return $managers;
     }
 
+    /**
+     * Get all direct team members under a manager's location and division.
+     * Returns an array keyed by role (e.g., ['ASM' => [...], 'DSA' => [...]])
+     *
+     * @return array<string, \Illuminate\Database\Eloquent\Collection>
+     */
+    public function getTeam(): array
+    {
+        $team = [];
+        $divisionId = $this->division_id;
+        $zoneId = $this->getZoneIdAttribute();
+        $regionId = $this->getRegionIdAttribute();
+        $areaId = $this->getAreaIdAttribute();
+
+        // If no location, return all users except self, grouped by role (for Head Office Roles)
+        if (!$this->location_type || !$this->location_id) {
+            $allUsers = self::where('id', '!=', $this->id)->with('roles')->get();
+            foreach ($allUsers as $user) {
+                foreach ($user->roles as $role) {
+                    $team[$role->name][] = $user;
+                }
+            }
+            foreach ($team as $role => $users) {
+                $team[$role] = collect($users)->unique('id');
+            }
+            return $team;
+        }
+
+        // Role mapping: manager role => [team role => [locationType, locationIds]]
+        $roleMap = [
+            'ZSM' => [
+                'RSM' => ['App\\Models\\Region', $zoneId ? $this->getRegionIdsByZone($zoneId) : []],
+                'ASM' => ['App\\Models\\Area', $zoneId ? $this->getAreaIdsByZone($zoneId) : []],
+                'DSA' => ['App\\Models\\Headquarter', $zoneId ? $this->getHeadquarterIdsByZone($zoneId) : []],
+            ],
+            'RSM' => [
+                'ZSM' => ['App\\Models\\Zone', $regionId ? $this->getZoneIdsByRegion($regionId) : []],
+                'ASM' => ['App\\Models\\Area', $regionId ? $this->getAreaIdsByRegion($regionId) : []],
+                'DSA' => ['App\\Models\\Headquarter', $regionId ? $this->getHeadquarterIdsByRegion($regionId) : []],
+            ],
+            'ASM' => [
+                'ZSM' => ['App\\Models\\Zone', $areaId ? $this->getZoneIdsByArea($areaId) : []],
+                'RSM' => ['App\\Models\\Region', $areaId ? $this->getRegionIdsByArea($areaId) : []],
+                'DSA' => ['App\\Models\\Headquarter', $areaId ? $this->getHeadquarterIdsByArea($areaId) : []],
+            ],
+            'DSA' => [
+                'ZSM' => ['App\\Models\\Zone', $this->getZoneIdAttribute() ? [$this->getZoneIdAttribute()] : []],
+                'RSM' => ['App\\Models\\Region', $this->getRegionIdAttribute() ? [$this->getRegionIdAttribute()] : []],
+                'ASM' => ['App\\Models\\Area', $this->getAreaIdAttribute() ? [$this->getAreaIdAttribute()] : []],
+                'DSA' => [$this->location_type, $this->location_id ? [$this->location_id] : []],
+            ],
+        ];
+
+        foreach ($roleMap as $managerRole => $teamRoles) {
+            if ($this->hasRole($managerRole)) {
+                foreach ($teamRoles as $teamRole => [$locationType, $locationIds]) {
+                    if (!empty($locationIds)) {
+                        $members = $this->findTeamMembers($teamRole, $locationType, $locationIds, $divisionId);
+                        // For DSA, exclude self
+                        if ($managerRole === 'DSA') {
+                            $members = $members->where('id', '!=', $this->id);
+                        }
+                        if ($members->isNotEmpty()) {
+                            $team[$teamRole] = $members;
+                        }
+                    }
+                }
+                break; // Only one manager role applies
+            }
+        }
+        return $team;
+    }
+
+    /**
+     * Helper to find team members by role, location type, location IDs, and division.
+     */
+    private function findTeamMembers(string $role, string $locationType, array $locationIds, $divisionId)
+    {
+        return self::whereHas('roles', fn($q) => $q->where('name', $role))
+            ->where('location_type', $locationType)
+            ->whereIn('location_id', $locationIds)
+            ->where('division_id', $divisionId)
+            ->get();
+    }
+
+    // Helper methods to get IDs for location scoping
+    private function getZoneIdsByRegion($regionId): array
+    {
+        return [\App\Models\Region::find($regionId)?->zone_id];
+    }
+    private function getZoneIdsByArea($areaId): array
+    {
+        $regionIds = \App\Models\Area::whereIn('id', (array)$areaId)->pluck('region_id')->toArray();
+        return \App\Models\Region::whereIn('id', $regionIds)->pluck('zone_id')->unique()->toArray();
+    }
+    private function getRegionIdsByArea($areaId): array
+    {
+        return \App\Models\Area::whereIn('id', (array)$areaId)->pluck('region_id')->unique()->toArray();
+    }
+    private function getRegionIdsByZone($zoneId): array
+    {
+        return \App\Models\Region::where('zone_id', $zoneId)->pluck('id')->toArray();
+    }
+    private function getAreaIdsByZone($zoneId): array
+    {
+        return \App\Models\Area::whereIn('region_id', $this->getRegionIdsByZone($zoneId))->pluck('id')->toArray();
+    }
+    private function getHeadquarterIdsByZone($zoneId): array
+    {
+        return \App\Models\Headquarter::whereIn('area_id', $this->getAreaIdsByZone($zoneId))->pluck('id')->toArray();
+    }
+    private function getAreaIdsByRegion($regionId): array
+    {
+        return \App\Models\Area::where('region_id', $regionId)->pluck('id')->toArray();
+    }
+    private function getHeadquarterIdsByRegion($regionId): array
+    {
+        return \App\Models\Headquarter::whereIn('area_id', $this->getAreaIdsByRegion($regionId))->pluck('id')->toArray();
+    }
+    private function getHeadquarterIdsByArea($areaId): array
+    {
+        return \App\Models\Headquarter::where('area_id', $areaId)->pluck('id')->toArray();
+    }
+
+    /**
+     * Get all doctors visible to this user based on their location.
+     * If location_type or location_id is null (admin/super_admin), return all doctors.
+     */
+    public function getDoctors()
+    {
+        if (!$this->location_type || !$this->location_id) {
+            // For admin/super_admin, return all doctors
+            return \App\Models\Doctor::all();
+        }
+
+        // If user is at headquarter level
+        if ($this->location_type === 'App\\Models\\Headquarter') {
+            return \App\Models\Doctor::where('headquarter_id', $this->location_id)->get();
+        }
+
+        // If user is at area, region, or zone, get all headquarters in that location, then all doctors in those HQs
+        $hqIds = [];
+
+        if ($this->location_type === 'App\\Models\\Area') {
+            $hqIds = \App\Models\Headquarter::where('area_id', $this->location_id)->pluck('id');
+        } elseif ($this->location_type === 'App\\Models\\Region') {
+            $areaIds = \App\Models\Area::where('region_id', $this->location_id)->pluck('id');
+            $hqIds = \App\Models\Headquarter::whereIn('area_id', $areaIds)->pluck('id');
+        } elseif ($this->location_type === 'App\\Models\\Zone') {
+            $regionIds = \App\Models\Region::where('zone_id', $this->location_id)->pluck('id');
+            $areaIds = \App\Models\Area::whereIn('region_id', $regionIds)->pluck('id');
+            $hqIds = \App\Models\Headquarter::whereIn('area_id', $areaIds)->pluck('id');
+        }
+
+        if (!empty($hqIds)) {
+            return \App\Models\Doctor::whereIn('headquarter_id', $hqIds)->get();
+        }
+
+        return collect();
+    }
+
+    public function getSubordinates(): \Illuminate\Support\Collection
+    {
+        // Admins and Super-Admins see all
+        if ($this->hasAnyRole(['admin', 'super_admin'])) {
+            return self::pluck('id');
+        }
+
+        // DSA: only themselves
+        if ($this->hasRole('DSA')) {
+            return collect([$this->id]);
+        }
+
+        // ASM: users in headquarters under their area and same division, plus themselves
+        if ($this->hasRole('ASM')) {
+            $hqIds = \App\Models\Headquarter::where('area_id', $this->location_id)->pluck('id');
+            $userIds = $this->getUserIdsByLocation(self::TYPE_HEADQUARTER, $hqIds, $this->division_id);
+            return $userIds->push($this->id);
+        }
+
+        // RSM: users in headquarters, areas, and regions under their region and same division, plus themselves
+        if ($this->hasRole('RSM')) {
+            $areaIds = \App\Models\Area::where('region_id', $this->location_id)->pluck('id');
+            $hqIds = \App\Models\Headquarter::whereIn('area_id', $areaIds)->pluck('id');
+            $dsaIds = $this->getUserIdsByLocation(self::TYPE_HEADQUARTER, $hqIds, $this->division_id);
+            $asmIds = $this->getUserIdsByLocation(self::TYPE_AREA, $areaIds, $this->division_id);
+            $rsmIds = $this->getUserIdsByLocation(self::TYPE_REGION, [$this->location_id], $this->division_id);
+            return $dsaIds->merge($asmIds)->merge($rsmIds)->push($this->id);
+        }
+
+        // ZSM: users in headquarters, areas, regions under their zone and same division, plus themselves
+        if ($this->hasRole('ZSM')) {
+            $regionIds = \App\Models\Region::where('zone_id', $this->location_id)->pluck('id');
+            $areaIds = \App\Models\Area::whereIn('region_id', $regionIds)->pluck('id');
+            $hqIds = \App\Models\Headquarter::whereIn('area_id', $areaIds)->pluck('id');
+            $dsaIds = $this->getUserIdsByLocation(self::TYPE_HEADQUARTER, $hqIds, $this->division_id);
+            $asmIds = $this->getUserIdsByLocation(self::TYPE_AREA, $areaIds, $this->division_id);
+            $rsmIds = $this->getUserIdsByLocation(self::TYPE_REGION, $regionIds, $this->division_id);
+            $zsmIds = $this->getUserIdsByLocation(self::TYPE_ZONE, [$this->location_id], $this->division_id);
+            return $dsaIds->merge($asmIds)->merge($rsmIds)->merge($zsmIds)->push($this->id);
+        }
+
+        // PMT/GM: all DSA, ASM, RSM, ZSM in their division
+        if ($this->hasRole(['PMT', 'GM'])) {
+            return self::where('division_id', $this->division_id)
+                ->whereHas('roles', function ($query) {
+                    $query->whereIn('name', ['DSA', 'ASM', 'RSM', 'ZSM']);
+                })
+                ->pluck('id');
+        }
+
+        // Default: only themselves
+        return collect([$this->id]);
+    }
 }

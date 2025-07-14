@@ -26,4 +26,17 @@ class CreateChemist extends CreateRecord
 
         return $data;
     }
+    protected function afterCreate(): void
+    {
+        $chemist = $this->record;
+        $tags = $this->data['tags'] ?? [];
+
+        if (!empty($tags)) {
+            $syncData = [];
+            foreach ($tags as $tagId) {
+                $syncData[$tagId] = ['user_id' => Auth::id()];
+            }
+            $chemist->tags()->sync($syncData);
+        }
+    }
 }

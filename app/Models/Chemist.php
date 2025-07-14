@@ -60,6 +60,15 @@ class Chemist extends BaseModel
     {
         return $this->belongsTo(User::class)->withTrashed();
     }
+    public function campaignEntries()
+    {
+        return $this->morphMany(CampaignEntry::class, 'customer');
+    }
+
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class, 'chemist_tag')->withTimestamps()->withPivot('user_id');
+    }
 
     public function getRelationsToCheckForDelete()
     {

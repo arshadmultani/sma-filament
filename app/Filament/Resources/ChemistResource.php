@@ -9,6 +9,7 @@ use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
@@ -20,6 +21,8 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\HandlesDeleteExceptions;
+use Icetalker\FilamentTableRepeatableEntry\Infolists\Components\TableRepeatableEntry;
+use Illuminate\Database\Eloquent\Builder;
 
 class ChemistResource extends Resource implements HasShieldPermissions
 {
@@ -79,6 +82,17 @@ class ChemistResource extends Resource implements HasShieldPermissions
                     ->hidden(fn() => Auth::user()->hasRole('DSA'))
                     ->preload()
                     ->required(),
+                Select::make('tags')
+                    ->label('Tags')
+                    ->multiple()
+                    ->visible(fn(string $context): bool => $context === 'create')
+                    ->preload()
+                    ->relationship(
+                        name: 'tags',
+                        titleAttribute: 'name',
+                        modifyQueryUsing: fn(Builder $query) => $query->where('attached_to', 'chemist')
+                    )
+                    ->searchable(),
             ]);
     }
 
@@ -132,7 +146,7 @@ class ChemistResource extends Resource implements HasShieldPermissions
                     UpdateStatusAction::makeBulk(),
                     Tables\Actions\DeleteBulkAction::make()
                         ->before(fn($action, $records) => collect($records)->each(fn($record) => (new static())->tryDeleteRecord($record, $action))),
-                        
+
                 ]),
             ]);
     }
@@ -144,9 +158,12 @@ class ChemistResource extends Resource implements HasShieldPermissions
                 Section::make()
                     ->columns(3)
                     ->schema([
-                        TextEntry::make('name'),
                         TextEntry::make('email'),
                         TextEntry::make('phone'),
+                        TextEntry::make('tags.name')
+                            ->label('Tags')
+                            ->hidden(fn($record) => $record->tags->isEmpty())
+                            ->badge(),
                     ]),
                 Section::make()
                     ->columns(3)
@@ -162,6 +179,48 @@ class ChemistResource extends Resource implements HasShieldPermissions
                         TextEntry::make('created_at')->since()->label('Created'),
                         TextEntry::make('updated_at')->since()->label('Updated'),
                     ]),
+                Section::make()
+                    ->compact()
+                    ->hidden(fn($record) => $record->tags->isEmpty())
+                    ->visible(fn() => Auth::user()->can('view_user'))
+                    ->schema([
+                        TableRepeatableEntry::make('tags')
+                            ->contained(false)
+                            ->label('')
+                            ->columnSpan(2)
+                            ->extraAttributes(['class' => 'hidden sm:block']) // Hidden on mobile, visible on sm and up
+                            ->schema([
+                                TextEntry::make('name')
+                                    ->badge()
+                                    ->label('Tag'),
+                                TextEntry::make('pivot.user_id')
+                                    ->label('Tagged By')
+                                    ->formatStateUsing(function ($state) {
+                                        return \App\Models\User::find($state)?->name ?? 'Unknown';
+                                    }),
+                                TextEntry::make('pivot.created_at')
+                                    ->label('Tagged On')
+                                    ->formatStateUsing(fn($state) => $state->format('d-m-Y')),
+                            ]),
+                        RepeatableEntry::make('tags')  // repeater for mobile
+                            ->label('')
+                            ->extraAttributes(['class' => 'block sm:hidden']) // Visible only on mobile
+                            ->schema([
+                                TextEntry::make('name')
+                                    ->columnSpan(2)
+                                    ->label('')
+                                    ->badge(),
+                                TextEntry::make('pivot.user_id')
+                                    ->label('Tagged By')
+                                    ->formatStateUsing(function ($state) {
+                                        return \App\Models\User::find($state)?->name ?? 'Unknown';
+                                    }),
+                                TextEntry::make('pivot.created_at')
+                                    ->label('Tagged On')
+                                    ->formatStateUsing(fn($state) => $state->format('d-m-Y')),
+                            ]),
+                    ])
+
 
             ]);
     }

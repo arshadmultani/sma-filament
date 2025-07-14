@@ -18,9 +18,10 @@ class CampaignCard extends Component
                 $query->whereHas('entryable');
             }])
             ->withCount(['entries as approved_entries_count' => function ($query) {
-                $query->whereHas('entryable', function ($q) {
-                    $q->where('status', 'Approved');
-                });
+                $query->where('entryable_type', 'kofol_entry')
+                      ->whereHasMorph('entryable', ['kofol_entry'], function ($q) {
+                          $q->where('status', 'Approved');
+                      });
             }])
             ->get();
 

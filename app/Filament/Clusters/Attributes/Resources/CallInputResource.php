@@ -15,9 +15,11 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Traits\HandlesDeleteExceptions;
 
 class CallInputResource extends Resource
 {
+    use HandlesDeleteExceptions;
     protected static ?string $model = CallInput::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-square-3-stack-3d';
@@ -44,11 +46,13 @@ class CallInputResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make()
+                    ->before(fn($action, $record) => (new static())->tryDeleteRecord($record, $action)),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                // Tables\Actions\BulkActionGroup::make([
+                //     // Tables\Actions\DeleteBulkAction::make(),
+                // ]),
             ]);
     }
 

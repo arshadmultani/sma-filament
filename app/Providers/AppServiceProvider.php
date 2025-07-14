@@ -22,6 +22,7 @@ use App\Models\Headquarter;
 use App\Models\Area;
 use App\Models\Region;
 use App\Models\Zone;
+use App\Models\ManagerLogEntry;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Validation\ValidationException;
@@ -63,11 +64,12 @@ class AppServiceProvider extends ServiceProvider
             EnvironmentCheck::new(),
         ]);
         Gate::define('viewPulse', function (User $user) {
-            return $user->email == 'arshadrmultani@gmail.com';
+            return $user->hasRole('super_admin');
         });
         Relation::morphMap([
             'kofol_entry' => KofolEntry::class,
             'microsite' => Microsite::class,
+            'manager_log_entry' => ManagerLogEntry::class,
             'doctor' => Doctor::class,
             'chemist' => Chemist::class,
             'headquarter' => Headquarter::class,

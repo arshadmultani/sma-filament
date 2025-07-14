@@ -12,9 +12,11 @@ use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use App\Filament\Clusters\Attributes;
+use App\Traits\HandlesDeleteExceptions;
 
 class QualificationResource extends Resource
 {
+    use HandlesDeleteExceptions;
     protected static ?string $model = Qualification::class;
     protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
 
@@ -50,6 +52,8 @@ class QualificationResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                // Tables\Actions\DeleteAction::make()
+                //     ->before(fn($action, $record) => (new static())->tryDeleteRecord($record, $action)),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

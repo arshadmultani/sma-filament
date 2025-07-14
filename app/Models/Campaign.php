@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 use App\Models\Scopes\CampaignVisibilityScope;
 
-
 class Campaign extends Model
 {
     use HasFactory;
@@ -61,9 +60,23 @@ class Campaign extends Model
         return $this->belongsToMany(\Spatie\Permission\Models\Role::class, 'campaign_role');
     }
 
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class, 'campaign_tag')->withTimestamps();
+    }
+
     public function getRelationsToCheckForDelete(): array
     {
         // Only check for campaign entries, not divisions or roles
         return ['entries'];
     }
+    public function getParticipantsAttribute()
+{
+    $headOfficeRoleNames = \Spatie\Permission\Models\Role::whereIn('id', \App\Models\User::headOfficeRoleIds())->pluck('name')->toArray();
+    return $this->roles
+        ->pluck('name')
+        ->reject(fn($role) => in_array($role, $headOfficeRoleNames))
+        ->values()
+        ->all();
+}
 }

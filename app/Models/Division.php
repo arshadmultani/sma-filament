@@ -35,4 +35,8 @@ class Division extends Model
     {
         return $this->hasMany(ConversionActivity::class);
     }
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class, 'division_tag');
+    }
 }

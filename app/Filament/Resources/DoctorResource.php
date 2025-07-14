@@ -30,6 +30,8 @@ use App\Traits\HandlesDeleteExceptions;
 use Njxqlus\Filament\Components\Infolists\LightboxImageEntry;
 use Illuminate\Support\Facades\Storage;
 use Filament\Infolists\Components\RepeatableEntry;
+use Illuminate\Database\Eloquent\Builder;
+use Icetalker\FilamentTableRepeatableEntry\Infolists\Components\TableRepeatableEntry;
 
 
 class DoctorResource extends Resource implements HasShieldPermissions
@@ -122,6 +124,18 @@ class DoctorResource extends Resource implements HasShieldPermissions
                     ->multiple()
                     ->minItems(1)
                     ->maxItems(1),
+                Select::make('tags')
+                    ->label('Tags')
+                    ->multiple()
+                    ->visible(fn(string $context): bool => $context === 'create')
+                    ->preload()
+                    ->relationship(
+                        name: 'tags',
+                        titleAttribute: 'name',
+                        modifyQueryUsing: fn(Builder $query) => $query->where('attached_to', 'doctor')
+                    )
+                    ->searchable(),
+
                 FileUpload::make('attachment')
                     ->directory('doctors/attachments')
                     ->placeholder('Upload Both or Any One')
@@ -129,10 +143,14 @@ class DoctorResource extends Resource implements HasShieldPermissions
                     ->multiple()
                     ->maxFiles(2)
                     ->panelLayout('grid')
-                    ->maxSize(1024)
+                    ->maxSize(2048)
                     ->label('Visiting Card/Rx. Pad'),
                 FileUpload::make('profile_photo')
-                    ->image()->directory('doctors/profile_photos'),
+                    ->image()
+                    ->directory('doctors/profile_photos')
+                    ->maxFiles(1)
+                    ->image()
+                    ->maxSize(2048),
 
             ]);
     }
@@ -215,10 +233,11 @@ class DoctorResource extends Resource implements HasShieldPermissions
             ->schema([
 
                 Section::make()
+                    ->compact()
                     ->columns(3)
                     ->schema([
                         LightboxImageEntry::make('profile_photo')
-                            ->href(fn($record) => $record->profile_photo ? Storage::temporaryUrl($record->profile_photo, now()->addMinutes(5)) : '')
+                            ->href(fn($state) => $state ? Storage::temporaryUrl($state, now()->addMinutes(5)) : '')
                             ->visible(fn($state) => !is_null($state))
                             ->label('Photo')->circular(),
 
@@ -235,6 +254,7 @@ class DoctorResource extends Resource implements HasShieldPermissions
                     ]),
 
                 Section::make('')
+                    ->compact()
                     ->columns(3)
                     ->schema([
 
@@ -249,10 +269,18 @@ class DoctorResource extends Resource implements HasShieldPermissions
                         // TextEntry::make('user.name'),
                     ]),
                 Section::make('')
-                    ->hidden(fn($record) => $record->products->isEmpty())
-                    ->columns(3)
+
+                    ->columns(4)
                     ->schema([
-                        TextEntry::make('products.name')->label('Focus Product'),
+                        TextEntry::make('products.name')
+                            ->hidden(fn($record) => $record->products->isEmpty())
+                            ->label('Focus Product'),
+                        TextEntry::make('tags.name')
+                            ->label('Tags')
+                            ->hidden(fn($record) => $record->tags->isEmpty())
+                            ->badge(),
+                        TextEntry::make('updated_at')->label('Updated')->since(),
+                        TextEntry::make('user.name')->label('Created By'),
                     ]),
                 Section::make()
                     ->hidden(fn($record) => $record->attachment == null)
@@ -267,7 +295,47 @@ class DoctorResource extends Resource implements HasShieldPermissions
                             ->visible(fn($record) => !empty($record->attachment)),
 
                     ]),
-
+                Section::make()
+                    ->compact()
+                    ->hidden(fn($record) => $record->tags->isEmpty())
+                    ->visible(fn() => Auth::user()->can('view_user'))
+                    ->schema([
+                        TableRepeatableEntry::make('tags')
+                            ->contained(false)
+                            ->label('')
+                            ->columnSpan(2)
+                            ->extraAttributes(['class' => 'hidden sm:block']) // Hidden on mobile, visible on sm and up
+                            ->schema([
+                                TextEntry::make('name')
+                                    ->badge()
+                                    ->label('Tag'),
+                                TextEntry::make('pivot.user_id')
+                                    ->label('Tagged By')
+                                    ->formatStateUsing(function ($state) {
+                                        return \App\Models\User::find($state)?->name ?? 'Unknown';
+                                    }),
+                                TextEntry::make('pivot.created_at')
+                                    ->label('Tagged On')
+                                    ->formatStateUsing(fn($state) => $state->format('d-m-Y')),
+                            ]),
+                        RepeatableEntry::make('tags')  // repeater for mobile
+                            ->label('')
+                            ->extraAttributes(['class' => 'block sm:hidden']) // Visible only on mobile
+                            ->schema([
+                                TextEntry::make('name')
+                                    ->columnSpan(2)
+                                    ->label('')
+                                    ->badge(),
+                                TextEntry::make('pivot.user_id')
+                                    ->label('Tagged By')
+                                    ->formatStateUsing(function ($state) {
+                                        return \App\Models\User::find($state)?->name ?? 'Unknown';
+                                    }),
+                                TextEntry::make('pivot.created_at')
+                                    ->label('Tagged On')
+                                    ->formatStateUsing(fn($state) => $state->format('d-m-Y')),
+                            ]),
+                    ])
             ]);
     }
 
@@ -287,10 +355,10 @@ class DoctorResource extends Resource implements HasShieldPermissions
             'view' => Pages\ViewDoctor::route('/{record}'),
         ];
     }
-    public function throwValidationException(array $errors): void
-    {
-        throw new ValidationException($errors);
-    }
+    // public function throwValidationException(array $errors): void
+    // {
+    //     throw new ValidationException($errors);
+    // }
     // public static function getNavigationBadge(): ?string
     // {
     //     return static::getModel()::count();

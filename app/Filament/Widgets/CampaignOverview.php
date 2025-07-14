@@ -40,11 +40,12 @@ class CampaignOverview extends BaseWidget
                     KofolEntry::query()->pluck('id')
                 )->count()
             )
-            ->icon('heroicon-s-ticket')
-            ->iconColor('primary')
-            ->textColor('primary', '', descriptionColor: 'primary'),
+                ->icon('heroicon-s-ticket')
+                ->iconColor('primary')
+                ->textColor('primary', '', descriptionColor: 'primary'),
 
-            Stat::make('Approved Invoices Amount', '₹' . number_format(KofolEntry::where('status', 'Approved')->sum('invoice_amount')))
+            Stat::make('Approved Invoices Amount', (new \NumberFormatter('en_IN', \NumberFormatter::CURRENCY))->formatCurrency(KofolEntry::where('status', 'Approved')->sum('invoice_amount'), 'INR'))
+
                 ->icon('heroicon-s-currency-rupee')
                 ->iconColor('primary')
                 ->textColor('primary', '', descriptionColor: 'primary')

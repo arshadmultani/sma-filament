@@ -11,9 +11,11 @@ use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use App\Filament\Clusters\Attributes;
+use App\Traits\HandlesDeleteExceptions;
 
 class SpecialtyResource extends Resource
 {
+    use HandlesDeleteExceptions;
     protected static ?string $model = Specialty::class;
 
     protected static ?string $cluster = Attributes::class;
@@ -42,11 +44,10 @@ class SpecialtyResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make()
+                    ->before(fn($action, $record) => (new static())->tryDeleteRecord($record, $action)),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
             ]);
     }
 

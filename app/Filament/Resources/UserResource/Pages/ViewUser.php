@@ -22,7 +22,7 @@ class ViewUser extends ViewRecord
                 ->label('Edit')
                 ->color('gray')
                 ->url(route('filament.admin.resources.users.edit', $this->record))
-                ->hidden(fn () => ! (Auth::user()->hasRole(['admin', 'super_admin']) || Auth::user()->id === $this->record->id))
-        ];
+                ->visible(fn () => Auth::user()->can('update', $this->record))
+            ];
     }
 }
