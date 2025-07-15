@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\KofolEntryResource\Pages;
 
+use App\Filament\Actions\NextAction;
+use App\Filament\Actions\PreviousAction;
 use App\Filament\Actions\SendKofolCouponAction;
 use App\Filament\Actions\UpdateKofolStatusAction;
 use App\Filament\Resources\KofolEntryResource;
@@ -13,25 +15,31 @@ use Illuminate\Support\Facades\Gate;
 use Torgodly\Html2Media\Actions\Html2MediaAction;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
+use App\Filament\Pages\Concerns\CanPaginateViewRecord;
 
 class ViewKofolEntry extends ViewRecord
 {
+    use CanPaginateViewRecord;
     protected static string $resource = KofolEntryResource::class;
 
     public function getTitle(): string
     {
-        return 'KSV/POB/'.$this->record->id;
+        return 'KSV/POB/' . $this->record->id;
     }
     protected function resolveRecord($key): Model
-{
-    $record = parent::resolveRecord($key)->load(['customer.headquarter', 'coupons']);
-    Log::info('Coupons are loaded:',[$record->coupons]);
-    return $record;
-}
+    {
+        $record = parent::resolveRecord($key)->load(['customer.headquarter', 'coupons']);
+        Log::info('Coupons are loaded:', [$record->coupons]);
+        return $record;
+    }
 
     public function getHeaderActions(): array
     {
         $actions = [];
+        $actions[] = PreviousAction::make()
+            ->extraAttributes(['class' => 'hidden sm:block']);
+        $actions[] = NextAction::make()
+            ->extraAttributes(['class' => 'hidden sm:block']);
         if (Gate::allows('updateStatus', $this->record)) {
             $actions[] = UpdateKofolStatusAction::make();
 
@@ -40,7 +48,7 @@ class ViewKofolEntry extends ViewRecord
         /** @var \App\Models\User|null $user */
         $user = Auth::user();
         if (Gate::allows('sendCoupon', $this->record)) {
-            $actions[] = SendKofolCouponAction::make()->visible(fn ($record) => $record->status == 'Approved');
+            $actions[] = SendKofolCouponAction::make()->visible(fn($record) => $record->status == 'Approved');
         }
         if (Gate::allows('update', $this->record) && Auth::id() === $this->record->user_id) {
             $actions[] = Action::make('edit')
@@ -61,5 +69,5 @@ class ViewKofolEntry extends ViewRecord
             ...$actions,
         ];
     }
-    
+
 }

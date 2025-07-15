@@ -85,22 +85,7 @@ class CampaignResource extends Resource
                             ->multiple()
                             ->relationship('tags', 'name')
                             ->preload()
-                            ->helperText('Leave blank to allow all approved customers')
-                            ->createOptionForm(
-                                [
-                                    TextInput::make('name')
-                                        ->unique(ignoreRecord: true)
-                                        ->required(),
-                                    Select::make('attached_to')
-                                        ->native(false)
-                                        ->required()
-                                        ->options([
-                                            'doctor' => 'Doctor',
-                                            'chemist' => 'Chemist',
-                                        ]),
-
-                                ]
-                            ),
+                            ->helperText('Leave blank to allow untagged yet approved customers')
 
                     ]),
                 Forms\Components\Section::make()

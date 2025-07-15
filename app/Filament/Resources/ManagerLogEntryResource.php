@@ -288,6 +288,7 @@ class ManagerLogEntryResource extends Resource
                         TextInput::make('no_of_prescriptions')
                             ->label('No. of Prescriptions')
                             ->visible(fn($get) => $get('conversion_type') === 'prescription')
+                            ->placeholder('Avg. no. of Rx per week')
                             ->reactive()
                             ->numeric()
                             ->required(fn($get) => $get('conversion_type') === 'prescription')
@@ -313,22 +314,25 @@ class ManagerLogEntryResource extends Resource
                             ->schema([
                                 Select::make('product_id')
                                     ->label('Product')
+                                    ->placeholder('Product Name')
                                     ->options(Product::all()->pluck('name', 'id'))
                                     ->searchable()
                                     ->required(),
                                 TextInput::make('quantity')
                                     ->label('Quantity')
+                                    ->placeholder('Product Qty')
                                     ->numeric()
                                     ->required(),
                             ])->columns(2),
                         TextInput::make('invoice_amount')
-                            ->label('Invoice Amount')
+                            ->label('POB Value')
+                            ->placeholder('POB amount')
                             ->numeric()
                             ->visible(fn($get) => $get('conversion_type') === 'pob')
                             ->prefix('₹')
                             ->required(fn($get) => $get('conversion_type') === 'pob'),
                         FileUpload::make('invoice_image')
-                            ->label('Invoice Image')
+                            ->label('POB Image')
                             ->disk('s3')
                             ->visible(fn($get) => $get('conversion_type') === 'pob')
                             ->image()
