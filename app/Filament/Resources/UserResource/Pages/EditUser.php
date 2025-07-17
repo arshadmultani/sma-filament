@@ -120,9 +120,9 @@ class EditUser extends EditRecord
         }
         $record->update($data);
         // Send notification if email or password changed
-        if ($emailChanged || $passwordChanged) {
-            Mail::to($record->email)->send(new SendUserCredentials($record->email, $plainPassword ?? 'Your password was not changed.'));
-        }
+        // if ($emailChanged || $passwordChanged) {
+        //     Mail::to($record->email)->send(new SendUserCredentials($record->email, $plainPassword ?? 'Your password was not changed.'));
+        // }
 
         return $record;
     }

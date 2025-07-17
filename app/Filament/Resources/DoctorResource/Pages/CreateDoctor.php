@@ -14,7 +14,7 @@ class CreateDoctor extends CreateRecord
 
     public function getRedirectUrl(): string
     {
-        return $this->getResource()::getUrl('index');
+        return $this->getResource()::getUrl('view', ['record' => $this->record]);
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array

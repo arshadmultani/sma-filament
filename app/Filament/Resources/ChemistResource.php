@@ -58,7 +58,7 @@ class ChemistResource extends Resource implements HasShieldPermissions
                     ->required(),
                 Select::make('type')
                     ->native(false)
-                    ->options(['Ayurvedic' => 'Ayurvedic', 'Allopathic' => 'Allopathic'])
+                    ->options(['Allopathic' => 'Allopathic','Ayurvedic' => 'Ayurvedic',])
                     ->required(),
                 Select::make('headquarter_id')
                     ->native(false)
@@ -67,15 +67,15 @@ class ChemistResource extends Resource implements HasShieldPermissions
 
                         if ($user->hasRole('ASM')) {
                             // ASM: headquarters under their area
-                            return \App\Models\Headquarter::where('area_id', $user->location_id)->pluck('name', 'id');
+                            return \App\Models\Headquarter::where('area_id', $user->location_id)->orderBy('name', 'asc')->pluck('name', 'id');
                         } elseif ($user->hasRole('RSM')) {
                             // RSM: headquarters under all areas in their region
-                            $areaIds = \App\Models\Area::where('region_id', $user->location_id)->pluck('id');
+                            $areaIds = \App\Models\Area::where('region_id', $user->location_id)->orderBy('name', 'asc')->pluck('id');
 
-                            return \App\Models\Headquarter::whereIn('area_id', $areaIds)->pluck('name', 'id');
+                            return \App\Models\Headquarter::whereIn('area_id', $areaIds)->orderBy('name', 'asc')->pluck('name', 'id');
                         } else {
                             // Default: all headquarters (or adjust as needed)
-                            return \App\Models\Headquarter::pluck('name', 'id');
+                            return \App\Models\Headquarter::orderBy('name', 'asc')->pluck('name', 'id');
                         }
                     })
                     ->searchable()

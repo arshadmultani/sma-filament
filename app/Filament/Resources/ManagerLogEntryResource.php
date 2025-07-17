@@ -169,7 +169,7 @@ class ManagerLogEntryResource extends Resource
                             ->placeholder('Select Team Member')
                             ->options(function () {
                                 $team = Auth::user()->getTeam();
-                                return collect($team)->flatten(1)->unique('id')->pluck('name', 'id')->toArray();
+                                return collect($team)->flatten(1)->unique('id')->sortBy('name')->pluck('name', 'id')->toArray();
                             })
 
                             ->searchable(),
@@ -231,6 +231,7 @@ class ManagerLogEntryResource extends Resource
                                 $doctors = Doctor::whereHas('tags', function ($q) use ($tagIds) {
                                     $q->whereIn('tags.id', $tagIds);
                                 })
+                                    ->orderBy('name', 'asc')
                                     ->pluck('name', 'id')
                                     ->toArray();
                                 return $doctors;
@@ -286,7 +287,7 @@ class ManagerLogEntryResource extends Resource
                             ->inline(),
                         /*-------------------------------------PRESCRIPTION --------------------------------*/
                         TextInput::make('no_of_prescriptions')
-                            ->label('No. of Prescriptions')
+                            ->label('No. of Prescriptions/week.')
                             ->visible(fn($get) => $get('conversion_type') === 'prescription')
                             ->placeholder('Avg. no. of Rx per week')
                             ->reactive()
@@ -315,7 +316,7 @@ class ManagerLogEntryResource extends Resource
                                 Select::make('product_id')
                                     ->label('Product')
                                     ->placeholder('Product Name')
-                                    ->options(Product::all()->pluck('name', 'id'))
+                                    ->options(Product::orderBy('name', 'asc')->pluck('name', 'id'))
                                     ->searchable()
                                     ->required(),
                                 TextInput::make('quantity')
@@ -344,7 +345,7 @@ class ManagerLogEntryResource extends Resource
                         Select::make('call_inputs')
                             ->label('Call Inputs')
                             ->multiple()
-                            ->relationship('callInputs', 'name')
+                            ->relationship('callInputs', 'name', fn($query) => $query->orderBy('name', 'asc'))
                             ->required()
                             ->preload()
                             ->searchable(),
