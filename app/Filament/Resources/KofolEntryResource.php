@@ -206,6 +206,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ->toggleable(),
                 TextColumn::make('status')->label('Status')
                     ->badge()
+                    ->sortable()
                     ->color(fn(string $state): string => match ($state) {
                         'Pending' => 'warning',
                         'Approved' => 'primary',
@@ -219,6 +220,9 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                 // Notification status column
                 TextColumn::make('notification_status')
                     ->toggleable()
+                    ->sortable(query: function ($query, $direction) {
+                        $query->orderBy('notification_status_sort', $direction);
+                    })
                     ->visible(fn($record) => Auth::user()->can('send_coupon_kofol::entry'))
                     ->label('CustomerEmail')
                     ->state(function ($record) {
@@ -251,7 +255,13 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                 //     ->toggleable(),
             ])
             ->filters([
-                // Removed coupon_code filter
+                SelectFilter::make('status')
+                    ->options([
+                        'Pending' => 'Pending',
+                        'Approved' => 'Approved',
+                        'Rejected' => 'Rejected',
+                    ])
+                    ->native(false),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
@@ -261,7 +271,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     Tables\Actions\DeleteBulkAction::make(),
                     // UpdateKofolStatusAction::makeBulk(), // Removed as bulk actions are commented out
                     // SendKofolCouponAction::makeBulk()
-                        // ->visible(fn() => Auth::user()->can('send_coupon_kofol::entry')),
+                    //     ->visible(fn() => Auth::user()->can('send_coupon_kofol::entry')),
                 ]),
             ]);
     }
@@ -407,6 +417,18 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                         \App\Models\Chemist::class => ['headquarter'],
                     ]);
                 }
-            ]);
+            ])
+            ->selectRaw('
+            *,
+            (
+                select case when exists (
+                    select 1 from notifications
+                    where notifiable_id = kofol_entries.customer_id
+                      and notifiable_type = kofol_entries.customer_type
+                      and type = ?
+                      and (data->>\'kofol_entry_id\')::int = kofol_entries.id
+                ) then \'Sent\' else \'Not Sent\' end
+            ) as notification_status_sort
+        ', [\App\Notifications\KofolCouponNotification::class]);
     }
 }

@@ -19,11 +19,11 @@ class ListDoctors extends ListRecords
     {
         return [
             Actions\CreateAction::make(),
-            Actions\ExportAction::make()
-            ->exporter(DoctorExporter::class)
-            ->visible(Auth::user()->can('force_delete_any_user'))
-            ->label('Download All Doctors')
-            ->color('primary'),
+            // Actions\ExportAction::make()
+            //     ->exporter(DoctorExporter::class)
+            //     ->visible(Auth::user()->can('force_delete_any_user'))
+            //     ->label('Download All Doctors')
+            //     ->color('primary'),
         ];
     }
 }

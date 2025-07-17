@@ -34,6 +34,9 @@ use Filament\Infolists\Components\RepeatableEntry;
 use Illuminate\Database\Eloquent\Builder;
 use Icetalker\FilamentTableRepeatableEntry\Infolists\Components\TableRepeatableEntry;
 use App\Models\Tag;
+use Filament\Tables\Grouping\Group;
+use App\Filament\Exports\DoctorExporter;
+use Filament\Actions\ExportAction;
 
 
 class DoctorResource extends Resource implements HasShieldPermissions
@@ -124,8 +127,8 @@ class DoctorResource extends Resource implements HasShieldPermissions
                     // ->required()
                     ->getOptionLabelFromRecordUsing(fn($record) => $record->name)
                     ->multiple(),
-                    // ->minItems(1)
-                    // ->maxItems(1),
+                // ->minItems(1)
+                // ->maxItems(1),
                 Select::make('tags')
                     ->label('Tags')
                     ->multiple()
@@ -160,6 +163,9 @@ class DoctorResource extends Resource implements HasShieldPermissions
     public static function table(Table $table): Table
     {
         return $table
+            // ->groups([
+            //    'tags.name'
+            // ])
             ->paginated([25, 50, 100, 250])
             ->defaultSort('name', 'asc')
             ->columns([
@@ -206,6 +212,10 @@ class DoctorResource extends Resource implements HasShieldPermissions
                 TextColumn::make('user.name')->label('Created By'),
                 // TextColumn::make('created_at')->since()->toggleable()->sortable(),
                 TextColumn::make('updated_at')->since()->toggleable()->sortable(),
+                TextColumn::make('tags.name')
+                    ->label('Tags')
+                    ->toggleable()
+                    ->badge(),
 
             ])
             ->filters([
@@ -215,8 +225,10 @@ class DoctorResource extends Resource implements HasShieldPermissions
                         'Approved' => 'Approved',
                         'Rejected' => 'Rejected',
                     ]),
-                // SelectFilter::make('tags')
-                //     ->options()
+                SelectFilter::make('tags')
+                    ->relationship('tags', 'name')
+                    ->preload()
+                    ->multiple(),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
@@ -226,6 +238,10 @@ class DoctorResource extends Resource implements HasShieldPermissions
                     UpdateStatusAction::makeBulk(),
                     Tables\Actions\DeleteBulkAction::make()
                         ->before(fn($action, $records) => collect($records)->each(fn($record) => (new static())->tryDeleteRecord($record, $action))),
+                    Tables\Actions\ExportBulkAction::make()->exporter(DoctorExporter::class)
+                        ->label('Download selected')
+                        ->visible(fn() => Auth::user()->can('view_user')),
+
                 ]),
             ]);
     }

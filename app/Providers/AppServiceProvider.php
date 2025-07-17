@@ -31,6 +31,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use Filament\Actions\ExportAction;
+
 
 
 class AppServiceProvider extends ServiceProvider
@@ -89,6 +91,10 @@ class AppServiceProvider extends ServiceProvider
                 ->danger()
                 ->send();
         };
+
+        ExportAction::configureUsing(fn(ExportAction $action) => $action->fileDisk('s3'));
+
+
     }
 
     private function configureCommands(): void

@@ -314,10 +314,12 @@ class UserResource extends Resource
                 // SendMailAction::make(),
             ])
             ->bulkActions([
-                SendMailAction::makeBulk(),
-                Tables\Actions\DeleteBulkAction::make(),
-                ForceDeleteBulkAction::make(),
-                Tables\Actions\ExportBulkAction::make()->exporter(UserExporter::class),
+                Tables\Actions\BulkActionGroup::make([
+                    // SendMailAction::makeBulk(),
+                    Tables\Actions\DeleteBulkAction::make(),
+                    ForceDeleteBulkAction::make(),
+                    Tables\Actions\ExportBulkAction::make()->exporter(UserExporter::class),
+                ]),
             ]);
     }
 

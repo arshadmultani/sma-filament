@@ -12,9 +12,14 @@ use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use App\Filament\Pages\Concerns\CanPaginateViewRecord;
+use App\Filament\Actions\PreviousAction;
+use App\Filament\Actions\NextAction;
 
 class ViewDoctor extends ViewRecord
 {
+    use CanPaginateViewRecord;
+
     protected static string $resource = DoctorResource::class;
 
     // public function getHeader(): ?View{
@@ -32,6 +37,10 @@ class ViewDoctor extends ViewRecord
     public function getHeaderActions(): array
     {
         $actions = [];
+        $actions[] = PreviousAction::make()
+            ->extraAttributes(['class' => 'hidden sm:block']);
+        $actions[] = NextAction::make()
+            ->extraAttributes(['class' => 'hidden sm:block']);
         if (Gate::allows('updateStatus', $this->getRecord())) {
             $actions[] = UpdateStatusAction::make();
         }
