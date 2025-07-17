@@ -23,7 +23,7 @@ class CreateDoctor extends CreateRecord
         if (Auth::user()->hasRole('DSA')) {
             $data['headquarter_id'] = Auth::user()->location_id;
         }
-
+        $data['status'] = 'Pending';
         return $data;
     }
 

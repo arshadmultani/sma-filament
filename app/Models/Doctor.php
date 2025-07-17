@@ -52,11 +52,11 @@ use Illuminate\Notifications\Notifiable;
  */
 class Doctor extends BaseModel
 {
-    use HasFactory,Notifiable;
+    use HasFactory, Notifiable;
 
     protected $fillable = ['name', 'email', 'phone', 'qualification_id', 'profile_photo', 'user_id', 'headquarter_id', 'attachment', 'address', 'type', 'support_type', 'town', 'specialty_id'];
 
-    
+
     protected $casts = [
         'attachment' => 'array',
     ];
@@ -110,5 +110,14 @@ class Doctor extends BaseModel
     public function getRelationsToCheckForDelete()
     {
         return ['microsites', 'kofolEntries'];
+    }
+
+    public static function booted()
+    {
+        parent::booted();
+        static::deleting(function ($doctor) {
+            $doctor->products()->detach();
+            $doctor->tags()->detach();
+        });
     }
 }

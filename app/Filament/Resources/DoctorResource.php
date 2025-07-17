@@ -27,11 +27,13 @@ use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use App\Traits\HandlesDeleteExceptions;
+use Filament\Infolists\Components\IconEntry;
 use Njxqlus\Filament\Components\Infolists\LightboxImageEntry;
 use Illuminate\Support\Facades\Storage;
 use Filament\Infolists\Components\RepeatableEntry;
 use Illuminate\Database\Eloquent\Builder;
 use Icetalker\FilamentTableRepeatableEntry\Infolists\Components\TableRepeatableEntry;
+use App\Models\Tag;
 
 
 class DoctorResource extends Resource implements HasShieldPermissions
@@ -67,22 +69,22 @@ class DoctorResource extends Resource implements HasShieldPermissions
                     ->label('Name'),
                 Select::make('type')
                     ->native(false)
-                    ->options(['Ayurvedic' => 'Ayurvedic', 'Allopathic' => 'Allopathic'])
+                    ->options(['Allopathic' => 'Allopathic', 'Ayurvedic' => 'Ayurvedic'])
                     ->required(),
                 Select::make('qualification_id')
                     ->native(false)
                     ->label('Qualification')
-                    ->options(Qualification::where('category', 'Doctor')->pluck('name', 'id'))
+                    ->options(Qualification::where('category', 'Doctor')->orderBy('name', 'asc')->pluck('name', 'id'))
                     ->required(),
                 Select::make('specialty_id')
                     ->label('Specialty')
                     ->native(false)
                     ->label('Specialty')
-                    ->options(Specialty::pluck('name', 'id'))
+                    ->options(Specialty::orderBy('name', 'asc')->pluck('name', 'id'))
                     ->required(),
                 Select::make('support_type')
                     ->native(false)
-                    ->options(['Prescribing' => 'Prescribing', 'Dispensing' => 'Dispensing'])
+                    ->options(['Dispensing' => 'Dispensing', 'Prescribing' => 'Prescribing'])
                     ->required(),
                 TextInput::make('email')
                     ->email()
@@ -99,15 +101,15 @@ class DoctorResource extends Resource implements HasShieldPermissions
 
                         if ($user->hasRole('ASM')) {
                             // ASM: headquarters under their area
-                            return \App\Models\Headquarter::where('area_id', $user->location_id)->pluck('name', 'id');
+                            return \App\Models\Headquarter::where('area_id', $user->location_id)->orderBy('name', 'asc')->pluck('name', 'id');
                         } elseif ($user->hasRole('RSM')) {
                             // RSM: headquarters under all areas in their region
-                            $areaIds = \App\Models\Area::where('region_id', $user->location_id)->pluck('id');
+                            $areaIds = \App\Models\Area::where('region_id', $user->location_id)->orderBy('name', 'asc')->pluck('id');
 
-                            return \App\Models\Headquarter::whereIn('area_id', $areaIds)->pluck('name', 'id');
+                            return \App\Models\Headquarter::whereIn('area_id', $areaIds)->orderBy('name', 'asc')->pluck('name', 'id');
                         } else {
                             // Default: all headquarters (or adjust as needed)
-                            return \App\Models\Headquarter::pluck('name', 'id');
+                            return \App\Models\Headquarter::orderBy('name', 'asc')->pluck('name', 'id');
                         }
                     })
                     ->searchable()
@@ -116,14 +118,14 @@ class DoctorResource extends Resource implements HasShieldPermissions
                     ->required(),
                 Select::make('products')
                     ->label('Focus Product')
-                    ->relationship('products', 'name')
+                    ->relationship('products', 'name', fn($query) => $query->orderBy('name', 'asc'))
                     ->preload()
                     ->searchable()
                     // ->required()
                     ->getOptionLabelFromRecordUsing(fn($record) => $record->name)
-                    ->multiple()
-                    ->minItems(1)
-                    ->maxItems(1),
+                    ->multiple(),
+                    // ->minItems(1)
+                    // ->maxItems(1),
                 Select::make('tags')
                     ->label('Tags')
                     ->multiple()
@@ -213,6 +215,8 @@ class DoctorResource extends Resource implements HasShieldPermissions
                         'Approved' => 'Approved',
                         'Rejected' => 'Rejected',
                     ]),
+                // SelectFilter::make('tags')
+                //     ->options()
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
@@ -272,6 +276,19 @@ class DoctorResource extends Resource implements HasShieldPermissions
 
                     ->columns(4)
                     ->schema([
+                        IconEntry::make('status')
+                            ->icon(fn(string $state): string => match ($state) {
+                                'Pending' => 'heroicon-o-clock',
+                                'Approved' => 'heroicon-o-check-circle',
+                                'Rejected' => 'heroicon-o-x-circle',
+                                default => 'heroicon-o-question-mark-circle',
+                            })
+                            ->color(fn(string $state): string => match ($state) {
+                                'Pending' => 'warning',
+                                'Approved' => 'success',
+                                'Rejected' => 'danger',
+                                default => 'secondary',
+                            }),
                         TextEntry::make('products.name')
                             ->hidden(fn($record) => $record->products->isEmpty())
                             ->label('Focus Product'),

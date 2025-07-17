@@ -14,6 +14,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Traits\HandlesDeleteExceptions;
+use App\Models\User;
 
 class TagResource extends Resource
 {
@@ -27,7 +28,7 @@ class TagResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
-            ->columns(3)
+            ->columns(4)
             ->schema([
                 Forms\Components\TextInput::make('name')
                     ->required()
@@ -42,6 +43,15 @@ class TagResource extends Resource
                         'chemist' => 'Chemist',
                     ])
                     ->preload()
+                    ->required(),
+                Forms\Components\Select::make('roles')
+                    ->label('Visible to')
+                    ->native(false)
+                    ->multiple()
+                    ->relationship('roles', 'name', function ($query) {
+                        $query->whereNotIn('roles.id', User::headOfficeRoleIds());
+                    })                    ->preload()
+                    // ->helperText('NOTE: 1. Makes tags visible to this role users only. 2. Avoid editing this after creation to prevent data corruption')
                     ->required(),
                 Forms\Components\Select::make('divisions')
                     ->label('Attach to Division')
@@ -66,6 +76,12 @@ class TagResource extends Resource
                 Tables\Columns\TextColumn::make('attached_to')
                     ->searchable()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('roles.name')
+                    ->label('Visible to')
+                    ->searchable()
+                    ->sortable()
+                    ->badge()
+                    ->color('gray'),
                 Tables\Columns\TextColumn::make('divisions.name')
                     ->label('Division')
                     ->searchable()

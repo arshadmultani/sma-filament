@@ -31,4 +31,8 @@ class Tag extends Model
     {
         return $this->belongsToMany(Division::class, 'division_tag', 'tag_id', 'division_id');
     }
+    public function roles()
+    {
+        return $this->belongsToMany(\Spatie\Permission\Models\Role::class, 'role_tag');
+    }
 }

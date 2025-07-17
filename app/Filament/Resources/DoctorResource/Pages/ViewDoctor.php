@@ -26,7 +26,7 @@ class ViewDoctor extends ViewRecord
 
     public function getTitle(): string
     {
-        return 'Dr. '.$this->record->name;
+        return 'Dr. ' . $this->record->name;
     }
 
     public function getHeaderActions(): array
@@ -37,13 +37,13 @@ class ViewDoctor extends ViewRecord
         }
         $actions[] = ActionGroup::make([
             AddTagAction::make(null, 'doctor', 'tags', 'Add Tag', 'Add Tag to Doctor')
-            ->visible(fn()=>$this->record->status=='Approved'),
+                ->visible(fn() => $this->record->status == 'Approved'),
             Action::make('edit')
-            ->icon('heroicon-m-pencil')
-            ->hidden(fn () => ! (Auth::user()->hasRole(['admin', 'super_admin']) || Auth::user()->id === $this->record->user_id))
-            ->label('Edit')
-            ->url(route('filament.admin.resources.doctors.edit', $this->record))
-            ->color('primary'),
+                ->icon('heroicon-m-pencil')
+                ->hidden(fn() => !(Auth::user()->hasRole(['admin', 'super_admin']) || Auth::user()->id === $this->record->user_id))
+                ->label('Edit')
+                ->url(route('filament.admin.resources.doctors.edit', $this->record))
+                ->color('primary'),
         ])->icon('heroicon-m-bars-3-bottom-right');
 
         return $actions;
