@@ -256,8 +256,11 @@ class DoctorResource extends Resource implements HasShieldPermissions
                     ->compact()
                     ->columns(3)
                     ->schema([
-                        LightboxImageEntry::make('profile_photo')
-                            ->href(fn($state) => $state ? Storage::temporaryUrl($state, now()->addMinutes(5)) : '')
+                        ImageEntry::make('profile_photo')
+                            ->disk('s3')
+                            ->visibility('private')
+                            ->url(fn($state) => $state ? Storage::temporaryUrl($state, now()->addMinutes(5)) : '')
+                            ->checkFileExistence(false)
                             ->visible(fn($state) => !is_null($state))
                             ->label('Photo')->circular(),
 
@@ -322,8 +325,11 @@ class DoctorResource extends Resource implements HasShieldPermissions
                         RepeatableEntry::make('attachment')
                             ->label('Visiting Card/Rx. Pad')
                             ->schema([
-                                LightboxImageEntry::make('') // no key, since each item is a string
-                                    ->href(fn($state) => $state ? Storage::temporaryUrl($state, now()->addMinutes(5)) : '')
+                                ImageEntry::make('') 
+                                    ->disk('s3')
+                                    ->visibility('private')
+                                    ->url(fn($state) => $state ? Storage::temporaryUrl($state, now()->addMinutes(5)) : '')
+                                    ->checkFileExistence(false)
                             ])
                             ->visible(fn($record) => !empty($record->attachment)),
 
