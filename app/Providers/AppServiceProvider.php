@@ -32,6 +32,8 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Filament\Actions\ExportAction;
+use Illuminate\Database\Eloquent\Builder;
+use App\Contracts\HeadquarterFilterable;
 
 
 
@@ -93,6 +95,18 @@ class AppServiceProvider extends ServiceProvider
         };
 
         ExportAction::configureUsing(fn(ExportAction $action) => $action->fileDisk('s3'));
+
+        // Register query builder macro for location filtering
+        Builder::macro('whereLocationIn', function (string $locationType, array $locationIds) {
+            /** @var Builder $this */
+            $model = $this->getModel();
+            
+            if ($model instanceof HeadquarterFilterable) {
+                return $model->scopeWhereLocationIn($this, $locationType, $locationIds);
+            }
+            
+            return $this;
+        });
 
 
     }
