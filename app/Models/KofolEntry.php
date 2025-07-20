@@ -2,14 +2,10 @@
 
 namespace App\Models;
 
-use App\Contracts\HeadquarterFilterable;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Scopes\TeamHierarchyScope;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use App\Contracts\IsCampaignEntry;
-use Illuminate\Database\Eloquent\Builder;
-use App\Models\Doctor;
-use App\Models\Chemist;
 
 /**
  * @property int $id
@@ -50,7 +46,7 @@ use App\Models\Chemist;
  */
 
 #[ScopedBy(TeamHierarchyScope::class)]
-class KofolEntry extends Model implements IsCampaignEntry, HeadquarterFilterable
+class KofolEntry extends Model implements IsCampaignEntry
 {
     protected $guarded = [];
     protected $casts = [
@@ -94,40 +90,5 @@ class KofolEntry extends Model implements IsCampaignEntry, HeadquarterFilterable
             $kofolEntry->campaignEntry()->delete();
         });
     }
-    public function scopeWhereHeadquarterIn(Builder $query, array $headquarterIds): Builder
-    {
-        return $query->whereHasMorph(
-            'customer',
-            [Doctor::class, Chemist::class],
-            fn (Builder $q) => $q->whereIn('headquarter_id', $headquarterIds)
-        );
-    }
 
-    public function scopeWhereLocationIn(Builder $query, string $locationType, array $locationIds): Builder
-    {
-        return $query->whereHasMorph(
-            'customer',
-            [Doctor::class, Chemist::class],
-            fn (Builder $q) => $q->whereHas('headquarter', function ($q2) use ($locationType, $locationIds) {
-                switch ($locationType) {
-                    case 'headquarter':
-                        $q2->whereIn('id', $locationIds);
-                        break;
-                    case 'area':
-                        $q2->whereIn('area_id', $locationIds);
-                        break;
-                    case 'region':
-                        $q2->whereHas('area', function ($q3) use ($locationIds) {
-                            $q3->whereIn('region_id', $locationIds);
-                        });
-                        break;
-                    case 'zone':
-                        $q2->whereHas('area.region', function ($q3) use ($locationIds) {
-                            $q3->whereIn('zone_id', $locationIds);
-                        });
-                        break;
-                }
-            })
-        );
-    }
 }
