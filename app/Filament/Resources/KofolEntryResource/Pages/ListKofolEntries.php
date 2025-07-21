@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Actions\ActionGroup;
 use App\Filament\Exports\KofolEntryExporter;
 use App\Filament\Exports\KofolEntryCouponExporter;
+use Filament\Actions\ExportAction;
+use Filament\Tables\Actions\BulkAction;
 use Illuminate\Support\Facades\Auth;
 
 class ListKofolEntries extends ListRecords
@@ -33,14 +35,14 @@ class ListKofolEntries extends ListRecords
                     ->modalWidth('2xl')
                     ->color('primary')
                     ->visible(fn(): bool => Auth::user()->can('create_user')),
-                Actions\ExportAction::make()
-                    ->exporter(KofolEntryCouponExporter::class)
-                    ->label('Download Coupons')
-                    ->modalDescription('This will download all the Coupons in the system. This may take a moment to complete.')
-                    ->maxRows(30000)
-                    ->modalWidth('2xl')
-                    ->color('primary')
-                    ->visible(fn(): bool => Auth::user()->can('create_user')),
+                // Actions\ExportAction::make()
+                //     ->exporter(KofolEntryCouponExporter::class)
+                //     ->label('Download Coupons')
+                //     ->modalDescription('This will download all the Coupons in the system. This may take a moment to complete.')
+                //     ->maxRows(30000)
+                //     ->modalWidth('2xl')
+                //     ->color('primary')
+                //     ->visible(fn(): bool => Auth::user()->can('create_user')),
 
             ])->icon('heroicon-m-bars-3-bottom-right'),
         ];
@@ -64,4 +66,5 @@ class ListKofolEntries extends ListRecords
                 ->query(fn(Builder $query) => $query->where('status', 'Rejected')),
         ];
     }
+
 }

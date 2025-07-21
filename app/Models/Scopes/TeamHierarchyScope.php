@@ -12,20 +12,26 @@ class TeamHierarchyScope implements Scope
 {
     public function apply(Builder $builder, Model $model)
     {
-        if (!Auth::check()) return;
+        /** @var \App\Models\User|null $user */
+        $user = \Illuminate\Support\Facades\Auth::user();
 
-        $user = Auth::user();
-        $builder->where(function ($query) use ($user, $model) {
-            // Always see own records
-            $query->where('user_id', $user->id);
+        if (! $user) {
+            return;
+        }
 
-            // Get subordinates (if any)
-            $subordinates = $this->getCachedSubordinates($user);
-            if (!empty($subordinates)) {
-                $query->orWhereIn('user_id', $subordinates);
-            }
+        // Use the new getSubordinates() method for all role logic
+        $userIds = $user->getSubordinates();
 
-            // Role-specific location filtering
+        // If the user can see all (admins/head office), don't apply any restriction
+        if ($userIds->count() === \App\Models\User::count()) {
+            return;
+        }
+
+        $builder->where(function ($query) use ($user, $userIds, $model) {
+            // See own and subordinates' records
+            $query->whereIn('user_id', $userIds);
+
+            // Location-based visibility for DSA/ASM/RSM/ZSM
             if ($user->hasRole('DSA') && $user->headquarter_id) {
                 $this->filterByLocation($query, $model, 'headquarter', $user->headquarter_id);
             } elseif ($user->hasRole('ASM') && $user->area_id) {

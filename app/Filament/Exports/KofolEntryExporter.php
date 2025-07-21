@@ -89,7 +89,10 @@ class KofolEntryExporter extends Exporter
             ExportColumn::make('updated_at')->label('Updated At'),
             ExportColumn::make('notification_status')
                 ->label('Notification')
-                ->formatStateUsing(function ($state, $record) {
+                ->formatStateUsing(function (
+                    $state,
+                    $record
+                ) {
                     $customer = $record->customer;
                     if (!$customer) return 'No customer';
                     return $customer->notifications()
@@ -97,9 +100,33 @@ class KofolEntryExporter extends Exporter
                         ->where('data->kofol_entry_id', $record->id)
                         ->exists() ? 'Sent' : 'Not Sent';
                 }),
+            ExportColumn::make('notified_at')
+                ->label('Notified At')
+                ->formatStateUsing(function ($state, $record) {
+                    $customer = $record->customer;
+                    if (!$customer) return '';
+                    $notification = $customer->notifications()
+                        ->where('type', \App\Notifications\KofolCouponNotification::class)
+                        ->where('data->kofol_entry_id', $record->id)
+                        ->orderByDesc('created_at')
+                        ->first();
+                    return $notification ? $notification->created_at->format('Y-m-d H:i:s') : '';
+                }),
         ];
     }
 
+    public static function modifyQuery(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
+    {
+        return KofolEntry::query()->with([
+            'user',
+            'customer' => function ($morphTo) {
+                $morphTo->morphWith([
+                    \App\Models\Doctor::class => ['headquarter', 'headquarter.area', 'headquarter.area.region', 'headquarter.area.region.zone'],
+                    \App\Models\Chemist::class => ['headquarter', 'headquarter.area', 'headquarter.area.region', 'headquarter.area.region.zone'],
+                ]);
+            },
+        ]);
+    }
     public static function getCompletedNotificationBody(Export $export): string
     {
         $body = 'Your kofol entry export has completed and ' . number_format($export->successful_rows) . ' ' . str('row')->plural($export->successful_rows) . ' exported.';

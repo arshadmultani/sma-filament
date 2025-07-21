@@ -116,7 +116,8 @@ class AppServiceProvider extends ServiceProvider
     {
         /** @var \Illuminate\Foundation\Application $app */
         $app = $this->app;
-        Model::shouldBeStrict(!$app->isProduction());
+        // Model::shouldBeStrict(!$app->isProduction());
+        Model::automaticallyEagerLoadRelationships(); // Testing this new method as of now, will keep if performance is not affected
         Model::unguard();
     }
 
