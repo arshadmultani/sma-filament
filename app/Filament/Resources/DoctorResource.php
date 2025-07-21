@@ -212,6 +212,9 @@ class DoctorResource extends Resource implements HasShieldPermissions
                 TextColumn::make('user.name')->label('Created By'),
                 // TextColumn::make('created_at')->since()->toggleable()->sortable(),
                 TextColumn::make('updated_at')->since()->toggleable()->sortable(),
+                TextColumn::make('products.name')
+                    ->label('Focus Product')
+                    ->toggleable(),
                 TextColumn::make('tags.name')
                     ->label('Tags')
                     ->toggleable()

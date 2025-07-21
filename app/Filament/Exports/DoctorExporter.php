@@ -20,6 +20,7 @@ class DoctorExporter extends Exporter
         return [
             ExportColumn::make('name'),
             ExportColumn::make('tags.name')->label('Tags'),
+            ExportColumn::make('products.name')->label('Focus Product'),
             ExportColumn::make('email'),
             ExportColumn::make('phone'),
             ExportColumn::make('user.name')->label('User'),
