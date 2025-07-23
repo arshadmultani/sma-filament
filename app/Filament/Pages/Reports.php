@@ -28,12 +28,40 @@ class Reports extends Page implements HasTable
 
     protected static string $view = 'filament.pages.reports';
 
+    protected array $productTotals = [];
+
+
     public static function shouldRegisterNavigation(): bool
     {
         return true;
     }
+    protected function calculateProductTotals()
+    {
+        // Only calculate once
+        if (!empty($this->productTotals)) {
+            return;
+        }
+
+        $totals = [];
+        // Fetch all approved entries once
+        $entries = KofolEntry::where('status', 'Approved')->get();
+        foreach ($entries as $entry) {
+            foreach ($entry->products as $product) {
+                $productId = (string) $product['product_id'];
+                $qty = (int) ($product['quantity'] ?? 0);
+                if (!isset($totals[$productId])) {
+                    $totals[$productId] = 0;
+                }
+                $totals[$productId] += $qty;
+            }
+        }
+        $this->productTotals = $totals;
+    }
     public function table(Table $table): Table
     {
+        // Calculate totals before rendering table
+        $this->calculateProductTotals();
+
         return $table
             ->query(Product::query()->where('brand_id', Brand::where('name', 'Kofol')->value('id')))
             ->columns([
@@ -41,22 +69,8 @@ class Reports extends Page implements HasTable
                 TextColumn::make('total_qty')
                     ->label('Qty')
                     ->getStateUsing(function ($record) {
-                        // $record is a Product
-                        // Get all KofolEntry records
-                        $entries = KofolEntry::all()->where('status', 'Approved');
-                        $total = 0;
-                        foreach ($entries as $entry) {
-                            $products = $entry->products; // assuming this is cast to array
-                            foreach ($products as $product) {
-                                if (
-                                    isset($product['product_id']) &&
-                                    (string)$product['product_id'] === (string)$record->id // compare as strings
-                                ) {
-                                    $total += (int)($product['quantity'] ?? 0); // use 'quantity'
-                                }
-                            }
-                        }
-                        return $total;
+                        // Use pre-calculated totals
+                        return $this->productTotals[(string)$record->id] ?? 0;
                     }),
             ]);
     }
