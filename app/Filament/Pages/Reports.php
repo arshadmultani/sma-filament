@@ -16,10 +16,12 @@ use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
+use App\Models\Product;
+use App\Models\Brand;   
 
-class Reports extends Page implements HasForms,HasTable
+class Reports extends Page implements HasTable
 {
-    use InteractsWithForms,InteractsWithTable;
+    use InteractsWithTable;
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     protected static ?int $navigationSort = 4;
@@ -30,39 +32,36 @@ class Reports extends Page implements HasForms,HasTable
     {
         return true;
     }
-
-    protected function getFormSchema(): array
-    {
-        return [
-            Section::make('Campaign')
-                ->columns(3)
-                ->schema([
-                    Select::make('campaign_id')
-                        ->label('Campaign')
-                        ->options(Campaign::where('is_active', true)->pluck('name', 'id'))
-                        ->native(false)
-                        ->required(),
-                    Select::make('report_type')
-                        ->native(false)
-                        ->options([
-                            'kofol' => 'Kofol',
-                        ])
-                        ->required(),
-                ])
-        ];
-    }
-
-    public function submit()
-    {
-        $this->validate();
-    }
-    public function setTable($campaign){
-        
-    }
     public function table(Table $table): Table
     {
-       return $table;
+        return $table
+            ->query(Product::query()->where('brand_id', Brand::where('name', 'Kofol')->value('id')))
+            ->columns([
+                TextColumn::make('name')->label('Product'),
+                TextColumn::make('total_qty')
+                    ->label('Qty')
+                    ->getStateUsing(function ($record) {
+                        // $record is a Product
+                        // Get all KofolEntry records
+                        $entries = KofolEntry::all()->where('status', 'Approved');
+                        $total = 0;
+                        foreach ($entries as $entry) {
+                            $products = $entry->products; // assuming this is cast to array
+                            foreach ($products as $product) {
+                                if (
+                                    isset($product['product_id']) &&
+                                    (string)$product['product_id'] === (string)$record->id // compare as strings
+                                ) {
+                                    $total += (int)($product['quantity'] ?? 0); // use 'quantity'
+                                }
+                            }
+                        }
+                        return $total;
+                    }),
+            ]);
     }
+
+
 }
 
 //table 1 of campaign 1
