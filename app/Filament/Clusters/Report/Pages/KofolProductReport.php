@@ -13,10 +13,12 @@ use App\Models\Brand;
 use App\Models\KofolEntry;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
+
 
 class KofolProductReport extends Page implements HasTable
 {
-    use InteractsWithTable;
+    use InteractsWithTable, HasPageShield;
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 

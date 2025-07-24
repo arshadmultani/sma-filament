@@ -102,7 +102,8 @@ class ChemistResource extends Resource implements HasShieldPermissions
             ->defaultSort('created_at', 'desc')
             ->paginated([10, 25, 50])
             ->columns([
-                TextColumn::make('name'),
+                TextColumn::make('name')
+                ->searchable(),
                 IconColumn::make('status')
                     ->sortable()
                     ->icon(fn(string $state): string => match ($state) {

@@ -15,7 +15,7 @@ class KofolEntryCoupon extends Model
 
     public function kofolEntry()
     {
-        return $this->belongsTo(KofolEntry::class);
+        return $this->belongsTo(KofolEntry::class,'kofol_entry_id');
     }
 
     protected static function booted()
