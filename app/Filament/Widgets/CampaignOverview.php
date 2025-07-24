@@ -36,11 +36,11 @@ class CampaignOverview extends BaseWidget
         })->count();
 
         $stats = [
-            Stat::make('Active Campaigns', Campaign::where('is_active', true)->count())
-                ->icon('heroicon-s-bolt')
-                ->iconColor('primary')
-                ->textColor('primary', '', descriptionColor: 'primary')
-                ->url(route('filament.admin.resources.campaigns.index')),
+            // Stat::make('Active Campaigns', Campaign::where('is_active', true)->count())
+            //     ->icon('heroicon-s-bolt')
+            //     ->iconColor('primary')
+            //     ->textColor('primary', '', descriptionColor: 'primary')
+            //     ->url(route('filament.admin.resources.campaigns.index')),
 
             Stat::make('Total KSV Bookings', KofolEntry::count())
                 ->icon('heroicon-s-document-plus')

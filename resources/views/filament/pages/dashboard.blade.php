@@ -9,6 +9,10 @@
                 @livewire('greeting')
                 @livewire('campaign-card')
                 @livewire('customer-card')
+
+                @livewire('heading', ['title' => 'Kofol Products'])
+                @livewire(App\Filament\Resources\KofolEntryResource\Widgets\KofolProductTable::class)
+
             </div>
         </template>
         <template x-if="!isMobile">
@@ -21,6 +25,10 @@
 
                 @livewire('heading', ['title' => 'Customers'])
                 @livewire(App\Filament\Widgets\CustomerOverview::class)
+
+                @livewire('heading', ['title' => 'Kofol Products'])
+                @livewire(App\Filament\Resources\KofolEntryResource\Widgets\KofolProductChart::class)
+
 
             </div>
         </template>
