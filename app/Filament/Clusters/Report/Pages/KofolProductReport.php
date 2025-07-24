@@ -96,7 +96,7 @@ class KofolProductReport extends Page implements HasTable
         $hqCouponCounts = \App\Models\KofolEntryCoupon::query()
             ->whereHas('kofolEntry', function ($q) {
                 $q->where('status', 'Approved')
-                  ->whereNotNull('headquarter_id');
+                    ->whereNotNull('headquarter_id');
             })
             ->with('kofolEntry')
             ->get()
@@ -107,11 +107,50 @@ class KofolProductReport extends Page implements HasTable
                 return $group->count();
             });
 
+        // Pre-calculate unique customer, Dr, and Chemist counts per headquarter
+        $approvedEntries = \App\Models\KofolEntry::where('status', 'Approved')
+            ->whereNotNull('headquarter_id')
+            ->get(['headquarter_id', 'customer_id', 'customer_type']);
+
+        $hqUniqueCustomers = $approvedEntries->groupBy('headquarter_id')->map(function ($entries) {
+            return $entries->pluck('customer_id')->unique()->count();
+        });
+        $hqUniqueDrs = $approvedEntries->where('customer_type', 'doctor')->groupBy('headquarter_id')->map(function ($entries) {
+            return $entries->pluck('customer_id')->unique()->count();
+        });
+        $hqUniqueChemists = $approvedEntries->where('customer_type', 'chemist')->groupBy('headquarter_id')->map(function ($entries) {
+            return $entries->pluck('customer_id')->unique()->count();
+        });
+
+        // Pre-calculate number of invoices per headquarter
+        $hqInvoiceCounts = $approvedEntries->groupBy('headquarter_id')->map(function ($entries) {
+            return $entries->count();
+        });
+
         // Build columns: first is HQ, then one per Kofol product
         $columns = [
             TextColumn::make('name')->label('DSA')
                 ->searchable()
                 ->sortable(),
+            TextColumn::make('kofol_coupon_count')
+                ->label('Coupons')
+                ->sortable()
+                ->getStateUsing(function ($record) use ($hqCouponCounts) {
+                    if (!$record->location instanceof \App\Models\Headquarter) {
+                        return '-';
+                    }
+                    $hqId = $record->location->id;
+                    return $hqCouponCounts[$hqId] ?? 0;
+                }),
+            TextColumn::make('hq_invoice_count')
+                ->label('No. of Invoices')
+                ->getStateUsing(function ($record) use ($hqInvoiceCounts) {
+                    if (!$record->location instanceof \App\Models\Headquarter) {
+                        return '-';
+                    }
+                    $hqId = $record->location->id;
+                    return $hqInvoiceCounts[$hqId] ?? 0;
+                }),
             TextColumn::make('kofol_invoice_total')
                 ->label('Invoice Amount')
                 ->getStateUsing(function ($record) use ($hqInvoiceTotals) {
@@ -122,14 +161,32 @@ class KofolProductReport extends Page implements HasTable
                     $total = $hqInvoiceTotals[$hqId] ?? 0;
                     return number_format($total, 0);
                 }),
-            TextColumn::make('kofol_coupon_count')
-                ->label('Coupons')
-                ->getStateUsing(function ($record) use ($hqCouponCounts) {
+            TextColumn::make('hq_unique_customers')
+                ->label('Unique Customers')
+                ->getStateUsing(function ($record) use ($hqUniqueCustomers) {
                     if (!$record->location instanceof \App\Models\Headquarter) {
                         return '-';
                     }
                     $hqId = $record->location->id;
-                    return $hqCouponCounts[$hqId] ?? 0;
+                    return $hqUniqueCustomers[$hqId] ?? 0;
+                }),
+            TextColumn::make('hq_unique_drs')
+                ->label('Unique Drs')
+                ->getStateUsing(function ($record) use ($hqUniqueDrs) {
+                    if (!$record->location instanceof \App\Models\Headquarter) {
+                        return '-';
+                    }
+                    $hqId = $record->location->id;
+                    return $hqUniqueDrs[$hqId] ?? 0;
+                }),
+            TextColumn::make('hq_unique_chemists')
+                ->label('Unique Chemists')
+                ->getStateUsing(function ($record) use ($hqUniqueChemists) {
+                    if (!$record->location instanceof \App\Models\Headquarter) {
+                        return '-';
+                    }
+                    $hqId = $record->location->id;
+                    return $hqUniqueChemists[$hqId] ?? 0;
                 }),
             TextColumn::make('headquarter_name')
                 ->label('HQ'),
@@ -169,15 +226,15 @@ class KofolProductReport extends Page implements HasTable
             //         ->orderQueryUsing(fn($query, $direction) => $query)
             //         ->groupQueryUsing(fn($query)=>$query->groupBy('area_name'))
             //         ->label('Area'),
-                // Group::make('location.area.name')
-                //     ->collapsible()
-                //     ->label('Area'),
-                // Group::make('location.area.region.name')
-                //     ->collapsible()
-                //     ->label('Region'),
-                // Group::make('location.area.region.zone.name')
-                //     ->collapsible()
-                //     ->label('Zone'),
+            // Group::make('location.area.name')
+            //     ->collapsible()
+            //     ->label('Area'),
+            // Group::make('location.area.region.name')
+            //     ->collapsible()
+            //     ->label('Region'),
+            // Group::make('location.area.region.zone.name')
+            //     ->collapsible()
+            //     ->label('Zone'),
             // ])
             ->headerActions([
                 ExportAction::make('export')
