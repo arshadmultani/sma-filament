@@ -1,40 +1,30 @@
 <?php
 
-namespace App\Filament\Pages;
+namespace App\Filament\Clusters\Report\Pages;
 
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
+use App\Filament\Clusters\Report;
 use Filament\Pages\Page;
-use Filament\Actions\Action;
-use Illuminate\Support\Facades\Auth;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Form;
-use App\Models\Campaign;
-use App\Models\KofolEntry;
-use Filament\Forms\Components\Section;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use App\Models\Product;
-use App\Models\Brand;   
+use App\Models\Brand;
+use App\Models\KofolEntry;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
-class Reports extends Page implements HasTable
+class KofolProductReport extends Page implements HasTable
 {
     use InteractsWithTable;
+
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
-    protected static ?int $navigationSort = 4;
+    protected static string $view = 'filament.clusters.report.pages.kofol-product-report';
 
-    protected static string $view = 'filament.pages.reports';
+    protected static ?string $cluster = Report::class;
 
     protected array $productTotals = [];
-
-
-    public static function shouldRegisterNavigation(): bool
-    {
-        return false;
-    }
     protected function calculateProductTotals()
     {
         // Only calculate once
@@ -63,28 +53,25 @@ class Reports extends Page implements HasTable
         $this->calculateProductTotals();
 
         return $table
+            ->heading('Kofol Product Report')
+            ->paginated(false)
             ->query(Product::query()->where('brand_id', Brand::where('name', 'Kofol')->value('id')))
+            ->headerActions([
+                ExportAction::make('export')
+                    ->exports([
+                        ExcelExport::make()
+                            ->fromTable()
+                            // ->queue()
+                    ])
+            ])
             ->columns([
                 TextColumn::make('name')->label('Product'),
                 TextColumn::make('total_qty')
                     ->label('Qty')
                     ->getStateUsing(function ($record) {
                         // Use pre-calculated totals
-                        return $this->productTotals[(string)$record->id] ?? 0;
+                        return $this->productTotals[(string) $record->id] ?? 0;
                     }),
             ]);
     }
-
-
 }
-
-//table 1 of campaign 1
-
-//table 2 of campaign 1
-
-//table 1 of campaign 2
-
-//table 2 of campaign 2
-
-
-
