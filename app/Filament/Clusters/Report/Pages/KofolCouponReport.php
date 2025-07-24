@@ -24,15 +24,54 @@ class KofolCouponReport extends Page implements HasTable
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     protected static string $view = 'filament.clusters.report.pages.kofol-coupon-report';
+    protected static ?string $navigationLabel = 'KSV Coupon Report';
+    protected static ?int $navigationSort = 2;
+
 
     protected static ?string $cluster = Report::class;
 
     public function table(Table $table): Table
     {
         // Fetch all products with brand 'Kofol'
-        $kofolProducts = \App\Models\Product::whereHas('brand', function ($q) {
-            $q->where('name', 'Kofol');
-        })->get();
+        $kofolProducts = \Cache::remember('kofol_products', 86400, function () {
+            return \App\Models\Product::whereHas('brand', function ($q) {
+                $q->where('name', 'Kofol');
+            })->get();
+        });
+
+        // Optimize: Only select columns needed for KofolEntryCoupon and related models
+        $couponQuery = \App\Models\KofolEntryCoupon::query()
+            ->select(['id', 'coupon_code', 'kofol_entry_id'])
+            ->with([
+                'kofolEntry:id,customer_id,user_id,headquarter_id,customer_type,invoice_amount,products',
+                'kofolEntry.customer:id,name,email,phone',
+                'kofolEntry.user:id,name',
+                'kofolEntry.headquarter:id,name,area_id',
+                'kofolEntry.headquarter.area:id,name,region_id',
+                'kofolEntry.headquarter.area.region:id,name,zone_id',
+                'kofolEntry.headquarter.area.region.zone:id,name',
+            ]);
+
+        // Precompute product quantities for all KofolEntry IDs on the current page
+        $precomputeProductQuantities = function ($records) use ($kofolProducts) {
+            $entryProductMap = [];
+            foreach ($records as $record) {
+                $entry = $record->kofolEntry;
+                if (!$entry) continue;
+                $products = \Cache::remember("kofol_entry_products_{$entry->id}", 3600, function () use ($entry) {
+                    $products = $entry->products ?? [];
+                    if (is_string($products)) {
+                        $products = json_decode($products, true);
+                    }
+                    return is_array($products) ? $products : [];
+                });
+                foreach ($kofolProducts as $product) {
+                    $item = collect($products)->firstWhere('product_id', (string)$product->id);
+                    $entryProductMap[$entry->id][$product->id] = $item['quantity'] ?? '-';
+                }
+            }
+            return $entryProductMap;
+        };
 
         $columns = [
             TextColumn::make('coupon_code')
@@ -68,38 +107,28 @@ class KofolCouponReport extends Page implements HasTable
                 ->numeric(),
         ];
 
-        // Add a column for each Kofol product
+        // Add a column for each Kofol product, using precomputed quantities
         foreach ($kofolProducts as $product) {
             $columns[] = TextColumn::make('kofolEntry.product_' . $product->id . '_qty')
                 ->label($product->name)
-                ->getStateUsing(function ($record) use ($product) {
-                    $products = $record->kofolEntry->products ?? [];
-                    if (is_string($products)) {
-                        $products = json_decode($products, true);
+                ->getStateUsing(function ($record) use ($product, &$precomputeProductQuantities) {
+                    static $entryProductMap = null;
+                    if ($entryProductMap === null) {
+                        // Precompute once per page
+                        $entryProductMap = $precomputeProductQuantities(func_get_args()[1] ?? []);
                     }
-                    if (!is_array($products)) {
-                        return '';
-                    }
-                    $item = collect($products)->firstWhere('product_id', (string)$product->id);
-                    return $item['quantity'] ?? '-';
+                    $entry = $record->kofolEntry;
+                    if (!$entry) return '';
+                    return $entryProductMap[$entry->id][$product->id] ?? '-';
                 });
         }
-
-        // $columns[] = TextColumn::make('kofolEntry.products')
-        //     ->label('Products');
 
         return $table
             ->paginated([50, 100, 250])
             ->defaultSort('coupon_code', 'asc')
             ->extremePaginationLinks()
-            ->heading('Kofol Coupon Report')
-            ->query(
-                KofolEntryCoupon::query()->with([
-                    'kofolEntry.customer',
-                    'kofolEntry.user',
-                    'kofolEntry.headquarter.area.region.zone',
-                ])
-            )
+            ->heading('KSV Coupons')
+            ->query($couponQuery)
             ->groups([
                 Group::make('kofolEntry.headquarter.name')
                     ->collapsible()
