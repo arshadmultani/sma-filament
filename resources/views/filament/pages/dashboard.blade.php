@@ -13,6 +13,9 @@
                 @livewire('heading', ['title' => 'Kofol Products'])
                 @livewire(App\Filament\Resources\KofolEntryResource\Widgets\KofolProductTable::class)
 
+                @livewire('heading', ['title' => 'Kofol Bookings'])
+                
+
             </div>
         </template>
         <template x-if="!isMobile">
@@ -28,6 +31,9 @@
 
                 @livewire('heading', ['title' => 'Kofol Products'])
                 @livewire(App\Filament\Resources\KofolEntryResource\Widgets\KofolProductChart::class)
+
+                @livewire('heading', ['title' => 'Kofol Bookings'])
+                @livewire(App\Filament\Resources\KofolEntryResource\Widgets\KofolEntryBooking::class)
 
 
             </div>
