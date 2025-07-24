@@ -24,6 +24,7 @@
         "league/flysystem-aws-s3-v3": "^3.0",
         "njxqlus/filament-lightbox": "^3.3",
         "predis/predis": "^2.0",
+        "pxlrbt/filament-excel": "^2.4",
         "rickdbcn/filament-email": "^1.10",
         "saade/filament-laravel-log": "^3.0",
         "shuvroroy/filament-spatie-laravel-health": "^2.3",
@@ -41,6 +42,7 @@
         "laravel/pail": "^1.2.2",
         "laravel/pint": "^1.22",
         "laravel/sail": "^1.41",
+        "laravel/telescope": "^5.10",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.6",
         "phpunit/phpunit": "^11.5.3",
@@ -86,7 +88,9 @@
     },
     "extra": {
         "laravel": {
-            "dont-discover": []
+            "dont-discover": [
+                 "laravel/telescope"
+            ]
         }
     },
     "config": {

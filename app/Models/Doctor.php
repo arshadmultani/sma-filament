@@ -112,12 +112,19 @@ class Doctor extends BaseModel
         return ['microsites', 'kofolEntries'];
     }
 
-    public static function booted()
+    protected static function booted()
     {
         parent::booted();
         static::deleting(function ($doctor) {
             $doctor->products()->detach();
             $doctor->tags()->detach();
+        });
+        static::updated(function ($doctor) {
+            if ($doctor->isDirty('headquarter_id')) {
+                \App\Models\KofolEntry::where('customer_type', $doctor->getMorphClass())
+                    ->where('customer_id', $doctor->id)
+                    ->update(['headquarter_id' => $doctor->headquarter_id]);
+            }
         });
     }
 }

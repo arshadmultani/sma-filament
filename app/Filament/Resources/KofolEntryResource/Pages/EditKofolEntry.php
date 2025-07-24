@@ -29,4 +29,12 @@ class EditKofolEntry extends EditRecord
 
         return $data;
     }
+    protected function afterSave(): void
+    {
+        $customer = $this->record->customer;
+        if ($customer && isset($customer->headquarter_id)) {
+            $this->record->headquarter_id = $customer->headquarter_id;
+            $this->record->save();
+        }
+    }
 }

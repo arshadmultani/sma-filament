@@ -74,4 +74,19 @@ class Chemist extends BaseModel
     {
         return ['kofolEntries'];
     }
+    protected static function booted()
+    {
+        parent::booted();
+        static::deleting(function ($chemist) {
+            $chemist->products()->detach();
+            $chemist->tags()->detach();
+        });
+        static::updated(function ($chemist) {
+            if ($chemist->isDirty('headquarter_id')) {
+                \App\Models\KofolEntry::where('customer_type', $chemist->getMorphClass())
+                    ->where('customer_id', $chemist->id)
+                    ->update(['headquarter_id' => $chemist->headquarter_id]);
+            }
+        });
+    }
 }

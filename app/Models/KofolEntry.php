@@ -68,7 +68,10 @@ class KofolEntry extends Model implements IsCampaignEntry
     {
         return $this->morphTo();
     }
-
+    public function headquarter()
+    {
+        return $this->belongsTo(Headquarter::class, 'headquarter_id');
+    }
     public function products()
     {
         return $this->hasMany(Product::class);
