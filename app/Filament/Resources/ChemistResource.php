@@ -23,6 +23,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Traits\HandlesDeleteExceptions;
 use Icetalker\FilamentTableRepeatableEntry\Infolists\Components\TableRepeatableEntry;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Tables\Actions\ExportBulkAction;
+use App\Filament\Exports\ChemistExporter;
 
 class ChemistResource extends Resource implements HasShieldPermissions
 {
@@ -58,7 +60,7 @@ class ChemistResource extends Resource implements HasShieldPermissions
                     ->required(),
                 Select::make('type')
                     ->native(false)
-                    ->options(['Allopathic' => 'Allopathic','Ayurvedic' => 'Ayurvedic',])
+                    ->options(['Allopathic' => 'Allopathic', 'Ayurvedic' => 'Ayurvedic',])
                     ->required(),
                 Select::make('headquarter_id')
                     ->native(false)
@@ -103,7 +105,7 @@ class ChemistResource extends Resource implements HasShieldPermissions
             ->paginated([10, 25, 50])
             ->columns([
                 TextColumn::make('name')
-                ->searchable(),
+                    ->searchable(),
                 IconColumn::make('status')
                     ->sortable()
                     ->icon(fn(string $state): string => match ($state) {
@@ -147,7 +149,10 @@ class ChemistResource extends Resource implements HasShieldPermissions
                     UpdateStatusAction::makeBulk(),
                     Tables\Actions\DeleteBulkAction::make()
                         ->before(fn($action, $records) => collect($records)->each(fn($record) => (new static())->tryDeleteRecord($record, $action))),
-
+                    ExportBulkAction::make()
+                        ->label('Download selected')
+                        ->visible(fn() => Auth::user()->can('view_user'))
+                        ->exporter(ChemistExporter::class),
                 ]),
             ]);
     }
