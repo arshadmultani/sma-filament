@@ -2,6 +2,7 @@
 
 namespace App\Filament\Actions;
 
+use App\Settings\KofolEntrySettings;
 use Filament\Actions\Action;
 use Filament\Forms\Get;
 use Filament\Forms\Components\Component;
@@ -48,7 +49,8 @@ class UpdateKofolStatusAction
                     ->visible(fn ($get) => $get('status') === 'Approved')
                     ->rule(function () {
                         return function (string $attribute, $value, \Closure $fail) {
-                            if ($value > 50) {
+                            $maxCoupons = app(KofolEntrySettings::class)->max_coupons;
+                            if ($value > $maxCoupons) {
                                 $fail('Yikes! You are trying to generate too many coupons.');
                             }
                         };

@@ -10,6 +10,7 @@ use App\Models\Doctor;
 use App\Models\KofolEntry;
 use App\Models\Product;
 use App\Models\Campaign;
+use App\Settings\KofolEntrySettings;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\FileUpload;
@@ -153,7 +154,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                             // ->visibility('private')
                             ->directory('kofol-invoices')
                             ->downloadable()
-                            ->maxSize(5120)
+                            ->maxSize(app(KofolEntrySettings::class)->max_invoice_size)
                             // ->imageResizeMode('cover')
                             // ->imageCropAspectRatio('16:9')
                             // ->imageResizeTargetWidth('1920')
