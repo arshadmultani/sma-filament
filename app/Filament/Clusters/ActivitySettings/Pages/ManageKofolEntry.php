@@ -7,10 +7,12 @@ use App\Settings\KofolEntrySettings;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Pages\SettingsPage;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
+use Filament\Actions\Action;
 
 class ManageKofolEntry extends SettingsPage
 {
-
+    use HasPageShield;
     protected static string $settings = KofolEntrySettings::class;
 
     protected static ?string $cluster = ActivitySettings::class;
@@ -50,6 +52,16 @@ class ManageKofolEntry extends SettingsPage
                     ->suffix('MB')
                     ->maxValue(10),
             ]);
+    }
+
+    public function getFormActions(): array
+    {
+        return [
+            Action::make('submitWithConfirmation')
+                ->label('Submit')
+                ->requiresConfirmation()
+                ->action(fn() => $this->save()),
+        ];
     }
 
 }
