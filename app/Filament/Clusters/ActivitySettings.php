@@ -6,5 +6,7 @@ use Filament\Clusters\Cluster;
 
 class ActivitySettings extends Cluster
 {
+    protected static ?string $navigationGroup = 'Settings';
+
     protected static ?string $navigationIcon = 'heroicon-o-adjustments-horizontal';
 }
