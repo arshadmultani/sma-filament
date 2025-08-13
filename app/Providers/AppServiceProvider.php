@@ -23,6 +23,7 @@ use App\Models\Area;
 use App\Models\Region;
 use App\Models\Zone;
 use App\Models\ManagerLogEntry;
+use App\Models\POB;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Validation\ValidationException;
@@ -74,6 +75,7 @@ class AppServiceProvider extends ServiceProvider
             'kofol_entry' => KofolEntry::class,
             'microsite' => Microsite::class,
             'manager_log_entry' => ManagerLogEntry::class,
+            'pob' => POB::class,
             'doctor' => Doctor::class,
             'chemist' => Chemist::class,
             'headquarter' => Headquarter::class,

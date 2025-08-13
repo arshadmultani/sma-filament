@@ -79,4 +79,25 @@ class Campaign extends Model
         ->values()
         ->all();
 }
+
+    /**
+     * Scope to get campaigns by entry type and active status
+     */
+    public function scopeForEntryType($query, string $entryType)
+    {
+        return $query->where('allowed_entry_type', $entryType)
+                    ->where('is_active', true);
+    }
+
+    /**
+     * Get campaigns for entry type with caching
+     */
+    public static function getForEntryType(string $entryType, int $cacheMinutes = 30)
+    {
+        $cacheKey = "campaigns_for_entry_type_{$entryType}";
+        
+        return \Illuminate\Support\Facades\Cache::remember($cacheKey, $cacheMinutes * 60, function () use ($entryType) {
+            return static::forEntryType($entryType)->pluck('name', 'id');
+        });
+    }
 }
