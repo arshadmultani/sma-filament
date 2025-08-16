@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pobs', function (Blueprint $table) {
+        Schema::create('p_o_b_s', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->nullOnDelete();
             $table->foreignId('headquarter_id')->nullable()->constrained('headquarters')->nullOnDelete();
@@ -24,9 +24,9 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('pob_product', function (Blueprint $table) {
+        Schema::create('p_o_b_product', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('pob_id')->constrained('pobs')->cascadeOnDelete();
+            $table->foreignId('p_o_b_id')->constrained('p_o_b_s')->cascadeOnDelete();
             $table->foreignId('product_id')->constrained('products')->nullOnDelete();
             $table->unsignedMediumInteger('quantity');
         });
@@ -37,7 +37,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pob_product');
-        Schema::dropIfExists('pobs');
+        Schema::dropIfExists('p_o_b_product');
+        Schema::dropIfExists('p_o_b_s');
     }
 };

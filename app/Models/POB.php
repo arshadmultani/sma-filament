@@ -6,42 +6,40 @@ use App\Contracts\IsCampaignEntry;
 use App\Models\Scopes\TeamHierarchyScope;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 #[ScopedBy(TeamHierarchyScope::class)]
 class POB extends Model implements IsCampaignEntry
 {
     protected $guarded = [];
 
-    protected $table = 'pobs';
+    //    protected $table = 'pobs';
 
-    public function campaignEntry()
+    public function campaignEntry(): MorphOne
     {
         return $this->morphOne(CampaignEntry::class, 'entryable');
     }
 
-    public function customer()
+    public function customer(): MorphTo
     {
         return $this->morphTo();
     }
 
-    public function user()
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class)->withTrashed();
+        return $this->belongsTo(User::class);
     }
 
-    public function headquarter()
+    public function headquarter(): BelongsTo
     {
         return $this->belongsTo(Headquarter::class, 'headquarter_id');
     }
 
-    // public function products()
-    // {
-    //     return $this->belongsToMany(Product::class, 'pob_product', 'pob_id', 'product_id')->withPivot('quantity');
-    // }
-
     public function pobProducts(): HasMany
     {
-        return $this->hasMany(POBProduct::class, 'pob_product', 'pob_id', 'product_id');
+        return $this->hasMany(POBProduct::class);
     }
 }

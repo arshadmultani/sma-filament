@@ -2,22 +2,24 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class POBProduct extends Pivot
 {
     public $incrementing = true;
 
+    public $timestamps = false;
+
     // protected $table = 'pob_product';
 
-    public function pob()
+    public function pob(): BelongsTo
     {
-        return $this->belongsTo(POB::class, 'pob_id');
+        return $this->belongsTo(POB::class);
     }
 
-    public function product()
+    public function product(): BelongsTo
     {
-        return $this->belongsTo(Product::class, 'product_id');
+        return $this->belongsTo(Product::class);
     }
 }

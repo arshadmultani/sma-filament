@@ -7,13 +7,13 @@ use App\Models\Campaign;
 use App\Models\Chemist;
 use App\Models\Doctor;
 use App\Models\POB;
-use Filament\Forms;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\MorphToSelect;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -71,6 +71,7 @@ class POBResource extends Resource
                             ->label('Product')
                             ->placeholder('Select Product')
                             ->required()
+                            ->preload()
                             ->searchable()
                             ->relationship('product', 'name'),
                         TextInput::make('quantity')
@@ -100,13 +101,23 @@ class POBResource extends Resource
     {
         return $table
             ->columns([
-                //
+                Tables\Columns\TextColumn::make('customer.name')
+                    ->label('Customer')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('invoice_amount')
+                    ->label('Invoice Amount')
+                    ->money('inr')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable(),
             ])
             ->filters([
 
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -119,14 +130,10 @@ class POBResource extends Resource
     {
         return $infolist
             ->schema([
-                Forms\Components\TextInput::make('campaign.name')
-                    ->label('Campaign')
-                    ->required()
-                    ->disabled(),
-                Forms\Components\TextInput::make('customer.name')
-                    ->label('Customer')
-                    ->required()
-                    ->disabled(),
+                TextEntry::make('campaign.name')
+                    ->label('Campaign'),
+                TextEntry::make('customer.name')
+                    ->label('Customer'),
             ]);
     }
 

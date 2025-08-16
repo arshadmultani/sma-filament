@@ -4,9 +4,8 @@ namespace App\Filament\Resources\POBResource\Pages;
 
 use App\Filament\Resources\POBResource;
 use Filament\Actions\Action;
-use Filament\Resources\Pages\ViewRecord;
 use Filament\Notifications\Notification;
-
+use Filament\Resources\Pages\ViewRecord;
 
 class ViewPOB extends ViewRecord
 {
@@ -15,6 +14,11 @@ class ViewPOB extends ViewRecord
     protected function getHeaderActions(): array
     {
         $actions = [];
+
+        $actions[] = Action::make('edit')
+            ->label('Edit')
+            ->url(route('filament.admin.resources.kofol-entries.edit', $this->record))
+            ->color('gray');
 
         if ($this->record && method_exists($this->record, 'getAvailableTransitions')) {
             $transitions = $this->record->getAvailableTransitions();
@@ -30,6 +34,7 @@ class ViewPOB extends ViewRecord
                     });
             }
         }
+
         return $actions;
     }
 }
