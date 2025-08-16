@@ -66,7 +66,7 @@ use Illuminate\Support\Facades\Auth;
 class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, HasRoles,Notifiable,SoftDeletes;
+    use HasFactory, HasRoles, Notifiable, SoftDeletes;
 
     // Location type constants
     public const TYPE_ZONE = \App\Models\Zone::class;
@@ -91,7 +91,7 @@ class User extends Authenticatable implements FilamentUser
 
     public function canAccessPanel(Panel $panel): bool
     {
-    return $this->roles->isNotEmpty();
+        return $this->roles->isNotEmpty();
     }
 
     /**
@@ -116,11 +116,14 @@ class User extends Authenticatable implements FilamentUser
             'password' => 'hashed',
         ];
     }
+
     // Add head office role names here for DRY purposes
     public static function headOfficeRoleIds(): array
     {
-        return Role::whereIn('name', ['admin', 'super_admin','PMT','GM','ZTM','Sales Manager'])->pluck('id')->toArray();
+        return Role::whereIn('name',
+            ['admin', 'super_admin', 'PMT', 'GM', 'ZTM', 'Sales Manager'])->pluck('id')->toArray();
     }
+
     public function division()
     {
         return $this->belongsTo(Division::class);
@@ -149,16 +152,16 @@ class User extends Authenticatable implements FilamentUser
         switch ($type) {
             case self::TYPE_ZONE:
                 return $location instanceof \App\Models\Zone ? $location->id :
-                       ($location instanceof \App\Models\Region ? $location->zone_id :
-                       ($location instanceof \App\Models\Area ? $location->region?->zone_id :
-                       ($location instanceof \App\Models\Headquarter ? $location->area?->region?->zone_id : null)));
+                    ($location instanceof \App\Models\Region ? $location->zone_id :
+                        ($location instanceof \App\Models\Area ? $location->region?->zone_id :
+                            ($location instanceof \App\Models\Headquarter ? $location->area?->region?->zone_id : null)));
             case self::TYPE_REGION:
                 return $location instanceof \App\Models\Region ? $location->id :
-                       ($location instanceof \App\Models\Area ? $location->region_id :
-                       ($location instanceof \App\Models\Headquarter ? $location->area?->region_id : null));
+                    ($location instanceof \App\Models\Area ? $location->region_id :
+                        ($location instanceof \App\Models\Headquarter ? $location->area?->region_id : null));
             case self::TYPE_AREA:
                 return $location instanceof \App\Models\Area ? $location->id :
-                       ($location instanceof \App\Models\Headquarter ? $location->area_id : null);
+                    ($location instanceof \App\Models\Headquarter ? $location->area_id : null);
             case self::TYPE_HEADQUARTER:
                 return $location instanceof \App\Models\Headquarter ? $location->id : null;
         }
@@ -166,10 +169,25 @@ class User extends Authenticatable implements FilamentUser
     }
 
     // Accessors using the generic method
-    public function getZoneIdAttribute() { return $this->getLocationIdByType(self::TYPE_ZONE); }
-    public function getRegionIdAttribute() { return $this->getLocationIdByType(self::TYPE_REGION); }
-    public function getAreaIdAttribute() { return $this->getLocationIdByType(self::TYPE_AREA); }
-    public function getHeadquarterIdAttribute() { return $this->getLocationIdByType(self::TYPE_HEADQUARTER); }
+    public function getZoneIdAttribute()
+    {
+        return $this->getLocationIdByType(self::TYPE_ZONE);
+    }
+
+    public function getRegionIdAttribute()
+    {
+        return $this->getLocationIdByType(self::TYPE_REGION);
+    }
+
+    public function getAreaIdAttribute()
+    {
+        return $this->getLocationIdByType(self::TYPE_AREA);
+    }
+
+    public function getHeadquarterIdAttribute()
+    {
+        return $this->getLocationIdByType(self::TYPE_HEADQUARTER);
+    }
 
     // Accessor for Zone Name
     public function getZoneNameAttribute()
@@ -380,35 +398,44 @@ class User extends Authenticatable implements FilamentUser
     {
         return [\App\Models\Region::find($regionId)?->zone_id];
     }
+
     private function getZoneIdsByArea($areaId): array
     {
-        $regionIds = \App\Models\Area::whereIn('id', (array)$areaId)->pluck('region_id')->toArray();
+        $regionIds = \App\Models\Area::whereIn('id', (array) $areaId)->pluck('region_id')->toArray();
         return \App\Models\Region::whereIn('id', $regionIds)->pluck('zone_id')->unique()->toArray();
     }
+
     private function getRegionIdsByArea($areaId): array
     {
-        return \App\Models\Area::whereIn('id', (array)$areaId)->pluck('region_id')->unique()->toArray();
+        return \App\Models\Area::whereIn('id', (array) $areaId)->pluck('region_id')->unique()->toArray();
     }
+
     private function getRegionIdsByZone($zoneId): array
     {
         return \App\Models\Region::where('zone_id', $zoneId)->pluck('id')->toArray();
     }
+
     private function getAreaIdsByZone($zoneId): array
     {
         return \App\Models\Area::whereIn('region_id', $this->getRegionIdsByZone($zoneId))->pluck('id')->toArray();
     }
+
     private function getHeadquarterIdsByZone($zoneId): array
     {
         return \App\Models\Headquarter::whereIn('area_id', $this->getAreaIdsByZone($zoneId))->pluck('id')->toArray();
     }
+
     private function getAreaIdsByRegion($regionId): array
     {
         return \App\Models\Area::where('region_id', $regionId)->pluck('id')->toArray();
     }
+
     private function getHeadquarterIdsByRegion($regionId): array
     {
-        return \App\Models\Headquarter::whereIn('area_id', $this->getAreaIdsByRegion($regionId))->pluck('id')->toArray();
+        return \App\Models\Headquarter::whereIn('area_id',
+            $this->getAreaIdsByRegion($regionId))->pluck('id')->toArray();
     }
+
     private function getHeadquarterIdsByArea($areaId): array
     {
         return \App\Models\Headquarter::where('area_id', $areaId)->pluck('id')->toArray();
@@ -503,5 +530,10 @@ class User extends Authenticatable implements FilamentUser
 
         // Default: only themselves
         return collect([$this->id]);
+    }
+
+    public static function yes()
+    {
+
     }
 }

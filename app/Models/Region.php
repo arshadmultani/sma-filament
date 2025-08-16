@@ -2,31 +2,35 @@
 
 namespace App\Models;
 
+use Eloquent;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
  * @property string $name
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  * @property int|null $zone_id
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Area> $areas
+ * @property-read Collection<int, Area> $areas
  * @property-read int|null $areas_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
+ * @property-read Collection<int, User> $users
  * @property-read int|null $users_count
- * @property-read \App\Models\Zone|null $zone
+ * @property-read Zone|null $zone
  *
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Region newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Region newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Region query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Region whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Region whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Region whereName($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Region whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Region whereZoneId($value)
+ * @method static Builder<static>|Region newModelQuery()
+ * @method static Builder<static>|Region newQuery()
+ * @method static Builder<static>|Region query()
+ * @method static Builder<static>|Region whereCreatedAt($value)
+ * @method static Builder<static>|Region whereId($value)
+ * @method static Builder<static>|Region whereName($value)
+ * @method static Builder<static>|Region whereUpdatedAt($value)
+ * @method static Builder<static>|Region whereZoneId($value)
  *
- * @mixin \Eloquent
+ * @mixin Eloquent
  */
 class Region extends Model
 {
