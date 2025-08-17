@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users')->nullOnDelete();
             $table->foreignId('headquarter_id')->nullable()->constrained('headquarters')->nullOnDelete();
-            $table->foreignId('status_id')->nullable()->constrained('statuses');
+            $table->foreignId('state_id')->nullable()->constrained('states');
 
             $table->morphs('customer');
 

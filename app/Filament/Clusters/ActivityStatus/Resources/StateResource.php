@@ -2,30 +2,27 @@
 
 namespace App\Filament\Clusters\ActivityStatus\Resources;
 
+use App\Enums\StateCategory;
 use App\Filament\Clusters\ActivityStatus;
-use App\Filament\Clusters\ActivityStatus\Resources\StatusResource\Pages;
-use App\Filament\Clusters\ActivityStatus\Resources\StatusResource\RelationManagers;
-use App\Models\Status;
-use App\Enums\StatusCategory;
-use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Filament\Forms\Components\ColorPicker;
+use App\Filament\Clusters\ActivityStatus\Resources\StateResource\Pages;
+use App\Models\State;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
-
-class StatusResource extends Resource
+class StateResource extends Resource
 {
-    protected static ?string $model = Status::class;
+    protected static ?string $model = State::class;
 
-    protected static ?string $navigationLabel = 'Activity Status';
+    protected static ?string $navigationLabel = 'Activity State';
 
     protected static ?string $cluster = ActivityStatus::class;
 
@@ -36,7 +33,7 @@ class StatusResource extends Resource
             ->schema([
                 TextInput::make('name')
                     ->live(onBlur: true)
-                    ->placeholder('Status Name')
+                    ->placeholder('State Name')
                     ->unique(ignoreRecord: true)
                     ->required()
                     ->afterStateUpdated(function (Get $get, Set $set, ?string $old, ?string $state) {
@@ -47,7 +44,7 @@ class StatusResource extends Resource
                         $set('slug', Str::slug($state));
                     }),
                 Select::make('color')
-                    ->label('Status Colour')
+                    ->label('State Colour')
                     ->options([
                         'danger' => 'Red',
                         'success' => 'Green',
@@ -57,6 +54,11 @@ class StatusResource extends Resource
                     ->native(false)
                     ->placeholder('Set status colour')
                     ->required(),
+                Select::make('category')
+                    ->options(StateCategory::class)
+                    ->native(false)
+                    ->required(),
+
                 Toggle::make('is_active')
                     ->label(function ($state) {
                         return $state ? 'Active' : 'Inactive';
@@ -68,20 +70,12 @@ class StatusResource extends Resource
                     ->onColor('success')
                     ->offColor('danger')
                     ->default(true),
-                Select::make('category')
-                    ->options(StatusCategory::class)
-                    ->native(false)
-                    ->required(),
-                TextInput::make('sort_order')
-                    ->label('Sort Order')
-                    ->numeric()
-                    ->minValue(1)
-                    ->required(),
                 TextInput::make('slug')
-                    ->label('Slug')
+                    ->label('System Name')
                     ->disabled()
+                    ->readOnly()
                     ->dehydrated()
-                    ->unique(ignoreRecord: true)
+                    ->unique(ignoreRecord: true),
 
             ]);
     }
@@ -90,24 +84,24 @@ class StatusResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name'),
-                Tables\Columns\TextColumn::make('color'),
-                Tables\Columns\BooleanColumn::make('is_active'),
+                Tables\Columns\TextColumn::make('name')
+                    ->badge()
+                    ->color(fn ($record) => $record->color),
+                //                Tables\Columns\TextColumn::make('color')
+                //                    ->badge()
+                //                    ->color(fn ($record) => $record->color),
+                Tables\Columns\TextColumn::make('is_active'),
                 Tables\Columns\TextColumn::make('category'),
-                Tables\Columns\TextColumn::make('sort_order'),
-                Tables\Columns\TextColumn::make('slug'),
 
             ])
-            ->filters([
-                //
-            ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->hidden(fn ($record) => $record->is_system),
+                Tables\Actions\DeleteAction::make()
+                    ->hidden(fn ($record) => $record->is_system),
+
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
             ]);
     }
 
@@ -121,9 +115,19 @@ class StatusResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListStatuses::route('/'),
-            // 'create' => Pages\CreateStatus::route('/create'),
-            // 'edit' => Pages\EditStatus::route('/{record}/edit'),
+            'index' => Pages\ListState::route('/'),
+            'create' => Pages\CreateState::route('/create'),
+            'edit' => Pages\EditState::route('/{record}/edit'),
         ];
+    }
+
+    public static function getRecordRouteKeyName(): string
+    {
+        return 'id';
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return ! $record->getAttribute('is_system');
     }
 }
