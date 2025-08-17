@@ -6,6 +6,7 @@ use App\Enums\StateCategory;
 use App\Filament\Clusters\ActivityStatus;
 use App\Filament\Clusters\ActivityStatus\Resources\StateResource\Pages;
 use App\Models\State;
+use App\Traits\HandlesDeleteExceptions;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -14,12 +15,14 @@ use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 class StateResource extends Resource
 {
+    use HandlesDeleteExceptions;
     protected static ?string $model = State::class;
 
     protected static ?string $navigationLabel = 'Activity State';
@@ -71,7 +74,8 @@ class StateResource extends Resource
                     ->offColor('danger')
                     ->default(true),
                 TextInput::make('slug')
-                    ->label('System Name')
+                    ->label('')
+                    ->helperText('system name')
                     ->disabled()
                     ->readOnly()
                     ->dehydrated()
@@ -86,22 +90,21 @@ class StateResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->badge()
-                    ->color(fn ($record) => $record->color),
-                //                Tables\Columns\TextColumn::make('color')
-                //                    ->badge()
-                //                    ->color(fn ($record) => $record->color),
+                    ->color(fn($record) => $record->color),
                 Tables\Columns\TextColumn::make('is_active'),
                 Tables\Columns\TextColumn::make('category'),
 
             ])
             ->actions([
-                Tables\Actions\EditAction::make()
-                    ->hidden(fn ($record) => $record->is_system),
+                Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make()
-                    ->hidden(fn ($record) => $record->is_system),
-
+                    ->before(fn($action, $record) => (new static())->tryDeleteRecord($record, $action)),
             ])
             ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->before(fn($action, $records) => collect($records)->each(fn($record) => (new static())->tryDeleteRecord($record, $action))),
+                ]),
             ]);
     }
 
@@ -128,6 +131,11 @@ class StateResource extends Resource
 
     public static function canEdit(Model $record): bool
     {
-        return ! $record->getAttribute('is_system');
+        return !$record->getAttribute('is_system');
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return !$record->getAttribute('is_system');
     }
 }

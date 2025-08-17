@@ -18,7 +18,7 @@ trait HasWorkflow
     {
         $morphAlias = $this->getMorphClass();
 
-        return cache()->rememberForever('workflow for.' . $morphAlias, function () use ($morphAlias) {
+        return cache()->rememberForever('workflow for.'.$morphAlias, function () use ($morphAlias) {
             return Workflow::where('model_type', $morphAlias)->where('is_active', true)->first();
         });
     }
@@ -26,12 +26,14 @@ trait HasWorkflow
     public function getAvailableTransitions()
     {
         $user = Auth::user();
-        if (!$user)
+        if (! $user) {
             return collect();
+        }
 
         $workflow = $this->getWorkflow();
-        if (!$workflow)
+        if (! $workflow) {
             return collect();
+        }
 
         return $workflow->transitions()->with('roles')->where('from_status_id', $this->status_id)
             ->get()

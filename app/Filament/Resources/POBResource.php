@@ -52,10 +52,10 @@ class POBResource extends Resource
                     ->types([
                         MorphToSelect\Type::make(Doctor::class)
                             ->titleAttribute('name')
-                            ->modifyOptionsQueryUsing(fn ($query) => $query->where('status', 'Approved')),
+                            ->modifyOptionsQueryUsing(fn($query) => $query->where('status', 'Approved')),
                         MorphToSelect\Type::make(Chemist::class)
                             ->titleAttribute('name')
-                            ->modifyOptionsQueryUsing(fn ($query) => $query->where('status', 'Approved')),
+                            ->modifyOptionsQueryUsing(fn($query) => $query->where('status', 'Approved')),
                     ])
                     ->native(false)
                     ->searchable()
@@ -134,6 +134,8 @@ class POBResource extends Resource
                     ->label('Campaign'),
                 TextEntry::make('customer.name')
                     ->label('Customer'),
+                TextEntry::make('headquarter.name')
+                    ->label('Headquarter')
             ]);
     }
 

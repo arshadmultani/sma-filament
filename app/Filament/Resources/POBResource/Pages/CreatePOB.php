@@ -3,9 +3,8 @@
 namespace App\Filament\Resources\POBResource\Pages;
 
 use App\Filament\Resources\POBResource;
-use Filament\Actions;
-use Illuminate\Support\Facades\Auth;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Support\Facades\Auth;
 
 class CreatePOB extends CreateRecord
 {
@@ -27,8 +26,18 @@ class CreatePOB extends CreateRecord
                 $data['headquarter_id'] = $customerModel->headquarter_id;
             }
         }
-        $data['status_id'] = 1; // Assuming 1 is the ID for 'Pending' status
+        $data['state_id'] = 9; // Assuming 5 is the ID for 'Pending' status
 
         return $data;
+    }
+
+    public function afterCreate(): void
+    {
+        $campaignId = $this->data['campaign_id'];
+        $this->record->campaignEntry()->create([
+            'campaign_id' => $campaignId,
+            'customer_id' => $this->record->customer_id,
+            'customer_type' => $this->record->customer_type,
+        ]);
     }
 }

@@ -40,8 +40,8 @@ class CreateMicrosite extends CreateRecord
         if (isset($data['doctor']['reviews'])) {
             unset($data['doctor']['reviews']);
         }
-        
-        if(isset($data['doctor'])) {
+
+        if (isset($data['doctor'])) {
             unset($data['doctor']);
         }
 
@@ -52,9 +52,9 @@ class CreateMicrosite extends CreateRecord
     {
         $campaignId = $this->data['campaign_id'];
         $this->record->campaignEntry()->create([
-            'campaign_id'   => $campaignId,
-            'customer_id'   => $this->record->doctor_id,
-            'customer_type' => 'doctor',
+            'campaign_id' => $campaignId,
+            'customer_id' => $this->record->doctor_id,
+            'customer_type' => $this->record->customer_type,
         ]);
     }
 }
