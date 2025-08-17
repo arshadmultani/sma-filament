@@ -29,7 +29,6 @@ class ViewKofolEntry extends ViewRecord
     protected function resolveRecord($key): Model
     {
         $record = parent::resolveRecord($key)->load(['customer.headquarter', 'coupons']);
-        Log::info('Coupons are loaded:', [$record->coupons]);
         return $record;
     }
 

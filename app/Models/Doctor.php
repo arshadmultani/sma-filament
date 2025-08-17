@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Events\CustomerHeadquarterUpdated;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
 
@@ -121,9 +122,7 @@ class Doctor extends BaseModel
         });
         static::updated(function ($doctor) {
             if ($doctor->isDirty('headquarter_id')) {
-                \App\Models\KofolEntry::where('customer_type', $doctor->getMorphClass())
-                    ->where('customer_id', $doctor->id)
-                    ->update(['headquarter_id' => $doctor->headquarter_id]);
+                event(new CustomerHeadquarterUpdated($doctor, $doctor->headquarter_id));
             }
         });
     }

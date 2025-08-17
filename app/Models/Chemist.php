@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Events\CustomerHeadquarterUpdated;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
 
@@ -43,7 +44,7 @@ use Illuminate\Notifications\Notifiable;
  */
 class Chemist extends BaseModel
 {
-    use HasFactory,Notifiable;
+    use HasFactory, Notifiable;
     protected $fillable = ['name', 'phone', 'email', 'town', 'user_id', 'address', 'headquarter_id', 'type'];
 
     public function headquarter()
@@ -83,9 +84,7 @@ class Chemist extends BaseModel
         });
         static::updated(function ($chemist) {
             if ($chemist->isDirty('headquarter_id')) {
-                \App\Models\KofolEntry::where('customer_type', $chemist->getMorphClass())
-                    ->where('customer_id', $chemist->id)
-                    ->update(['headquarter_id' => $chemist->headquarter_id]);
+                event(new CustomerHeadquarterUpdated($chemist, $chemist->headquarter_id));
             }
         });
     }
