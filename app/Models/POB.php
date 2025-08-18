@@ -18,6 +18,10 @@ class POB extends Model implements IsCampaignEntry
     use HasActivity;
     protected $guarded = [];
 
+    protected $casts = [
+        'invoice_image' => 'array'
+    ];
+
     public function pobProducts(): HasMany
     {
         return $this->hasMany(POBProduct::class);

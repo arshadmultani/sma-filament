@@ -11,6 +11,11 @@ class ViewPOB extends ViewRecord
 {
     protected static string $resource = POBResource::class;
 
+    public function getTitle(): string
+    {
+        return 'POB-' . $this->record->id . '-' . $this->record->created_at->day;
+    }
+
     protected function getHeaderActions(): array
     {
         $actions = [];

@@ -2,22 +2,30 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\POBResource\Pages;
-use App\Models\Campaign;
-use App\Models\Chemist;
-use App\Models\Doctor;
 use App\Models\POB;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\MorphToSelect;
-use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
+use Filament\Tables;
+use App\Models\Doctor;
+use App\Models\Chemist;
+use App\Models\Campaign;
 use Filament\Forms\Form;
-use Filament\Infolists\Components\TextEntry;
+use Filament\Tables\Table;
+use Illuminate\Support\Str;
+use App\Settings\POBSettings;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
+use Filament\Forms\Components\Select;
+use Filament\Support\Enums\FontWeight;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\TextInput;
+use Filament\Infolists\Components\Split;
+use Filament\Forms\Components\FileUpload;
+use Filament\Infolists\Components\Section;
+use Filament\Forms\Components\MorphToSelect;
+use Filament\Infolists\Components\TextEntry;
+use App\Filament\Resources\POBResource\Pages;
+use Filament\Infolists\Components\ImageEntry;
+use Illuminate\Support\Facades\Storage;
+
 
 class POBResource extends Resource
 {
@@ -30,6 +38,34 @@ class POBResource extends Resource
     protected static ?string $pluralLabel = 'POB';
 
     protected static ?string $slug = 'pob';
+
+    /**
+     * Generate URL to a model's resource view page
+     */
+    public static function getCustomerResourceUrl($customer): ?string
+    {
+        if (!$customer) {
+            return null;
+        }
+
+        $resourceClass = 'App\\Filament\\Resources\\' . class_basename($customer) . 'Resource';
+
+        if (class_exists($resourceClass)) {
+            return $resourceClass::getUrl('view', ['record' => $customer]);
+        }
+
+        return null;
+    }
+    public static function getS3ImageUrls($imageArray, int $expirationMinutes = 5): array
+    {
+        if (!$imageArray || !is_array($imageArray)) {
+            return [];
+        }
+
+        return collect($imageArray)->map(function ($imagePath) use ($expirationMinutes) {
+            return Storage::temporaryUrl($imagePath, now()->addMinutes($expirationMinutes));
+        })->toArray();
+    }
 
     public static function form(Form $form): Form
     {
@@ -87,11 +123,13 @@ class POBResource extends Resource
                     ->minValue(1),
                 FileUpload::make('invoice_image')
                     ->image()
+                    ->multiple()
+                    ->maxFiles(app(POBSettings::class)->max_invoices)
+                    ->helperText('No. of Images allowed: ' . app(POBSettings::class)->max_invoices)
                     ->disk('s3')
                     ->directory('pob-invoices')
                     ->downloadable()
-                    // ->maxSize(app(::class)->max_invoice_size)
-
+                    ->maxSize(app(POBSettings::class)->max_invoice_size)
                     ->required(),
 
             ]);
@@ -130,12 +168,44 @@ class POBResource extends Resource
     {
         return $infolist
             ->schema([
-                TextEntry::make('campaign.name')
-                    ->label('Campaign'),
-                TextEntry::make('customer.name')
-                    ->label('Customer'),
-                TextEntry::make('headquarter.name')
-                    ->label('Headquarter')
+                Split::make([
+                    Section::make('Activity Information')
+                        ->compact()
+                        ->columns(4)
+                        ->columnSpanFull()
+                        ->grow(true)
+                        ->schema([
+                            TextEntry::make('campaignEntry.campaign.name')
+                                ->label('Campaign'),
+                            TextEntry::make('customer.name')
+                                ->label('Customer')
+                                ->url(fn($record) => static::getCustomerResourceUrl($record->customer))
+                                ->color('primary'),
+                            TextEntry::make('customer_type')
+                                ->formatStateUsing(fn($state) => Str::ucfirst($state))
+                                ->label('Customer Type'),
+                            TextEntry::make('headquarter.name')
+                                ->label('Headquarter')
+                        ]),
+                    Section::make('')
+                        ->compact()
+                        ->schema([
+                            ImageEntry::make('invoice_image')
+                                ->label('Invoice')
+                                ->disk('s3')
+                                ->visibility('private')
+                                ->url(fn($record, $state) => $state, shouldOpenInNewTab: true)
+                                // ->getStateUsing(fn($record) => static::getS3ImageUrls($record->invoice_image))
+                                ->checkFileExistence(false)
+                                ->columns(1),
+                            TextEntry::make('invoice_amount')->label('Total Amount')->money('INR')->weight(FontWeight::SemiBold),
+
+                        ])
+                ])->from('xl')->columnSpanFull(),
+
+
+
+
             ]);
     }
 

@@ -2,9 +2,10 @@
 
 namespace App\Filament\Resources\POBResource\Pages;
 
+use App\Settings\POBSettings;
+use Illuminate\Support\Facades\Auth;
 use App\Filament\Resources\POBResource;
 use Filament\Resources\Pages\CreateRecord;
-use Illuminate\Support\Facades\Auth;
 
 class CreatePOB extends CreateRecord
 {
@@ -26,7 +27,7 @@ class CreatePOB extends CreateRecord
                 $data['headquarter_id'] = $customerModel->headquarter_id;
             }
         }
-        $data['state_id'] = 9; // Assuming 5 is the ID for 'Pending' status
+        $data['state_id'] = app(POBSettings::class)->start_state;
 
         return $data;
     }
