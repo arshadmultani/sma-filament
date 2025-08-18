@@ -6,6 +6,7 @@ use App\Models\POB;
 use Filament\Tables;
 use App\Models\Doctor;
 use App\Models\Chemist;
+use App\Models\Product;
 use App\Models\Campaign;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
@@ -13,9 +14,12 @@ use Illuminate\Support\Str;
 use App\Settings\POBSettings;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
+use function Illuminate\Log\log;
+use Illuminate\Support\Facades\Log;
 use Filament\Forms\Components\Select;
 use Filament\Support\Enums\FontWeight;
 use Filament\Forms\Components\Repeater;
+use Illuminate\Support\Facades\Storage;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\Split;
 use Filament\Forms\Components\FileUpload;
@@ -23,9 +27,10 @@ use Filament\Infolists\Components\Section;
 use Filament\Forms\Components\MorphToSelect;
 use Filament\Infolists\Components\TextEntry;
 use App\Filament\Resources\POBResource\Pages;
-use Filament\Infolists\Components\ImageEntry;
-use Illuminate\Support\Facades\Storage;
+use Filament\Forms\Components\Actions\Action;
 
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\RepeatableEntry;
 
 class POBResource extends Resource
 {
@@ -99,15 +104,28 @@ class POBResource extends Resource
                     ->preload() // this is causing the issue for admin in 5L+ entries are there. fix this later
                     ->required(),
                 Repeater::make('pobProducts')
+                    ->label('')
+                    ->minItems(1)
+                    ->columns(2)
+                    ->reorderable(false)
+                    ->itemLabel(
+                        fn(array $state): string => Product::find($state['product_id'])?->name ?? ''
+                    )
+                    ->collapsible()
                     ->relationship('pobProducts')
                     ->columnSpanFull()
                     ->addActionLabel('Add Product')
+                    ->deleteAction(
+                        fn(Action $action) => $action->requiresConfirmation()
+                    )
                     ->schema([
                         Select::make('product_id')
                             ->label('Product')
                             ->placeholder('Select Product')
                             ->required()
+                            ->distinct()
                             ->preload()
+                            ->reactive()
                             ->searchable()
                             ->relationship('product', 'name'),
                         TextInput::make('quantity')
@@ -123,9 +141,9 @@ class POBResource extends Resource
                     ->minValue(1),
                 FileUpload::make('invoice_image')
                     ->image()
-                    ->multiple()
-                    ->maxFiles(app(POBSettings::class)->max_invoices)
-                    ->helperText('No. of Images allowed: ' . app(POBSettings::class)->max_invoices)
+                    // ->multiple()
+                    // ->maxFiles(app(POBSettings::class)->max_invoices)
+                    // ->helperText('No. of Images allowed: ' . app(POBSettings::class)->max_invoices)
                     ->disk('s3')
                     ->directory('pob-invoices')
                     ->downloadable()
@@ -168,40 +186,52 @@ class POBResource extends Resource
     {
         return $infolist
             ->schema([
-                Split::make([
-                    Section::make('Activity Information')
-                        ->compact()
-                        ->columns(4)
-                        ->columnSpanFull()
-                        ->grow(true)
-                        ->schema([
-                            TextEntry::make('campaignEntry.campaign.name')
-                                ->label('Campaign'),
-                            TextEntry::make('customer.name')
-                                ->label('Customer')
-                                ->url(fn($record) => static::getCustomerResourceUrl($record->customer))
-                                ->color('primary'),
-                            TextEntry::make('customer_type')
-                                ->formatStateUsing(fn($state) => Str::ucfirst($state))
-                                ->label('Customer Type'),
-                            TextEntry::make('headquarter.name')
-                                ->label('Headquarter')
-                        ]),
-                    Section::make('')
-                        ->compact()
-                        ->schema([
-                            ImageEntry::make('invoice_image')
-                                ->label('Invoice')
-                                ->disk('s3')
-                                ->visibility('private')
-                                ->url(fn($record, $state) => $state, shouldOpenInNewTab: true)
-                                // ->getStateUsing(fn($record) => static::getS3ImageUrls($record->invoice_image))
-                                ->checkFileExistence(false)
-                                ->columns(1),
-                            TextEntry::make('invoice_amount')->label('Total Amount')->money('INR')->weight(FontWeight::SemiBold),
 
-                        ])
-                ])->from('xl')->columnSpanFull(),
+                Section::make('Activity Information')
+                    ->compact()
+                    ->columns(4)
+                    ->columnSpanFull()
+                    ->grow(true)
+                    ->schema([
+                        TextEntry::make('campaignEntry.campaign.name')
+                            ->label('Campaign'),
+                        TextEntry::make('customer.name')
+                            ->label('Customer')
+                            ->url(fn($record) => static::getCustomerResourceUrl($record->customer))
+                            ->color('primary'),
+                        TextEntry::make('customer_type')
+                            ->formatStateUsing(fn($state) => Str::ucfirst($state))
+                            ->label('Customer Type'),
+                        TextEntry::make('headquarter.name')
+                            ->label('Headquarter')
+                    ]),
+                Section::make('Products')
+                    ->compact()
+                    ->collapsible()
+                    ->schema([
+                        RepeatableEntry::make('pobProducts')
+                            ->columns(2)
+                            ->schema([
+                                TextEntry::make('product.name'),
+                                TextEntry::make('quantity')
+                            ])
+
+                    ]),
+                Section::make('Invoice')
+                    ->compact()
+                    // ->columns(2)
+                    ->collapsible()
+                    ->schema([
+                        ImageEntry::make('invoice_image')
+                            ->label('Invoice')
+                            ->disk('s3')
+                            ->visibility('private')
+                            ->url(fn($record) => $record->invoice_image ? Storage::temporaryUrl($record->invoice_image, now()->addMinutes(5)) : '')
+                            ->checkFileExistence(false),
+                        TextEntry::make('invoice_amount')->label('Total Amount')->money('INR')->weight(FontWeight::SemiBold),
+
+                    ])
+
 
 
 

@@ -47,16 +47,17 @@ class ManagePOB extends SettingsPage
                     ->dehydrateStateUsing(function ($state) {
                         return $state * 1024;
                     }),
+                // TODO: set max_invoices
 
-                TextInput::make('max_invoices')
-                    ->label('Maximum Invoices')
-                    ->placeholder('No. of image files can be uploaded')
-                    ->helperText('Current Value: ' . app(POBSettings::class)->max_invoices)
-                    ->required()
-                    ->numeric()
-                    ->suffix('No. of Images')
-                    ->minValue(1)
-                    ->maxValue(4),
+                // TextInput::make('max_invoices')
+                //     ->label('Maximum Invoices')
+                //     ->placeholder('No. of image files can be uploaded')
+                //     ->helperText('Current Value: ' . app(POBSettings::class)->max_invoices)
+                //     ->required()
+                //     ->numeric()
+                //     ->suffix('No. of Images')
+                //     ->minValue(1)
+                //     ->maxValue(4),
                 Select::make('start_state')
                     ->helperText('The default status of Document when it is sumbitted')
                     ->placeholder('Select a status')
