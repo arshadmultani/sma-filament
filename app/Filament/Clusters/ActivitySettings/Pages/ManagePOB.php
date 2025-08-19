@@ -2,6 +2,7 @@
 
 namespace App\Filament\Clusters\ActivitySettings\Pages;
 
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Forms;
 use App\Models\State;
 use Filament\Forms\Form;
@@ -15,6 +16,7 @@ use EightyNine\FilamentAdvancedWidget\AdvancedStatsOverviewWidget\Stat;
 
 class ManagePOB extends SettingsPage
 {
+    use HasPageShield;
     // protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
 
     protected static string $settings = POBSettings::class;

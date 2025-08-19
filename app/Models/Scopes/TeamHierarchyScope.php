@@ -15,7 +15,7 @@ class TeamHierarchyScope implements Scope
         /** @var \App\Models\User|null $user */
         $user = \Illuminate\Support\Facades\Auth::user();
 
-        if (! $user) {
+        if (!$user) {
             return;
         }
 
@@ -49,20 +49,39 @@ class TeamHierarchyScope implements Scope
         // Simple switch for model types
         if ($model instanceof \App\Models\KofolEntry) {
             $query->orWhereHasMorph('customer', [\App\Models\Doctor::class, \App\Models\Chemist::class], function ($q) use ($type, $id) {
-                if ($type === 'headquarter') $q->where('headquarter_id', $id);
-                if ($type === 'area') $q->whereHas('headquarter', fn($hq) => $hq->where('area_id', $id));
-                if ($type === 'region') $q->whereHas('headquarter.area', fn($a) => $a->where('region_id', $id));
-                if ($type === 'zone') $q->whereHas('headquarter.area.region', fn($r) => $r->where('zone_id', $id));
+                if ($type === 'headquarter')
+                    $q->where('headquarter_id', $id);
+                if ($type === 'area')
+                    $q->whereHas('headquarter', fn($hq) => $hq->where('area_id', $id));
+                if ($type === 'region')
+                    $q->whereHas('headquarter.area', fn($a) => $a->where('region_id', $id));
+                if ($type === 'zone')
+                    $q->whereHas('headquarter.area.region', fn($r) => $r->where('zone_id', $id));
             });
         } elseif ($model instanceof \App\Models\Microsite) {
             $query->orWhereHas('doctor', function ($q) use ($type, $id) {
-                if ($type === 'headquarter') $q->where('headquarter_id', $id);
-                if ($type === 'area') $q->whereHas('headquarter', fn($hq) => $hq->where('area_id', $id));
-                if ($type === 'region') $q->whereHas('headquarter.area', fn($a) => $a->where('region_id', $id));
-                if ($type === 'zone') $q->whereHas('headquarter.area.region', fn($r) => $r->where('zone_id', $id));
+                if ($type === 'headquarter')
+                    $q->where('headquarter_id', $id);
+                if ($type === 'area')
+                    $q->whereHas('headquarter', fn($hq) => $hq->where('area_id', $id));
+                if ($type === 'region')
+                    $q->whereHas('headquarter.area', fn($a) => $a->where('region_id', $id));
+                if ($type === 'zone')
+                    $q->whereHas('headquarter.area.region', fn($r) => $r->where('zone_id', $id));
+            });
+        } elseif ($model instanceof \App\Models\POB) {
+            $query->orWhereHas('customer', function ($q) use ($type, $id) {
+                if ($type === 'headquarter')
+                    $q->where('headquarter_id', $id);
+                if ($type === 'area')
+                    $q->whereHas('headquarter', fn($hq) => $hq->where('area_id', $id));
+                if ($type === 'region')
+                    $q->whereHas('headquarter.area', fn($a) => $a->where('region_id', $id));
+                if ($type === 'zone')
+                    $q->whereHas('headquarter.area.region', fn($r) => $r->where('zone_id', $id));
             });
         }
-        // Add more models here as needed
+
     }
 
     protected function getCachedSubordinates($user)

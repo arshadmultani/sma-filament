@@ -95,7 +95,7 @@ class Campaign extends Model
 
     public static function getCacheKeyForEntryType(string $entryType): string
     {
-        return "campaigns_for_entry_type_{$entryType}";
+        return "campaigns_for_entry_type_{$entryType}" . now()->format('Y-m-d-H-i-s');
     }
     public static function getForEntryType(string $entryType)
     {

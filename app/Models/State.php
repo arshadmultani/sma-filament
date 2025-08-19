@@ -36,6 +36,12 @@ class State extends Model
         return $this->hasMany(POB::class);
     }
 
+    public function isFinalized(): bool
+    {
+        return $this->category === StateCategory::FINALIZED;
+    }
+
+
     /**
      * Define which relationships to check before deletion.
      *

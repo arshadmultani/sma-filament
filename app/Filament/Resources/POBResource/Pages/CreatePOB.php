@@ -28,18 +28,19 @@ class CreatePOB extends CreateRecord
     {
         $data['user_id'] = Auth::user()->id;
 
-        // Get the customer model instance based on the polymorphic relationship
+        // Get the customer 
         $customerType = $data['customer_type'];
         $customerId = $data['customer_id'];
 
+        //set HQ
         if ($customerType && $customerId) {
-            // Use Relation::getMorphedModel to get the actual class from the morph map
             $customerClass = \Illuminate\Database\Eloquent\Relations\Relation::getMorphedModel($customerType);
             $customerModel = $customerClass::find($customerId);
             if ($customerModel && isset($customerModel->headquarter_id)) {
                 $data['headquarter_id'] = $customerModel->headquarter_id;
             }
         }
+        // set default state
         $data['state_id'] = app(POBSettings::class)->start_state;
 
         return $data;

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Actions\UpdateStateAction;
 use App\Models\POB;
 use Filament\Tables;
 use App\Models\Doctor;
@@ -29,13 +30,26 @@ use Filament\Infolists\Components\Section;
 use Filament\Forms\Components\MorphToSelect;
 use Filament\Infolists\Components\TextEntry;
 use App\Filament\Resources\POBResource\Pages;
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 use Icetalker\FilamentTableRepeatableEntry\Infolists\Components\TableRepeatableEntry;
 
-class POBResource extends Resource
+class POBResource extends Resource implements HasShieldPermissions
 {
+    public static function getPermissionPrefixes(): array
+    {
+        return [
+            'view',
+            'view_any',
+            'create',
+            'update',
+            'delete',
+            'delete_any',
+            'update_state',
+        ];
+    }
     protected static ?string $model = POB::class;
 
     protected static ?string $navigationGroup = 'Activities';
@@ -183,6 +197,7 @@ class POBResource extends Resource
             ->columns([
                 TextColumn::make('id')
                     ->label('POB #')
+                    ->prefix('POB/')
                     ->toggleable()
                     ->searchable()
                     ->sortable(),
@@ -228,6 +243,7 @@ class POBResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    // UpdateStateAction::makeBulk()
                 ]),
             ]);
     }
@@ -310,7 +326,10 @@ class POBResource extends Resource
 
             ]);
     }
-
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
     public static function getRelations(): array
     {
         return [

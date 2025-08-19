@@ -10,6 +10,15 @@ class EditPOB extends EditRecord
 {
     protected static string $resource = POBResource::class;
 
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        $data['campaign_id'] = $this->record->campaignEntry->campaign->name; //show campaign name
+        return $data;
+    }
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('view', ['record' => $this->getRecord()]);
+    }
     protected function getHeaderActions(): array
     {
         return [
