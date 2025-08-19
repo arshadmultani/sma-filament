@@ -28,9 +28,9 @@ use Filament\Forms\Components\MorphToSelect;
 use Filament\Infolists\Components\TextEntry;
 use App\Filament\Resources\POBResource\Pages;
 use Filament\Forms\Components\Actions\Action;
-
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\RepeatableEntry;
+use Illuminate\Support\Facades\Cache;
 
 class POBResource extends Resource
 {
@@ -93,18 +93,20 @@ class POBResource extends Resource
                     ->types([
                         MorphToSelect\Type::make(Doctor::class)
                             ->titleAttribute('name')
+                            ->label('Doctor')
                             ->modifyOptionsQueryUsing(fn($query) => $query->where('status', 'Approved')),
                         MorphToSelect\Type::make(Chemist::class)
                             ->titleAttribute('name')
                             ->modifyOptionsQueryUsing(fn($query) => $query->where('status', 'Approved')),
                     ])
+                    ->label('Customer')
                     ->native(false)
                     ->searchable()
                     ->optionsLimit(10)
-                    ->preload() // this is causing the issue for admin in 5L+ entries are there. fix this later
+                    // ->preload() // this is causing the issue for admin in 5L+ entries are there. fix this later
                     ->required(),
                 Repeater::make('pobProducts')
-                    ->label('')
+                    ->label('Products')
                     ->minItems(1)
                     ->columns(2)
                     ->reorderable(false)
@@ -120,35 +122,51 @@ class POBResource extends Resource
                     )
                     ->schema([
                         Select::make('product_id')
-                            ->label('Product')
+                            ->label('Product Name')
                             ->placeholder('Select Product')
                             ->required()
                             ->distinct()
-                            ->preload()
+                            ->optionsLimit(30)
                             ->reactive()
                             ->searchable()
-                            ->relationship('product', 'name'),
+                            ->options(
+                                function () {
+                                    return Cache::remember(Product::SELECT_CACHE_KEY, now()->addHours(24), function () {
+                                        return Product::pluck('name', 'id')->all();
+                                    });
+                                }
+                            ),
                         TextInput::make('quantity')
                             ->label('Quantity')
+                            ->placeholder('No.')
                             ->required()
                             ->numeric()
                             ->minValue(1),
                     ]),
-                TextInput::make('invoice_amount')
-                    ->label('Invoice Amount')
-                    ->required()
-                    ->numeric()
-                    ->minValue(1),
-                FileUpload::make('invoice_image')
-                    ->image()
-                    // ->multiple()
-                    // ->maxFiles(app(POBSettings::class)->max_invoices)
-                    // ->helperText('No. of Images allowed: ' . app(POBSettings::class)->max_invoices)
-                    ->disk('s3')
-                    ->directory('pob-invoices')
-                    ->downloadable()
-                    ->maxSize(app(POBSettings::class)->max_invoice_size)
-                    ->required(),
+                \Filament\Forms\Components\Section::make()
+                    ->columns(2)
+                    ->schema([
+                        FileUpload::make('invoice_image')
+                            ->image()
+                            ->label('Invoice Image')
+                            // ->multiple()
+                            // ->maxFiles(app(POBSettings::class)->max_invoices)
+                            // ->helperText('No. of Images allowed: ' . app(POBSettings::class)->max_invoices)
+                            ->disk('s3')
+                            ->directory('pob-invoices')
+                            ->downloadable()
+                            ->maxSize(app(POBSettings::class)->max_invoice_size)
+                            ->required(),
+                        TextInput::make('invoice_amount')
+                            ->label('POB Value')
+                            ->placeholder('Total value')
+                            ->required()
+                            ->prefix('₹')
+                            ->numeric()
+                            ->minValue(1),
+                    ]),
+
+
 
             ]);
     }

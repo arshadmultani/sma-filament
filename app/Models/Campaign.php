@@ -2,12 +2,16 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
+use App\Observers\CamapaignObserver;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Database\Eloquent\Model;
+use App\Models\Scopes\CampaignVisibilityScope;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Carbon\Carbon;
-use App\Models\Scopes\CampaignVisibilityScope;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 
+#[ObservedBy([CamapaignObserver::class])]
 class Campaign extends Model
 {
     use HasFactory;
@@ -71,14 +75,14 @@ class Campaign extends Model
         return ['entries'];
     }
     public function getParticipantsAttribute()
-{
-    $headOfficeRoleNames = \Spatie\Permission\Models\Role::whereIn('id', \App\Models\User::headOfficeRoleIds())->pluck('name')->toArray();
-    return $this->roles
-        ->pluck('name')
-        ->reject(fn($role) => in_array($role, $headOfficeRoleNames))
-        ->values()
-        ->all();
-}
+    {
+        $headOfficeRoleNames = \Spatie\Permission\Models\Role::whereIn('id', \App\Models\User::headOfficeRoleIds())->pluck('name')->toArray();
+        return $this->roles
+            ->pluck('name')
+            ->reject(fn($role) => in_array($role, $headOfficeRoleNames))
+            ->values()
+            ->all();
+    }
 
     /**
      * Scope to get campaigns by entry type and active status
@@ -86,17 +90,18 @@ class Campaign extends Model
     public function scopeForEntryType($query, string $entryType)
     {
         return $query->where('allowed_entry_type', $entryType)
-                    ->where('is_active', true);
+            ->where('is_active', true);
     }
 
-    /**
-     * Get campaigns for entry type with caching
-     */
-    public static function getForEntryType(string $entryType, int $cacheMinutes = 30)
+    public static function getCacheKeyForEntryType(string $entryType): string
     {
-        $cacheKey = "campaigns_for_entry_type_{$entryType}";
-        
-        return \Illuminate\Support\Facades\Cache::remember($cacheKey, $cacheMinutes * 60, function () use ($entryType) {
+        return "campaigns_for_entry_type_{$entryType}";
+    }
+    public static function getForEntryType(string $entryType)
+    {
+        $cacheKey = self::getCacheKeyForEntryType($entryType);
+
+        return Cache::remember($cacheKey, now()->addDays(1), function () use ($entryType) {
             return static::forEntryType($entryType)->pluck('name', 'id');
         });
     }

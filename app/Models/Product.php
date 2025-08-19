@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Observers\ProductObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -34,9 +36,12 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @mixin \Eloquent
  */
+#[ObservedBy([ProductObserver::class])]
 class Product extends Model
 {
     protected $fillable = ['name', 'description', 'price', 'division_id', 'brand_id'];
+
+    public const SELECT_CACHE_KEY = 'products.select';
 
     public function division()
     {

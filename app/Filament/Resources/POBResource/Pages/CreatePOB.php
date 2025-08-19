@@ -11,6 +11,19 @@ class CreatePOB extends CreateRecord
 {
     protected static string $resource = POBResource::class;
 
+    public function getTitle(): string
+    {
+        return 'New POB';
+    }
+
+    protected function getFormActions(): array
+    {
+        return [
+            $this->getSubmitFormAction()->label('Submit'),
+            $this->getCancelFormAction(),
+        ];
+
+    }
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['user_id'] = Auth::user()->id;
