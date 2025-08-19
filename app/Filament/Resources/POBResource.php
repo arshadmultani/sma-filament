@@ -17,8 +17,10 @@ use Filament\Resources\Resource;
 use function Illuminate\Log\log;
 use Illuminate\Support\Facades\Log;
 use Filament\Forms\Components\Select;
+use Illuminate\Support\Facades\Cache;
 use Filament\Support\Enums\FontWeight;
 use Filament\Forms\Components\Repeater;
+use Filament\Tables\Columns\TextColumn;
 use Illuminate\Support\Facades\Storage;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\Split;
@@ -30,7 +32,7 @@ use App\Filament\Resources\POBResource\Pages;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\RepeatableEntry;
-use Illuminate\Support\Facades\Cache;
+use Icetalker\FilamentTableRepeatableEntry\Infolists\Components\TableRepeatableEntry;
 
 class POBResource extends Resource
 {
@@ -94,16 +96,18 @@ class POBResource extends Resource
                         MorphToSelect\Type::make(Doctor::class)
                             ->titleAttribute('name')
                             ->label('Doctor')
-                            ->modifyOptionsQueryUsing(fn($query) => $query->where('status', 'Approved')),
+                            ->modifyOptionsQueryUsing(fn($query) => $query->approved()->orderBy('name', 'asc')),
                         MorphToSelect\Type::make(Chemist::class)
                             ->titleAttribute('name')
-                            ->modifyOptionsQueryUsing(fn($query) => $query->where('status', 'Approved')),
+                            ->modifyOptionsQueryUsing(fn($query) => $query->approved()->orderBy('name', 'asc')),
                     ])
-                    ->label('Customer')
+                    ->label('Customer (Type & Name)')
                     ->native(false)
                     ->searchable()
+                    ->loadingMessage('Loading customers...')
+                    ->noSearchResultsMessage('Customer not found')
                     ->optionsLimit(10)
-                    // ->preload() // this is causing the issue for admin in 5L+ entries are there. fix this later
+                    ->preload() // this is causing the issue for admin in 5L+ entries are there. fix this later
                     ->required(),
                 Repeater::make('pobProducts')
                     ->label('Products')
@@ -138,7 +142,7 @@ class POBResource extends Resource
                             ),
                         TextInput::make('quantity')
                             ->label('Quantity')
-                            ->placeholder('No.')
+                            ->placeholder('Product Qty.')
                             ->required()
                             ->numeric()
                             ->minValue(1),
@@ -174,24 +178,52 @@ class POBResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('created_at', 'desc')
+            ->paginated([25, 50, 100, 250])
             ->columns([
-                Tables\Columns\TextColumn::make('customer.name')
-                    ->label('Customer')
+                TextColumn::make('id')
+                    ->label('POB #')
+                    ->toggleable()
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('invoice_amount')
-                    ->label('Invoice Amount')
+                TextColumn::make('campaignEntry.campaign.name')
+                    ->label('Campaign')
+                    ->toggleable(),
+                TextColumn::make('customer.name')
+                    ->label('Customer')
+                    ->searchable(),
+                TextColumn::make(name: 'customer_type')
+                    ->label('Cx. Type')
+                    ->searchable()
+                    ->formatStateUsing(fn($state) => class_basename($state))
+                    ->sortable()
+                    ->toggleable(),
+                TextColumn::make('user.name')->label('Submitted By')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
+                TextColumn::make('user.division.name')->label('Division')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
+                TextColumn::make('state.name')->label('Status')
+                    ->badge()
+                    ->sortable()
+                    ->color(fn($record) => $record->state->color),
+                TextColumn::make('invoice_amount')
+                    ->label('POB Amount')
                     ->money('inr')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable(),
+                TextColumn::make('created_at')->label('Submission')
+                    ->since()
+                    ->sortable()
+                    ->toggleable(),
             ])
             ->filters([
 
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
+                // Tables\Actions\ViewAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -207,28 +239,50 @@ class POBResource extends Resource
 
                 Section::make('Activity Information')
                     ->compact()
+                    ->collapsible()
                     ->columns(4)
                     ->columnSpanFull()
                     ->grow(true)
                     ->schema([
-                        TextEntry::make('campaignEntry.campaign.name')
-                            ->label('Campaign'),
                         TextEntry::make('customer.name')
                             ->label('Customer')
                             ->url(fn($record) => static::getCustomerResourceUrl($record->customer))
-                            ->color('primary'),
+                            ->color('primary')
+                            ->extraAttributes(['class' => 'hover:underline']),
                         TextEntry::make('customer_type')
                             ->formatStateUsing(fn($state) => Str::ucfirst($state))
                             ->label('Customer Type'),
                         TextEntry::make('headquarter.name')
-                            ->label('Headquarter')
+                            ->label('Headquarter'),
+                        TextEntry::make('campaignEntry.campaign.name')
+                            ->label('Campaign'),
+                        TextEntry::make('user.name')
+                            ->label('Submitted By'),
+                        TextEntry::make('created_at')
+                            ->label('Created At')
+                            ->dateTime('d-m-y @ H:i'),
+                        TextEntry::make('state.name')
+                            ->label('Status')
+                            ->badge()
+                            ->color(fn($record) => $record->state->color)
+
                     ]),
                 Section::make('Products')
                     ->compact()
                     ->collapsible()
                     ->schema([
-                        RepeatableEntry::make('pobProducts')
+                        TableRepeatableEntry::make('pobProducts')
+                            ->label('')
                             ->columns(2)
+                            ->extraAttributes(['class' => 'hidden sm:block']) // Visible only on mobile
+                            ->schema([
+                                TextEntry::make('product.name'),
+                                TextEntry::make('quantity')
+                            ]),
+                        RepeatableEntry::make('pobProducts')
+                            ->label('')
+                            ->columns(2)
+                            ->extraAttributes(['class' => 'block sm:hidden']) // Visible only on mobile
                             ->schema([
                                 TextEntry::make('product.name'),
                                 TextEntry::make('quantity')

@@ -95,6 +95,16 @@ class Doctor extends BaseModel
         return $this->belongsTo(Specialty::class);
     }
 
+    public function isApproved(): bool
+    {
+        return $this->status === 'Approved';
+    }
+
+    public function scopeApproved($query)
+    {
+        return $query->where('status', 'Approved');
+    }
+
     public function getHeadquarterNameAttribute()
     {
         return $this->headquarter?->name;

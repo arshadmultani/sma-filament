@@ -71,6 +71,16 @@ class Chemist extends BaseModel
         return $this->belongsToMany(Tag::class, 'chemist_tag')->withTimestamps()->withPivot('user_id');
     }
 
+    public function isApproved(): bool
+    {
+        return $this->status === 'Approved';
+    }
+
+    public function scopeApproved($query)
+    {
+        return $query->where('status', 'Approved');
+    }
+
     public function getRelationsToCheckForDelete()
     {
         return ['kofolEntries'];
