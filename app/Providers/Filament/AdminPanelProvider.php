@@ -26,6 +26,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Rmsramos\Activitylog\ActivitylogPlugin;
 use ShuvroRoy\FilamentSpatieLaravelHealth\FilamentSpatieLaravelHealthPlugin;
 use SolutionForest\FilamentSimpleLightBox\SimpleLightBoxPlugin;
 use Saade\FilamentLaravelLog\FilamentLaravelLogPlugin;
@@ -56,7 +57,7 @@ class AdminPanelProvider extends PanelProvider
             ->passwordReset()
             ->profile(isSimple: false)
             ->brandName('StepUp')
-            ->favicon(asset('public/logo.svg'))
+            ->favicon(asset('images/icons/icon.png'))
             // ->sidebarCollapsibleOnDesktop()
             // ->brandLogo(fn () => view('filament.admin.logo'))
 
@@ -80,8 +81,8 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make()
                     ->label('Territory')
                     ->icon('heroicon-o-map-pin'),
-                
-                
+
+
             ])
             ->sidebarWidth('15rem')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
@@ -137,6 +138,9 @@ class AdminPanelProvider extends PanelProvider
                 // HooksHelperPlugin::make(),
 
                 \RickDBCN\FilamentEmail\FilamentEmail::make(),
+                ActivitylogPlugin::make()
+                    ->navigationItem(false)
+
             ])
             ->discoverClusters(in: app_path('Filament/Clusters'), for: 'App\\Filament\\Clusters')
             ->databaseNotifications()
@@ -158,19 +162,20 @@ class AdminPanelProvider extends PanelProvider
                 $pages = $this->tabPages;
                 $tabs = [];
                 foreach ($pages as $pageClass) {
-                    if (! class_exists($pageClass) || ! is_subclass_of($pageClass, \Filament\Pages\Page::class)) {
+                    if (!class_exists($pageClass) || !is_subclass_of($pageClass, \Filament\Pages\Page::class)) {
                         continue;
                     }
                     $tabs[] = [
                         'label' => method_exists($pageClass, 'getNavigationLabel') ? $pageClass::getNavigationLabel() : ($pageClass::$navigationLabel ?? $pageClass::$title ?? class_basename($pageClass)),
                         'icon' => $pageClass::$navigationIcon ?? 'heroicon-o-document-text',
                         'url' => $pageClass::getUrl(),
-                        'active' => request()->routeIs('filament.admin.pages.'.\Illuminate\Support\Str::kebab(class_basename($pageClass))),
+                        'active' => request()->routeIs('filament.admin.pages.' . \Illuminate\Support\Str::kebab(class_basename($pageClass))),
                     ];
                 }
 
                 return \Illuminate\Support\Facades\Blade::render(
-                    'components.filament-header-tabs', ['tabs' => $tabs]
+                    'components.filament-header-tabs',
+                    ['tabs' => $tabs]
                 );
             }
         );
@@ -179,7 +184,7 @@ class AdminPanelProvider extends PanelProvider
             'panels::body.end',
             function (): string {
                 // Show the mobile nav on all Filament admin pages except auth pages
-                if (! request()->routeIs('filament.admin.auth.*')) {
+                if (!request()->routeIs('filament.admin.auth.*')) {
                     return Blade::render('filament.admin.mobile-bottom-nav');
                 }
 
@@ -189,7 +194,7 @@ class AdminPanelProvider extends PanelProvider
         // PWA HEAD HOOK
         FilamentView::registerRenderHook(
             'panels::head.end',
-            fn (): string => Blade::render('pwa-head')
+            fn(): string => Blade::render('pwa-head')
         );
     }
 }

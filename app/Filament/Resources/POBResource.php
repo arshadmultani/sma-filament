@@ -35,6 +35,9 @@ use Filament\Forms\Components\Actions\Action;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 use Icetalker\FilamentTableRepeatableEntry\Infolists\Components\TableRepeatableEntry;
+use Illuminate\Support\Facades\Auth;
+use Rmsramos\Activitylog\Actions\ActivityLogTimelineTableAction;
+use Rmsramos\Activitylog\RelationManagers\ActivitylogRelationManager;
 
 class POBResource extends Resource implements HasShieldPermissions
 {
@@ -238,7 +241,8 @@ class POBResource extends Resource implements HasShieldPermissions
 
             ])
             ->actions([
-                // Tables\Actions\ViewAction::make(),
+                ActivityLogTimelineTableAction::make()->label('')
+                    ->visible(Auth::user()->can('view_user')),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -333,7 +337,7 @@ class POBResource extends Resource implements HasShieldPermissions
     public static function getRelations(): array
     {
         return [
-            //
+            // ActivitylogRelationManager::class,
         ];
     }
 

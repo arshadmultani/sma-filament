@@ -11,11 +11,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
+
 
 #[ScopedBy(TeamHierarchyScope::class)]
 class POB extends Model implements IsCampaignEntry
 {
-    use HasActivity;
+    use HasActivity, LogsActivity;
     protected $guarded = [];
 
     // currently not used as issue in image entry infolist
@@ -27,4 +30,15 @@ class POB extends Model implements IsCampaignEntry
     {
         return $this->hasMany(POBProduct::class);
     }
+    public function getStateNameAttribute(): ?string
+    {
+        return $this->state?->name;
+    }
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['state_name']);
+    }
+
+
 }
