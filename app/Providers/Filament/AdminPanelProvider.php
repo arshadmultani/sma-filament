@@ -173,7 +173,7 @@ class AdminPanelProvider extends PanelProvider
                     ];
                 }
 
-                return \Illuminate\Support\Facades\Blade::render(
+                return Blade::render(
                     'components.filament-header-tabs',
                     ['tabs' => $tabs]
                 );
