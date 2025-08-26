@@ -162,6 +162,7 @@ class POBResource extends Resource implements HasShieldPermissions
                             ->placeholder('Product Qty.')
                             ->required()
                             ->numeric()
+                            ->integer()
                             ->minValue(1),
                     ]),
                 \Filament\Forms\Components\Section::make()
@@ -184,6 +185,7 @@ class POBResource extends Resource implements HasShieldPermissions
                             ->required()
                             ->prefix('₹')
                             ->numeric()
+                            ->integer()
                             ->minValue(1),
                     ]),
 
