@@ -16,7 +16,7 @@ class KofolEntryMonitor extends Page
 
     public static function shouldRegisterNavigation(): bool
     {
-        return false;
+        return true;
     }
 
     protected static ?string $navigationGroup = 'System';

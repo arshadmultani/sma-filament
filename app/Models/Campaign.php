@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use App\Observers\CamapaignObserver;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Scopes\CampaignVisibilityScope;
@@ -93,6 +94,11 @@ class Campaign extends Model
             ->where('is_active', true);
     }
 
+    public static function getActiveCampaigns(): Collection
+    {
+        return self::where('is_active', true)->get(['id', 'name', 'allowed_entry_type']);
+    }
+
     public static function getCacheKeyForEntryType(string $entryType): string
     {
         return "campaigns_for_entry_type_{$entryType}" . now()->format('Y-m-d-H-i-s');
@@ -104,5 +110,13 @@ class Campaign extends Model
         return Cache::remember($cacheKey, now()->addDays(1), function () use ($entryType) {
             return static::forEntryType($entryType)->pluck('name', 'id');
         });
+    }
+
+    public function test(): bool
+    {
+        if ($this->id <= 1) {
+            return true;
+        }
+        return false;
     }
 }
