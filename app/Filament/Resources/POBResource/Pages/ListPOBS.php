@@ -5,6 +5,9 @@ namespace App\Filament\Resources\POBResource\Pages;
 use App\Models\State;
 use Filament\Actions;
 use App\Enums\StateCategory;
+use Filament\Actions\ActionGroup;
+use Illuminate\Support\Facades\Auth;
+use App\Filament\Exports\POBExporter;
 use Filament\Resources\Components\Tab;
 use App\Filament\Resources\POBResource;
 use Filament\Resources\Pages\ListRecords;
@@ -13,12 +16,7 @@ class ListPOBS extends ListRecords
 {
     protected static string $resource = POBResource::class;
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\CreateAction::make(),
-        ];
-    }
+
     public function getTabs(): array
     {
         return [
@@ -36,6 +34,22 @@ class ListPOBS extends ListRecords
                 ->badgeColor('danger')
                 ->icon('heroicon-o-x-circle'),
         ];
+    }
 
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\CreateAction::make(),
+            ActionGroup::make([
+                Actions\ExportAction::make()
+                    ->exporter(POBExporter::class)
+                    ->label('Download POB')
+                    ->modalDescription('This will download all the POBs in the system. This may take a moment to complete.')
+                    ->maxRows(30000)
+                    ->modalWidth('2xl')
+                    ->color('primary')
+                    ->visible(fn(): bool => Auth::user()->can('create_user')),
+            ])->icon('heroicon-m-bars-3-bottom-right'),
+        ];
     }
 }

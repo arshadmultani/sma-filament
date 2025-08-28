@@ -216,18 +216,35 @@ class POBResource extends Resource implements HasShieldPermissions
                     ->formatStateUsing(fn($state) => class_basename($state))
                     ->sortable()
                     ->toggleable(),
-                TextColumn::make('user.name')->label('Submitted By')
-                    ->searchable()
-                    ->sortable()
-                    ->toggleable(),
-                TextColumn::make('user.division.name')->label('Division')
-                    ->searchable()
-                    ->sortable()
-                    ->toggleable(),
                 TextColumn::make('state.name')->label('Status')
                     ->badge()
                     ->sortable()
                     ->color(fn($record) => $record->state->color),
+                TextColumn::make('user.name')->label('Submitted By')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
+                TextColumn::make('headquarter.name')->label('Headquarter')
+                    ->visible(fn() => Auth::user()->can('view_user'))
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
+                TextColumn::make('headquarter.area.name')->label('Area')
+                    ->visible(fn() => Auth::user()->can('view_user'))
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
+                TextColumn::make('headquarter.area.region.name')->label('Region')
+                    ->visible(fn() => Auth::user()->can('view_user'))
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
+
+                TextColumn::make('user.division.name')->label('Division')
+                    ->visible(fn() => Auth::user()->can('view_user'))
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('invoice_amount')
                     ->label('POB Amount')
                     ->money('inr')
@@ -237,9 +254,7 @@ class POBResource extends Resource implements HasShieldPermissions
                     ->sortable()
                     ->toggleable(),
             ])
-            ->filters([
-
-            ])
+            ->filters([])
             ->actions([
                 ActivityLogTimelineTableAction::make()->label('')
                     ->visible(Auth::user()->can('view_user')),

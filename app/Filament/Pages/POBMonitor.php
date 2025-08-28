@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Filament\Resources\POBResource\Widgets\POBStats;
 use App\Filament\Resources\POBResource\Widgets\POBTable;
 use Filament\Pages\Page;
+use Illuminate\Support\Facades\Auth;
 
 class POBMonitor extends Page
 {
@@ -26,10 +27,13 @@ class POBMonitor extends Page
 
     protected function getHeaderWidgets(): array
     {
-        return [
-            POBStats::class,
-            POBTable::class
+        $widgets = [];
+        $widgets[] = POBStats::class;
 
-        ];
+        if (Auth::user()->can('view_user')) {
+            $widgets[] = POBTable::class;
+        }
+
+        return $widgets;
     }
 }
