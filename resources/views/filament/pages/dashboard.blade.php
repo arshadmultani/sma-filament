@@ -24,12 +24,12 @@
 
                 @livewire('heading', ['title' => 'Active Campaigns'])
 
-                <h1>{{ $this->getActiveCampaigns()->pluck('name') }}</h1>
+                {{-- <h1>{{ $this->getActiveCampaigns()->pluck('name') }}</h1>
 
-                <h1>{{ $this->getActiveCampaigns()->count() }}</h1>
+                <h1>{{ $this->getActiveCampaigns()->count() }}</h1> --}}
 
 
-                @if ($this->getActiveCampaigns()->isNotEmpty())
+                {{-- @if ($this->getActiveCampaigns()->isNotEmpty())
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         @foreach ($this->getActiveCampaigns() as $campaign)
                             <div class="p-4 border">
@@ -42,9 +42,9 @@
                     <div class="text-center">
                         <p>No active campaigns found.</p>
                     </div>
-                @endif
+                @endif --}}
 
-                {{-- @livewire(App\Filament\Widgets\CampaignOverview::class)
+                @livewire(App\Filament\Widgets\CampaignOverview::class)
 
                 @livewire('heading', ['title' => 'Customers'])
                 @livewire(App\Filament\Widgets\CustomerOverview::class)
@@ -58,7 +58,7 @@
                 @if (auth()->user()->can('view_user'))
                     @livewire('heading', ['title' => 'Kofol Coupons'])
                     @livewire(App\Filament\Resources\KofolEntryResource\Widgets\KofolCoupon::class)
-                @endif --}}
+                @endif
 
             </div>
         </template>
