@@ -120,8 +120,10 @@ class User extends Authenticatable implements FilamentUser
     // Add head office role names here for DRY purposes
     public static function headOfficeRoleIds(): array
     {
-        return Role::whereIn('name',
-            ['admin', 'super_admin', 'PMT', 'GM', 'ZTM', 'Sales Manager'])->pluck('id')->toArray();
+        return Role::whereIn(
+            'name',
+            ['admin', 'super_admin', 'PMT', 'GM', 'ZTM', 'Sales Manager']
+        )->pluck('id')->toArray();
     }
 
     public function division()
@@ -132,6 +134,11 @@ class User extends Authenticatable implements FilamentUser
     public function location()
     {
         return $this->morphTo();
+    }
+
+    public function pobs()
+    {
+        return $this->hasMany(POB::class);
     }
 
     // Helper to get user IDs by location type, location IDs, and division
@@ -151,17 +158,11 @@ class User extends Authenticatable implements FilamentUser
         $location = $this->location;
         switch ($type) {
             case self::TYPE_ZONE:
-                return $location instanceof \App\Models\Zone ? $location->id :
-                    ($location instanceof \App\Models\Region ? $location->zone_id :
-                        ($location instanceof \App\Models\Area ? $location->region?->zone_id :
-                            ($location instanceof \App\Models\Headquarter ? $location->area?->region?->zone_id : null)));
+                return $location instanceof \App\Models\Zone ? $location->id : ($location instanceof \App\Models\Region ? $location->zone_id : ($location instanceof \App\Models\Area ? $location->region?->zone_id : ($location instanceof \App\Models\Headquarter ? $location->area?->region?->zone_id : null)));
             case self::TYPE_REGION:
-                return $location instanceof \App\Models\Region ? $location->id :
-                    ($location instanceof \App\Models\Area ? $location->region_id :
-                        ($location instanceof \App\Models\Headquarter ? $location->area?->region_id : null));
+                return $location instanceof \App\Models\Region ? $location->id : ($location instanceof \App\Models\Area ? $location->region_id : ($location instanceof \App\Models\Headquarter ? $location->area?->region_id : null));
             case self::TYPE_AREA:
-                return $location instanceof \App\Models\Area ? $location->id :
-                    ($location instanceof \App\Models\Headquarter ? $location->area_id : null);
+                return $location instanceof \App\Models\Area ? $location->id : ($location instanceof \App\Models\Headquarter ? $location->area_id : null);
             case self::TYPE_HEADQUARTER:
                 return $location instanceof \App\Models\Headquarter ? $location->id : null;
         }
@@ -432,8 +433,10 @@ class User extends Authenticatable implements FilamentUser
 
     private function getHeadquarterIdsByRegion($regionId): array
     {
-        return \App\Models\Headquarter::whereIn('area_id',
-            $this->getAreaIdsByRegion($regionId))->pluck('id')->toArray();
+        return \App\Models\Headquarter::whereIn(
+            'area_id',
+            $this->getAreaIdsByRegion($regionId)
+        )->pluck('id')->toArray();
     }
 
     private function getHeadquarterIdsByArea($areaId): array
@@ -530,10 +533,5 @@ class User extends Authenticatable implements FilamentUser
 
         // Default: only themselves
         return collect([$this->id]);
-    }
-
-    public static function yes()
-    {
-
     }
 }

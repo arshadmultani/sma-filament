@@ -293,6 +293,9 @@ class POBResource extends Resource implements HasShieldPermissions
                             ->label('Campaign'),
                         TextEntry::make('user.name')
                             ->label('Submitted By'),
+                        TextEntry::make('user.division.name')
+                            ->visible(fn() => Auth::user()->can('view_user'))
+                            ->label('Division'),
                         TextEntry::make('created_at')
                             ->label('Created At')
                             ->dateTime('d-m-y @ H:i'),

@@ -60,4 +60,8 @@ class Headquarter extends Model
     {
         return $this->hasMany(Doctor::class);
     }
+    public function pobs()
+    {
+        return $this->hasMany(POB::class);
+    }
 }
