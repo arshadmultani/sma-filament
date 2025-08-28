@@ -2,19 +2,20 @@
 
 namespace App\Filament\Clusters\Report\Pages;
 
-use App\Filament\Clusters\Report;
-use App\Models\KofolEntryCoupon;
 use Filament\Pages\Page;
-use Filament\Tables\Columns\Summarizers\Count;
-use Filament\Tables\Contracts\HasTable;
-use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
+use App\Models\KofolEntryCoupon;
+use App\Filament\Clusters\Report;
 use Filament\Tables\Grouping\Group;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
+use Illuminate\Support\Facades\Cache;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Contracts\HasTable;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
+use Filament\Tables\Columns\Summarizers\Count;
+use Filament\Tables\Concerns\InteractsWithTable;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 
 
 
@@ -33,7 +34,7 @@ class KofolCouponReport extends Page implements HasTable
     public function table(Table $table): Table
     {
         // Fetch all products with brand 'Kofol'
-        $kofolProducts = \Cache::remember('kofol_products', 86400, function () {
+        $kofolProducts = Cache::remember('kofol_products', 86400, function () {
             return \App\Models\Product::whereHas('brand', function ($q) {
                 $q->where('name', 'Kofol');
             })->get();
@@ -58,7 +59,7 @@ class KofolCouponReport extends Page implements HasTable
             foreach ($records as $record) {
                 $entry = $record->kofolEntry;
                 if (!$entry) continue;
-                $products = \Cache::remember("kofol_entry_products_{$entry->id}", 3600, function () use ($entry) {
+                $products = Cache::remember("kofol_entry_products_{$entry->id}", 3600, function () use ($entry) {
                     $products = $entry->products ?? [];
                     if (is_string($products)) {
                         $products = json_decode($products, true);

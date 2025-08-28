@@ -13,6 +13,8 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Illuminate\Database\Eloquent\Builder;
+use App\Enums\StateCategory;
 
 
 #[ScopedBy(TeamHierarchyScope::class)]
@@ -38,6 +40,26 @@ class POB extends Model implements IsCampaignEntry
     {
         return LogOptions::defaults()
             ->logOnly(['state_name']);
+    }
+
+    public function isApproved():bool{
+        return $this->state?->isFinalized() ?? false;
+    }
+
+    /**
+     * Scope a query to only approved POBs.
+     */
+    public function scopeApproved(Builder $query): Builder
+    {
+        return $query->whereHas('state', fn($q) => $q->where('category', StateCategory::FINALIZED));
+    }
+
+    /**
+     * Return count of approved POBs.
+     */
+    public static function approvedCount(): int
+    {
+        return static::approved()->count();
     }
 
 
