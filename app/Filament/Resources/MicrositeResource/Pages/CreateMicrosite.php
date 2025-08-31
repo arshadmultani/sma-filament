@@ -7,6 +7,7 @@ use App\Models\Doctor;
 use App\Models\Microsite;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -34,8 +35,11 @@ class CreateMicrosite extends CreateRecord
 
         $data['url'] = $url;
         $data['is_active'] = false;
-        $data['status'] = 'Pending';
+        // $data['status'] = 'Pending';
         $data['user_id'] = Auth::user()->id;
+        $data['headquarter_id'] = $doctor->headquarter_id;
+        // $data['state_id'] = app(POBSettings::class)->start_state;
+
 
         if (isset($data['doctor']['reviews'])) {
             unset($data['doctor']['reviews']);
@@ -54,7 +58,7 @@ class CreateMicrosite extends CreateRecord
         $this->record->campaignEntry()->create([
             'campaign_id' => $campaignId,
             'customer_id' => $this->record->doctor_id,
-            'customer_type' => $this->record->customer_type,
+            'customer_type' => 'doctor',
         ]);
     }
 }

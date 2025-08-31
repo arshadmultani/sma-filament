@@ -3,8 +3,10 @@
 namespace App\Models;
 
 use App\Contracts\IsCampaignEntry;
+use Spatie\Activitylog\LogOptions;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Scopes\TeamHierarchyScope;
+use Spatie\Activitylog\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 
 
@@ -12,6 +14,7 @@ use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 
 class Microsite extends Model implements IsCampaignEntry
 {
+    use LogsActivity;
     protected $guarded = [];
     protected $casts = [
         'reviews' => 'array',
@@ -36,6 +39,16 @@ class Microsite extends Model implements IsCampaignEntry
     {
         return $this->morphOne(CampaignEntry::class, 'entryable');
     }
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['state_name', 'is_active',]);
+    }
+
+    public function template()
+    {
+        return $this->belongsTo(MicrositeTemplate::class);
+    }
 
     protected static function booted()
     {
@@ -47,6 +60,4 @@ class Microsite extends Model implements IsCampaignEntry
             $model->is_active = $model->status === 'Approved';
         });
     }
-
-
 }

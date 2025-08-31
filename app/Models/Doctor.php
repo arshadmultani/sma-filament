@@ -85,6 +85,16 @@ class Doctor extends BaseModel
         return $this->hasOne(Microsite::class);
     }
 
+    public function merits()
+    {
+        return $this->hasMany(Merit::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
     public function qualification()
     {
         return $this->belongsTo(Qualification::class);
