@@ -14,15 +14,35 @@ return new class extends Migration
         // Doctors Table
         Schema::table('doctors', function (Blueprint $table) {
             $table->unsignedTinyInteger('experience')->nullable();
-            $table->foreignId('merit_id')->nullable()->constrained('merits')->after('microsite_template_id');
         });
         // Microsites Table
         Schema::table('microsites', function (Blueprint $table) {
 
-            // DROP STATUS COLUMN
-            $table->dropColumn('status');
+            // DROP COLUMNS
+            if (Schema::hasColumn('microsites', 'status')) {
+                $table->dropColumn('status');
+            }
+            if (Schema::hasColumn('microsites', 'message')) {
+                $table->dropColumn('message');
+            }
+            if (Schema::hasColumn('microsites', 'reviews')) {
+                $table->dropColumn('reviews');
+            }
+            if (Schema::hasColumn('microsites', 'doctor_id')) {
+                $table->dropColumn('doctor_id');
+            }
+            if (Schema::hasColumn('microsites', 'customer_type')) {
+                $table->dropColumn('customer_type');
+            }
+            if (Schema::hasColumn('microsites', 'customer_id')) {
+                $table->dropColumn('customer_id');
+            }
+
+
+
 
             // ADD NEW COLUMNS
+            $table->morphs('customer');
             $table->foreignId('microsite_template_id')->nullable()->constrained('microsite_templates')->after('headquarter_id');
             $table->foreignId('state_id')->nullable()->constrained('states')->after('user_id');
             $table->foreignId('headquarter_id')->nullable()->constrained('headquarters')->nullOnDelete()->after('state_id');
@@ -36,7 +56,6 @@ return new class extends Migration
     {
         Schema::table('doctors', function (Blueprint $table) {
             $table->dropColumn('experience');
-            $table->dropColumn('merit_id');
         });
         Schema::table('microsites', function (Blueprint $table) {
             $table->dropForeign(['microsite_template_id']);

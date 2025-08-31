@@ -2,21 +2,23 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Actions\SiteUrlAction;
-use App\Filament\Resources\MicrositeResource\Pages;
-use App\Filament\Resources\MicrositeResource\RelationManagers;
-use App\Models\Campaign;
-use App\Models\Microsite;
 use Filament\Forms;
-use Filament\Forms\Components\Repeater;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
+use App\Models\Campaign;
+use Filament\Forms\Form;
+use App\Models\Microsite;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 use Filament\Infolists\Infolist;
+use Filament\Resources\Resource;
+use Filament\Forms\Components\Select;
+use App\Filament\Actions\SiteUrlAction;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\FileUpload;
+use Illuminate\Database\Eloquent\Builder;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
+use App\Filament\Resources\MicrositeResource\Pages;
+use App\Filament\Resources\MicrositeResource\RelationManagers;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 
 class MicrositeResource extends Resource implements HasShieldPermissions
@@ -48,38 +50,26 @@ class MicrositeResource extends Resource implements HasShieldPermissions
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('campaign_id')
+                Select::make('campaign_id')
                     ->label('Campaign')
-                    ->options(function () {
-                        return Campaign::query()
-                            ->where('allowed_entry_type', 'microsite')
-                            ->where('is_active', true)
-                            ->pluck('name', 'id');
-                    })
-                    ->required()
-                    ->preload()
-                    ->searchable()
+                    ->placeholder('Select Campaign')
                     ->dehydrated(false)
-                    ->native(false),
-                Forms\Components\Select::make('doctor_id')
+                    ->reactive()
+                    ->native(false)
+                    ->preload()
+                    ->required()
+                    ->searchable()
+                    ->options(function () {
+                        return Campaign::getForEntryType('pob');
+                    }),
+                Select::make('doctor_id')
                     ->relationship('doctor', 'name')
                     ->required()
                     ->preload()
                     ->searchable()
                     ->native(false),
-                Forms\Components\FileUpload::make('message')
-                    ->columnSpanFull()
-                    ->label('Doctor Video Message (Optional)')
-                    ->acceptedFileTypes(['video/*'])
-                    ->maxSize(10240),
-                Repeater::make('reviews')
-                    ->columnSpanFull()
-                    ->schema([
-                        Forms\Components\TextInput::make('reviewer_name')
-                            ->required(),
-                        Forms\Components\FileUpload::make('video')
-                            ->required(),
-                    ]),
+
+
             ]);
     }
 
