@@ -59,8 +59,9 @@ class MicrositeResource extends Resource implements HasShieldPermissions
                     ->preload()
                     ->required()
                     ->searchable()
+                    ->noSearchResultsMessage('No Active Campaigns found')
                     ->options(function () {
-                        return Campaign::getForEntryType('pob');
+                        return Campaign::getForEntryType('microsite');
                     }),
                 Select::make('doctor_id')
                     ->relationship('doctor', 'name')

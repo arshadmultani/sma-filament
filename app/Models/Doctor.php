@@ -95,6 +95,11 @@ class Doctor extends BaseModel
         return $this->hasMany(Review::class);
     }
 
+    public function showcases()
+    {
+        return $this->hasMany(Showcase::class);
+    }
+
     public function qualification()
     {
         return $this->belongsTo(Qualification::class);
