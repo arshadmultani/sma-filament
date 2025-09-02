@@ -42,7 +42,7 @@ return new class extends Migration
 
 
             // ADD NEW COLUMNS
-            $table->morphs('customer');
+            $table->foreignId('doctor_id')->nullable()->constrained('doctors');
             $table->foreignId('microsite_template_id')->nullable()->constrained('microsite_templates')->after('headquarter_id');
             $table->foreignId('state_id')->nullable()->constrained('states')->after('user_id');
             $table->foreignId('headquarter_id')->nullable()->constrained('headquarters')->nullOnDelete()->after('state_id');
