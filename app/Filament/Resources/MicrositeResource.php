@@ -69,13 +69,12 @@ class MicrositeResource extends Resource implements HasShieldPermissions
                     ->options(function () {
                         return Campaign::getForEntryType('microsite');
                     }),
-                Select::make('doctor_id') // <-- CHANGED: The name now matches your database column
-                    ->relationship('doctor', 'name', fn($query) => $query->approved()) // <-- A cleaner way to load options
+                Select::make('doctor_id')
+                    ->relationship('doctor', 'name', fn($query) => $query->approved())
                     ->label('Doctor Name')
                     ->placeholder('Select Doctor')
-                    // ->unique() has been updated to be more specific and correct
                     ->unique(table: Microsite::class, column: 'doctor_id')
-                    ->live() // Using live() is often better than reactive() for this use case
+                    ->live()
                     ->noSearchResultsMessage('Doctor not found')
                     ->optionsLimit(50)
                     ->required()
@@ -111,7 +110,7 @@ class MicrositeResource extends Resource implements HasShieldPermissions
                     ->helperText('Select Yes if you want to add a video of the doctor promoting themself.')
                     ->required()
                     ->reactive()
-                    ->dehydrated(false)
+                    ->dehydrated()
                     ->inline()
                     ->inlineLabel(false)
                     ->options([
@@ -143,7 +142,8 @@ class MicrositeResource extends Resource implements HasShieldPermissions
                     ->addActionLabel('Add Another Showcase')
                     ->deleteAction(
                         fn($action) => $action->requiresConfirmation()
-                    )
+                    ),
+
             ]);
     }
 
@@ -196,7 +196,10 @@ class MicrositeResource extends Resource implements HasShieldPermissions
                         TextEntry::make('doctor.name'),
                         TextEntry::make('campaignEntry.campaign.name')->label('Campaign'),
                         // TextEntry::make('is_active')->boolean(),
-                        TextEntry::make('status'),
+                        TextEntry::make('state.name')
+                            ->label('Status')
+                            ->badge()
+                            ->color(fn($record) => $record->state->color),
                     ]),
 
             ]);
