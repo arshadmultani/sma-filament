@@ -2,42 +2,45 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Actions\UpdateStatusAction;
-use App\Filament\Resources\DoctorResource\Pages;
+use Dom\Text;
+use Carbon\Carbon;
+use App\Models\Tag;
+use Filament\Tables;
 use App\Models\Doctor;
-use App\Models\Qualification;
-use App\Models\Specialty;
-use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
-use Filament\Infolists\Components\ImageEntry;
-use Filament\Infolists\Components\Section;
-use Filament\Infolists\Components\TextEntry;
+use App\Models\Specialty;
+use Filament\Tables\Table;
+use App\Models\Qualification;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
-use Filament\Support\Enums\FontWeight;
-use Filament\Tables;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\ImageColumn;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Table;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\ValidationException;
-use App\Traits\HandlesDeleteExceptions;
-use Filament\Infolists\Components\IconEntry;
-use Njxqlus\Filament\Components\Infolists\LightboxImageEntry;
-use Illuminate\Support\Facades\Storage;
-use Filament\Infolists\Components\RepeatableEntry;
-use Illuminate\Database\Eloquent\Builder;
-use Icetalker\FilamentTableRepeatableEntry\Infolists\Components\TableRepeatableEntry;
-use App\Models\Tag;
-use Filament\Tables\Grouping\Group;
-use App\Filament\Exports\DoctorExporter;
 use Filament\Actions\ExportAction;
-
+use Filament\Tables\Grouping\Group;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Date;
+use Filament\Forms\Components\Select;
+use Filament\Support\Enums\FontWeight;
+use App\Traits\HandlesDeleteExceptions;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Illuminate\Support\Facades\Storage;
+use App\Filament\Exports\DoctorExporter;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
+use Filament\Tables\Filters\SelectFilter;
+use Illuminate\Database\Eloquent\Builder;
+use Filament\Infolists\Components\Section;
+use App\Filament\Actions\UpdateStatusAction;
+use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\ImageEntry;
+use Illuminate\Validation\ValidationException;
+use App\Filament\Resources\DoctorResource\Pages;
+use Filament\Infolists\Components\RepeatableEntry;
+use Njxqlus\Filament\Components\Infolists\LightboxImageEntry;
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
+use Icetalker\FilamentTableRepeatableEntry\Infolists\Components\TableRepeatableEntry;
 
 class DoctorResource extends Resource implements HasShieldPermissions
 {
@@ -89,6 +92,29 @@ class DoctorResource extends Resource implements HasShieldPermissions
                     ->native(false)
                     ->options(['Dispensing' => 'Dispensing', 'Prescribing' => 'Prescribing'])
                     ->required(),
+                Select::make('practice_since')
+                    ->label('Practice Since')
+                    ->placeholder('e.g 2001')
+                    // ->options(collect(range(now()->year, 1900))->mapWithKeys(fn($year) => [$year => $year]))
+                    ->options(function () {
+                        static $yearOptions = null;
+
+                        if ($yearOptions === null) {
+                            $years = range(now()->year, 1900);
+                            $yearOptions = array_combine($years, $years);
+                        }
+
+                        return $yearOptions;
+                    })
+                    ->searchable()
+                    ->native(false)
+                    ->required()
+                    ->mutateDehydratedStateUsing(fn($state) => "{$state}-01-01")
+                    ->afterStateHydrated(function (Select $component, $state) {
+                        if ($state) {
+                            $component->state(date('Y', strtotime($state)));
+                        }
+                    }),
                 TextInput::make('email')
                     ->email()
                     ->required(),
@@ -275,6 +301,12 @@ class DoctorResource extends Resource implements HasShieldPermissions
                                 TextEntry::make('support_type'),
                                 TextEntry::make('qualification.name'),
                                 TextEntry::make('town'),
+                                TextEntry::make('practice_since')
+                                    ->date('Y')
+                                    ->label('Practicing Since'),
+                                TextEntry::make('practice_since')
+                                    ->formatStateUsing(fn($state) => (int)Carbon::parse($state)->diffInYears(now(), false) . ' years')
+                                    ->label('Experience'),
                             ]),
 
                     ]),
@@ -328,7 +360,7 @@ class DoctorResource extends Resource implements HasShieldPermissions
                         RepeatableEntry::make('attachment')
                             ->label('Visiting Card/Rx. Pad')
                             ->schema([
-                                ImageEntry::make('') 
+                                ImageEntry::make('')
                                     ->disk('s3')
                                     ->visibility('private')
                                     ->url(fn($state) => $state ? Storage::temporaryUrl($state, now()->addMinutes(5)) : '')

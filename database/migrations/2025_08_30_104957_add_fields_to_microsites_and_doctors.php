@@ -13,7 +13,7 @@ return new class extends Migration
     {
         // Doctors Table
         Schema::table('doctors', function (Blueprint $table) {
-            $table->unsignedTinyInteger('experience')->nullable();
+            $table->date('practice_since')->nullable();
         });
         // Microsites Table
         Schema::table('microsites', function (Blueprint $table) {
@@ -55,7 +55,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('doctors', function (Blueprint $table) {
-            $table->dropColumn('experience');
+            $table->dropColumn('practice_since');
         });
         Schema::table('microsites', function (Blueprint $table) {
             $table->dropForeign(['microsite_template_id']);

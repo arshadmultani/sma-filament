@@ -73,7 +73,7 @@ class MicrositeResource extends Resource implements HasShieldPermissions
                     ->relationship('doctor', 'name', fn($query) => $query->approved())
                     ->label('Doctor Name')
                     ->placeholder('Select Doctor')
-                    ->unique(table: Microsite::class, column: 'doctor_id')
+                    ->unique(ignoreRecord: true)
                     ->live()
                     ->noSearchResultsMessage('Doctor not found')
                     ->optionsLimit(50)
@@ -110,7 +110,7 @@ class MicrositeResource extends Resource implements HasShieldPermissions
                     ->helperText('Select Yes if you want to add a video of the doctor promoting themself.')
                     ->required()
                     ->reactive()
-                    ->dehydrated()
+                    ->dehydrated(false)
                     ->inline()
                     ->inlineLabel(false)
                     ->options([

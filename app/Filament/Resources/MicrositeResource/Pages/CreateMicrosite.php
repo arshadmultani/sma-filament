@@ -29,21 +29,30 @@ class CreateMicrosite extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $doctor = Doctor::find($data['doctor_id']);
-        $firstName = explode(' ', $doctor->name)[0];
-        $slug = Str::slug($firstName);
 
+        // Split into parts
+        $parts = explode(' ', trim($doctor->name));
+
+        // Remove "Dr" or "Dr." prefix if present
+        if (isset($parts[0]) && in_array(strtolower(trim($parts[0])), ['dr', 'dr.'])) {
+            array_shift($parts); // remove the prefix
+        }
+
+        // Slugify the remaining full name
+        $slug = Str::slug(implode(' ', $parts));
+
+        // Generate unique URL
         do {
             $random = Str::lower(Str::random(5));
             $url = $slug . '-' . $random;
         } while (Microsite::where('url', $url)->exists());
 
         $data['url'] = $url;
+
         $data['user_id'] = Auth::user()->id;
         $data['is_active'] = true;
-        // $data['customer_type'] = 'doctor';
         $data['state_id'] = State::where('category', StateCategory::PENDING)->first()->id;
         $data['headquarter_id'] = $doctor->headquarter_id;
-        // $data['state_id'] = app(POBSettings::class)->start_state;
 
 
         if (isset($data['doctor']['reviews'])) {

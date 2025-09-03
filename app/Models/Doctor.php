@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Notifications\Notifiable;
 use App\Events\CustomerHeadquarterUpdated;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Notifications\Notifiable;
 
 /**
  * @property int $id
@@ -60,8 +61,16 @@ class Doctor extends BaseModel
 
     protected $casts = [
         'attachment' => 'array',
+        'practice_since' => 'date',
     ];
+    protected $appends = ['profile_photo_url'];
 
+    public function getProfilePhotoUrlAttribute()
+    {
+        return $this->profile_photo
+            ? Storage::temporaryUrl($this->profile_photo, now()->addMinutes(5))
+            : null;
+    }
     public function user()
     {
         return $this->belongsTo(User::class)->withTrashed();

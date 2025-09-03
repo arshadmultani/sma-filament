@@ -2,24 +2,26 @@
 
 namespace App\Models;
 
+use App\Traits\HasActivity;
 use App\Contracts\IsCampaignEntry;
 use Spatie\Activitylog\LogOptions;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Scopes\TeamHierarchyScope;
-use App\Traits\HasActivity;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
-
 
 #[ScopedBy(TeamHierarchyScope::class)]
 
 class Microsite extends Model implements IsCampaignEntry
 {
-    use LogsActivity, HasActivity;
+    use HasActivity, LogsActivity;
     protected $guarded = [];
     protected $casts = [
         'reviews' => 'array',
     ];
+
 
     public function getActivitylogOptions(): LogOptions
     {
@@ -36,14 +38,19 @@ class Microsite extends Model implements IsCampaignEntry
         return $this->belongsTo(MicrositeTemplate::class);
     }
 
-    // protected static function booted()
-    // {
-    //     static::deleting(function ($microsite) {
-    //         $microsite->campaignEntry()->delete();
-    //     });
+    protected static function booted()
+    {
+        parent::booted();
 
-    //     static::saving(function ($model) {
-    //         $model->is_active = $model->status === 'Approved';
-    //     });
-    // }
+        static::deleting(function ($microsite) {
+            if ($microsite->doctor) {
+                $microsite->doctor->showcases->each(function ($showcase) {
+                    Log::info('DELETING EVENT: Triggering delete for individual Showcase.', ['showcase_id' => $showcase->id]);
+                    $showcase->delete();
+                });
+
+                $microsite->doctor->reviews()->delete();
+            }
+        });
+    }
 }

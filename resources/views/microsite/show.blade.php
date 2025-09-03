@@ -46,23 +46,24 @@
                     src="{{ $microsite->doctor->profile_photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($microsite->doctor->name) . '&color=7F9CF5&background=EBF4FF' }}"
                     alt="Dr. {{ $microsite->doctor->name }}">
                 <h1 class="text-3xl font-bold text-gray-800 mt-4">{{ $microsite->doctor->name }}</h1>
-                <p class="text-md text-gray-500">{{ $microsite->doctor->qualifications ?? 'MBBS, MD' }}</p>
+                {{-- <p class="text-md text-gray-500">{{ $microsite->doctor->qualification->name ?? 'MBBS, MD' }}</p> --}}
             </div>
             <div class="grid grid-cols-2 gap-4 mt-6 text-center">
                 <div class="bg-blue-50 p-3 rounded-xl">
-                    <p class="font-bold text-blue-600 text-xl">{{ $microsite->doctor->experience_years ?? '10+' }}</p>
+                    <p class="font-bold text-blue-600 text-xl">{{ $microsite->doctor->experience ?? '10+' }}</p>
                     <p class="text-sm text-blue-500">Years Experience</p>
                 </div>
                 <div class="bg-blue-50 p-3 rounded-xl">
-                    <p class="font-bold text-blue-600 text-xl">{{ $microsite->doctor->specialties ?? 'Cardiology' }}</p>
+                    <p class="font-bold text-blue-600 text-xl">{{ $microsite->doctor->specialty->name ?? 'Cardiology' }}
+                    </p>
                     <p class="text-sm text-blue-500">Specialty</p>
                 </div>
             </div>
-            <div class="bg-gray-100 p-3 rounded-xl mt-4 text-center">
+            {{-- <div class="bg-gray-100 p-3 rounded-xl mt-4 text-center">
                 <p class="font-semibold text-gray-700">{{ $microsite->doctor->clinic_name ?? 'City General Hospital' }}
                 </p>
                 <p class="text-sm text-gray-500">Clinic/Hospital</p>
-            </div>
+            </div> --}}
         </header>
 
         <!-- Tabs Navigation -->
@@ -83,18 +84,7 @@
             <div x-show="activeTab === 'about'" x-transition>
                 <h2 class="text-2xl font-bold text-gray-800 mb-4">About Dr. {{ $microsite->doctor->name }}</h2>
                 <p class="text-gray-600 leading-relaxed">
-                    {{ $microsite->doctor->about ??
-                        'Dr. ' .
-                            $microsite->doctor->name .
-                            'Ex do quis ea id ex ad culpa eu aute reprehenderit nulla cupidatat ad. Pariatur aliqua Lorem qui ullamco culpa et excepteur ad tempor irure sunt minim. Ad sit do in cillum quis anim mollit exercitation duis ipsum reprehenderit aute ipsum. Proident eu ex mollit nulla quis nisi reprehenderit nisi labore Lorem occaecat sit in.
-                    
-                    Culpa laboris duis exercitation mollit. Deserunt sit ex veniam adipisicing nostrud et quis do ullamco irure aliquip amet laborum reprehenderit. Voluptate et nisi duis magna culpa quis aliqua aliquip nostrud culpa. Incididunt do nulla ullamco. Tempor officia occaecat dolor ad magna pariatur culpa eiusmod cupidatat reprehenderit Lorem in minim elit. Esse laboris incididunt veniam sunt ut minim duis exercitation est magna sunt. Amet sit aliqua pariatur nulla officia officia id ea mollit consectetur.
-                    
-                    Elit velit excepteur quis incididunt ipsum occaecat esse adipisicing consectetur officia non ea mollit. Magna eu laboris non. Consectetur non fugiat excepteur aliquip irure irure dolore proident et. Nostrud ad proident duis ad magna velit magna reprehenderit deserunt ex ipsum. Nisi minim nulla labore labore tempor.
-                    
-                    Ex enim enim incididunt labore. Ipsum dolore voluptate dolore duis laboris dolore ipsum non velit sint. In do fugiat velit deserunt adipisicing minim aute culpa sint laborum amet cillum veniam dolor. Nostrud consequat aute proident ad anim cillum aliqua.
-                    
-                    Quis ea nostrud tempor laboris sunt velit. Dolor voluptate eu tempor dolor laborum. Cupidatat consequat aliquip deserunt eiusmod exercitation dolor ea sunt commodo dolor. Occaecat ut non aliqua amet amet ullamco tempor consectetur id eu consectetur ipsum reprehenderit id. Adipisicing aliqua ut mollit anim ullamco veniam ex cillum tempor ex tempor culpa elit. Sint ullamco aute incididunt ipsum nisi exercitation esse velit. Lorem irure proident sint ullamco nisi tempor sunt elit ad ex adipisicing elit occaecat veniam aliquip. Nisi ut anim in dolore irure commodo ex.' }}
+                    {{ $microsite->doctor->about ?? 'Dr. ' . $microsite->doctor->name . ' Excepteur ullamco magna eu commodo pariatur eu commodo voluptate qui ut cupidatat dolore.' }}
                 </p>
             </div>
 
