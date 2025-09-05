@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Filament\Resources\Pages\CreateRecord;
 use App\Filament\Resources\MicrositeResource;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Log;
 
 class CreateMicrosite extends CreateRecord
 {
@@ -29,6 +30,13 @@ class CreateMicrosite extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $doctor = Doctor::find($data['doctor_id']);
+
+        // if (!empty($data['profile_photo'])) {
+        //     $doctor->profile_photo = $data['profile_photo'];
+        //     $doctor->save();
+        // }
+        // unset($data['profile_photo']);
+
 
         // Split into parts
         $parts = explode(' ', trim($doctor->name));
@@ -63,7 +71,6 @@ class CreateMicrosite extends CreateRecord
             unset($data['doctor']);
         }
 
-        // Store doctor showcases separately to handle after creation
         if (isset($data['showcases_data'])) {
             $this->doctorShowcases = $data['showcases_data'];
             unset($data['showcases_data']);
@@ -72,37 +79,25 @@ class CreateMicrosite extends CreateRecord
         return $data;
     }
 
-    // protected function afterCreate(): void
-    // {
-    //     $campaignId = $this->data['campaign_id'];
-    //     $this->record->campaignEntry()->create([
-    //         'campaign_id' => $campaignId,
-    //         'customer_id' => $this->record->customer_id,
-    //         'customer_type' => 'doctor',
-    //     ]);
-    // }
-
     protected function afterCreate(): void
     {
-        // Step 1: Get the campaign ID from the form data. This is correct.
         $campaignId = $this->data['campaign_id'];
 
-        // Step 2: Get the actual customer—the Doctor—from the newly created microsite record.
         $doctor = $this->record->doctor;
 
-        // Step 3: Create the campaign entry on the Doctor model's relationship.
-        // We check if a doctor is actually associated before proceeding.
+        Log::info('Doctor Profile Photo: ', ['profile_photo' => $this->data['profile_photo']]);
+        $doctor->profile_photo = reset($this->data['profile_photo']);
+        // dd($doctor->profile_photo);
+        $doctor->save();
+        Log::info('Doctor profile photo  after: ', ['profile_photo' => $doctor->profile_photo]);
+
         if ($doctor) {
             $doctor->campaignEntries()->create([
                 'entryable_type' => 'microsite',
                 'entryable_id' => $this->record->id,
                 'campaign_id' => $campaignId,
-                // That's it! Eloquent's polymorphic relationship automatically fills
-                // 'customerable_id' with the doctor's ID and
-                // 'customerable_type' with 'App\Models\Doctor'.
             ]);
 
-            // Step 4: Create doctor showcases if any were provided
             if (!empty($this->doctorShowcases)) {
                 foreach ($this->doctorShowcases as $showcase) {
                     $doctor->showcases()->create([

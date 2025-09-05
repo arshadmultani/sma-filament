@@ -21,7 +21,6 @@ class EditMicrosite extends EditRecord
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        // Load existing showcases for the doctor
         if ($this->record->doctor) {
             $showcases = $this->record->doctor->showcases()
                 ->select(['title', 'description', 'media_url'])
@@ -36,7 +35,6 @@ class EditMicrosite extends EditRecord
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        // Store doctor showcases separately to handle after save
         if (isset($data['showcases_data'])) {
             $this->doctorShowcases = $data['showcases_data'];
             unset($data['showcases_data']);
@@ -47,12 +45,8 @@ class EditMicrosite extends EditRecord
 
     protected function afterSave(): void
     {
-        // Update doctor showcases if any were provided
         if (isset($this->doctorShowcases) && $this->record->doctor) {
-            // Delete existing showcases
             $this->record->doctor->showcases()->delete();
-
-            // Create new showcases
             foreach ($this->doctorShowcases as $showcase) {
                 if (!empty($showcase['media_url'])) {
                     $this->record->doctor->showcases()->create([
@@ -63,6 +57,10 @@ class EditMicrosite extends EditRecord
                     ]);
                 }
             }
+        }
+        if (isset($this->data['profile_photo']) && $this->record->doctor) {
+            $this->record->doctor->profile_photo = reset($this->data['profile_photo']);
+            $this->record->doctor->save();
         }
     }
 }

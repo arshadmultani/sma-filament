@@ -74,6 +74,7 @@ class MicrositeResource extends Resource implements HasShieldPermissions
                     ->label('Doctor Name')
                     ->placeholder('Select Doctor')
                     ->unique(ignoreRecord: true)
+                    ->reactive()
                     ->live()
                     ->noSearchResultsMessage('Doctor not found')
                     ->optionsLimit(50)
@@ -105,9 +106,42 @@ class MicrositeResource extends Resource implements HasShieldPermissions
                                 ->send();
                         }
                     }),
+                Radio::make('has_profile_photo')
+                    ->label('Profile photo not uploaded for this doctor. Would you like to upload?')
+                    ->reactive()
+                    ->live()
+
+                    ->visible(function ($get) {
+                        $doctorId = $get('doctor_id');
+                        if (!$doctorId) {
+                            return false;
+                        }
+                        $doctor = Doctor::find($doctorId);
+                        return is_null($doctor?->profile_photo);
+                    })
+                    ->required()
+                    ->dehydrated(false)
+                    ->inline()
+                    ->inlineLabel(false)
+                    ->options([
+                        'yes' => 'Yes',
+                        'no' => 'No',
+                    ]),
+                FileUpload::make('profile_photo')
+                    ->dehydrated(false)
+                    ->label('Profile Photo')
+                    ->disk('s3')
+                    ->visibility('private')
+                    ->directory('doctors/profile_photos')
+                    ->maxFiles(1)
+                    ->image()
+                    ->required(fn($get) => $get('has_profile_photo') === 'yes')
+                    ->visible(fn($get) => $get('has_profile_photo') === 'yes')
+                    ->helperText('Upload a profile photo for the doctor.'),
+
                 Radio::make('has_any_showcase')
                     ->label('Promotional/Introduction Video')
-                    ->helperText('Select Yes if you want to add a video of the doctor promoting themself.')
+                    ->helperText('Select Yes if you want to add a video of the Doctor\'s introduction/information.')
                     ->required()
                     ->reactive()
                     ->dehydrated(false)
@@ -119,23 +153,25 @@ class MicrositeResource extends Resource implements HasShieldPermissions
                     ]),
                 Repeater::make('showcases_data')
                     ->columnSpanFull()
-                    ->visible(fn($get) => $get('has_any_showcase') === 'yes')
+                    ->visible(fn($get, $context) => $get('has_any_showcase') === 'yes' || $context === 'edit')
                     ->required(fn($get) => $get('has_any_showcase') === 'yes')
-                    ->label('Doctor Showcases')
+                    ->label('Doctor\'s Video')
+                    ->deletable(false)
+                    ->maxItems(1)
                     ->schema([
-                        Forms\Components\TextInput::make('title')
-                            ->label('Title')
-                            ->required(),
-                        Forms\Components\Textarea::make('description')
-                            ->label('Description')
-                            ->rows(3),
+                        // Forms\Components\TextInput::make('title')
+                        //     ->label('Title')
+                        //     ->required(),
+                        // Forms\Components\Textarea::make('description')
+                        //     ->label('Description')
+                        //     ->rows(3),
                         FileUpload::make('media_url')
                             ->disk('s3')
                             ->visibility('private')
-                            ->directory('doctor-showcases')
-                            ->label('Video Upload')
+                            ->directory('microsite/doctor_showcases')
+                            ->label('Upload Video')
                             ->acceptedFileTypes(['video/mp4', 'video/x-m4v'])
-                            ->helperText('Upload videos for the doctor\'s showcases.')
+                            ->helperText('If you have any video of the Doctor, please upload it here.')
                             ->required(),
                     ])
                     ->defaultItems(1)
