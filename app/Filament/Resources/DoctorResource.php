@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use Dom\Text;
 use Carbon\Carbon;
 use App\Models\Tag;
+use Filament\Infolists\Components\Fieldset;
 use Filament\Tables;
 use App\Models\Doctor;
 use Filament\Forms\Form;
@@ -56,6 +57,7 @@ class DoctorResource extends Resource implements HasShieldPermissions
             'delete',
             'delete_any',
             'update_status',
+            'request_panel_access',
         ];
     }
 
@@ -280,6 +282,22 @@ class DoctorResource extends Resource implements HasShieldPermissions
         return $infolist
 
             ->schema([
+                TextEntry::make('panelAccessRequest.state.name')
+                    ->label('Panel Access')
+                    // ->badge()
+                    // ->color(fn($record) => $record->panelAccessRequest?->state->color ?? 'secondary')
+                    // ->placeholder('No Request')
+                    ->visible(fn($record) => !is_null($record->panelAccessRequest)),
+                // Fieldset::make('')
+
+                // ->schema([
+                //         TextEntry::make('panelAccessRequest.state.name')
+                //             ->label('Panel Access')
+                //             // ->badge()
+                //             // ->color(fn($record) => $record->panelAccessRequest?->state->color ?? 'secondary')
+                //             // ->placeholder('No Request')
+                //             ->visible(fn($record) => !is_null($record->panelAccessRequest)),
+                //     ]),
 
                 Section::make()
                     ->compact()
@@ -303,9 +321,11 @@ class DoctorResource extends Resource implements HasShieldPermissions
                                 TextEntry::make('town'),
                                 TextEntry::make('practice_since')
                                     ->date('Y')
+                                    ->hidden(fn($record) => is_null($record->practice_since))
                                     ->label('Practicing Since'),
                                 TextEntry::make('practice_since')
-                                    ->formatStateUsing(fn($state) => (int)Carbon::parse($state)->diffInYears(now(), false) . ' years')
+                                    ->formatStateUsing(fn($state) => (int) Carbon::parse($state)->diffInYears(now(), false) . ' years')
+                                    ->hidden(fn($record) => is_null($record->practice_since))
                                     ->label('Experience'),
                             ]),
 

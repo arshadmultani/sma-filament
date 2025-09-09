@@ -246,14 +246,8 @@ class UserResource extends Resource
                 TextColumn::make('name')->searchable()->sortable(),
                 TextColumn::make('roles.name')
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
-                        'RSM' => 'danger',
-                        'ASM' => 'warning',
-                        'DSA' => 'info',
-                        'ZSM' => 'success',
-                        'NSM' => 'primary',
-                        default => 'primary'
-                    })
+                    ->color(fn($record) => $record->roles->first()?->roleColor() ?? 'secondary')
+
                     ->label('Desgn.')
                     ->sortable()
                     ->searchable(),

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Notifications\Notifiable;
 use App\Events\CustomerHeadquarterUpdated;
@@ -71,9 +73,15 @@ class Doctor extends BaseModel
             ? Storage::temporaryUrl($this->profile_photo, now()->addMinutes(5))
             : null;
     }
+
     public function user()
     {
         return $this->belongsTo(User::class)->withTrashed();
+    }
+
+    public function loginAccount(): MorphOne
+    {
+        return $this->morphOne(User::class, 'userable');
     }
     public function products()
     {
@@ -147,6 +155,20 @@ class Doctor extends BaseModel
         return ['microsites', 'kofolEntries'];
     }
 
+    public function panelAccessRequest(): HasOne
+    {
+        return $this->hasOne(PanelAccessRequest::class);
+    }
+
+    public function hasPanelAccessRequest(): bool
+    {
+        return $this->panelAccessRequest()->exists();
+    }
+
+    public function panelRequestApproved(): bool
+    {
+        return $this->panelAccessRequest && $this->panelAccessRequest->state_id === State::where('category', 'Finalized')->value('id');
+    }
     protected static function booted()
     {
         parent::booted();

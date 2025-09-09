@@ -2,11 +2,11 @@
 
 namespace App\Policies;
 
-use App\Models\Doctor;
 use App\Models\User;
+use App\Models\PanelAccessRequest;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class DoctorPolicy
+class PanelAccessRequestPolicy
 {
     use HandlesAuthorization;
 
@@ -15,15 +15,15 @@ class DoctorPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_doctor');
+        return $user->can('view_any_panel::access::request');
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Doctor $doctor): bool
+    public function view(User $user, PanelAccessRequest $panelAccessRequest): bool
     {
-        return $user->can('view_doctor');
+        return $user->can('view_panel::access::request');
     }
 
     /**
@@ -31,23 +31,23 @@ class DoctorPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create_doctor');
+        return $user->can('create_panel::access::request');
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Doctor $doctor): bool
+    public function update(User $user, PanelAccessRequest $panelAccessRequest): bool
     {
-        return $user->can('update_doctor');
+        return $user->can('update_panel::access::request');
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Doctor $doctor): bool
+    public function delete(User $user, PanelAccessRequest $panelAccessRequest): bool
     {
-        return $user->can('delete_doctor');
+        return $user->can('delete_panel::access::request');
     }
 
     /**
@@ -55,15 +55,15 @@ class DoctorPolicy
      */
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any_doctor');
+        return $user->can('delete_any_panel::access::request');
     }
 
     /**
      * Determine whether the user can permanently delete.
      */
-    public function forceDelete(User $user, Doctor $doctor): bool
+    public function forceDelete(User $user, PanelAccessRequest $panelAccessRequest): bool
     {
-        return $user->can('{{ ForceDelete }}');
+        return $user->can('force_delete_panel::access::request');
     }
 
     /**
@@ -71,15 +71,15 @@ class DoctorPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('{{ ForceDeleteAny }}');
+        return $user->can('force_delete_any_panel::access::request');
     }
 
     /**
      * Determine whether the user can restore.
      */
-    public function restore(User $user, Doctor $doctor): bool
+    public function restore(User $user, PanelAccessRequest $panelAccessRequest): bool
     {
-        return $user->can('{{ Restore }}');
+        return $user->can('restore_panel::access::request');
     }
 
     /**
@@ -87,15 +87,15 @@ class DoctorPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('{{ RestoreAny }}');
+        return $user->can('restore_any_panel::access::request');
     }
 
     /**
      * Determine whether the user can replicate.
      */
-    public function replicate(User $user, Doctor $doctor): bool
+    public function replicate(User $user, PanelAccessRequest $panelAccessRequest): bool
     {
-        return $user->can('{{ Replicate }}');
+        return $user->can('replicate_panel::access::request');
     }
 
     /**
@@ -103,15 +103,6 @@ class DoctorPolicy
      */
     public function reorder(User $user): bool
     {
-        return $user->can('{{ Reorder }}');
-    }
-
-    public function updateStatus(User $user): bool
-    {
-        return $user->can('update_status_doctor');
-    }
-    public function requestPanelAccess(User $user): bool
-    {
-        return $user->can('request_panel_access_doctor');
+        return $user->can('reorder_panel::access::request');
     }
 }

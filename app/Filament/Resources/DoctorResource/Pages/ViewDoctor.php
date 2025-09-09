@@ -2,19 +2,22 @@
 
 namespace App\Filament\Resources\DoctorResource\Pages;
 
-use App\Filament\Actions\AddTagAction;
-use App\Filament\Actions\UpdateStatusAction;
-use App\Filament\Resources\DoctorResource;
+use App\Models\State;
 use Filament\Actions;
+use App\Enums\StateCategory;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
-use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Contracts\View\View;
+use App\Filament\Actions\NextAction;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
-use App\Filament\Pages\Concerns\CanPaginateViewRecord;
+use App\Filament\Actions\AddTagAction;
 use App\Filament\Actions\PreviousAction;
-use App\Filament\Actions\NextAction;
+use Filament\Resources\Pages\ViewRecord;
+use App\Filament\Resources\DoctorResource;
+use App\Filament\Actions\UpdateStatusAction;
+use App\Filament\Actions\RequestPanelAccessAction;
+use App\Filament\Pages\Concerns\CanPaginateViewRecord;
 
 class ViewDoctor extends ViewRecord
 {
@@ -41,6 +44,12 @@ class ViewDoctor extends ViewRecord
             ->extraAttributes(['class' => 'hidden sm:block']);
         $actions[] = NextAction::make()
             ->extraAttributes(['class' => 'hidden sm:block']);
+
+        if (Gate::allows('requestPanelAccess', $this->getRecord())) {
+            $actions[] = RequestPanelAccessAction::make()
+                ->hidden(fn() => $this->record->panelAccessRequest?->state_id === State::where('category', StateCategory::FINALIZED)->value('id'));
+        }
+
         if (Gate::allows('updateStatus', $this->getRecord())) {
             $actions[] = UpdateStatusAction::make();
         }
