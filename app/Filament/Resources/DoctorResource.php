@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Actions\ViewInfoAction;
 use Dom\Text;
 use Carbon\Carbon;
 use App\Models\Tag;
@@ -282,22 +283,27 @@ class DoctorResource extends Resource implements HasShieldPermissions
         return $infolist
 
             ->schema([
-                TextEntry::make('panelAccessRequest.state.name')
-                    ->label('Panel Access')
-                    // ->badge()
-                    // ->color(fn($record) => $record->panelAccessRequest?->state->color ?? 'secondary')
-                    // ->placeholder('No Request')
-                    ->visible(fn($record) => !is_null($record->panelAccessRequest)),
-                // Fieldset::make('')
 
-                // ->schema([
-                //         TextEntry::make('panelAccessRequest.state.name')
-                //             ->label('Panel Access')
-                //             // ->badge()
-                //             // ->color(fn($record) => $record->panelAccessRequest?->state->color ?? 'secondary')
-                //             // ->placeholder('No Request')
-                //             ->visible(fn($record) => !is_null($record->panelAccessRequest)),
-                //     ]),
+                Section::make('Portal Access')
+                    ->collapsible()
+                    ->columns(3)
+                    ->visible(fn($record) => $record->hasPanelAccessRequest())
+                    ->schema([
+                        TextEntry::make('panelAccessRequest.state.name')
+                            ->label('Request Status')
+                            ->badge()
+                            ->color(fn($record) => $record->panelAccessRequest?->state->color ?? 'secondary'),
+                        TextEntry::make('panelAccessRequest.reviewed_at')
+                            ->label('Reviewed')
+                            ->placeholder('NA')
+                            ->since()
+                            ->visible(fn($record) => !is_null($record->panelAccessRequest->reviewed_at)),
+                        TextEntry::make('panelAccessRequest.created_at')
+                            ->label('Requested')
+                            ->since(),
+                        TextEntry::make('panelAccessRequest.requester.name')
+                            ->label('Request By'),
+                    ]),
 
                 Section::make()
                     ->compact()
@@ -371,7 +377,7 @@ class DoctorResource extends Resource implements HasShieldPermissions
                             ->hidden(fn($record) => $record->tags->isEmpty())
                             ->badge(),
                         TextEntry::make('updated_at')->label('Updated')->since(),
-                        TextEntry::make('user.name')->label('Created By'),
+                        TextEntry::make('user.name')->label('Created By')
                     ]),
                 Section::make()
                     ->hidden(fn($record) => $record->attachment == null)

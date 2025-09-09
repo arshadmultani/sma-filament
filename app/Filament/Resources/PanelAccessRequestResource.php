@@ -111,11 +111,9 @@ class PanelAccessRequestResource extends Resource
                     ->schema([
                         TextEntry::make('doctor.name')
                             ->label('Doctor')
-                            ->color('primary')
                             ->prefixAction(ViewInfoAction::for('doctor', DoctorResource::class, 'Doctor')),
                         TextEntry::make('requester.name')
                             ->label('Requested By')
-                            ->color('primary')
                             ->prefixAction(ViewInfoAction::for('requester', UserResource::class, 'Requester')),
                         TextEntry::make('created_at')
                             ->label('Requested At')

@@ -47,7 +47,8 @@ class ViewDoctor extends ViewRecord
 
         if (Gate::allows('requestPanelAccess', $this->getRecord())) {
             $actions[] = RequestPanelAccessAction::make()
-                ->hidden(fn() => $this->record->panelAccessRequest?->state_id === State::where('category', StateCategory::FINALIZED)->value('id'));
+                ->visible(fn() => $this->record->status === 'Approved')
+                ->hidden(fn() => $this->record->panelAccessRequest?->state_id === State::finalized()->value('id'));
         }
 
         if (Gate::allows('updateStatus', $this->getRecord())) {

@@ -157,7 +157,7 @@ class Doctor extends BaseModel
 
     public function panelAccessRequest(): HasOne
     {
-        return $this->hasOne(PanelAccessRequest::class);
+        return $this->hasOne(PanelAccessRequest::class)->latestOfMany();
     }
 
     public function hasPanelAccessRequest(): bool

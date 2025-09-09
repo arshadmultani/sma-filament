@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\StateCategory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class State extends Model
@@ -36,11 +37,29 @@ class State extends Model
         return $this->hasMany(POB::class);
     }
 
-    public function isFinalized(): bool
+    public function isFinalized(): Attribute
     {
-        return $this->category === StateCategory::FINALIZED;
+        return Attribute::make(
+            get: fn() => $this->category === StateCategory::FINALIZED,
+        );
     }
 
+    public function isPending(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->category === StateCategory::PENDING,
+        );
+    }
+
+    public function scopePending($query)
+    {
+        return $query->where('category', StateCategory::PENDING);
+    }
+
+    public function scopeFinalized($query)
+    {
+        return $query->where('category', StateCategory::FINALIZED);
+    }
 
     /**
      * Define which relationships to check before deletion.

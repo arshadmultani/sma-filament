@@ -246,8 +246,7 @@ class UserResource extends Resource
                 TextColumn::make('name')->searchable()->sortable(),
                 TextColumn::make('roles.name')
                     ->badge()
-                    ->color(fn($record) => $record->roles->first()?->roleColor() ?? 'secondary')
-
+                    ->color(fn($record) => $record->roleColor() ?? 'secondary')
                     ->label('Desgn.')
                     ->sortable()
                     ->searchable(),

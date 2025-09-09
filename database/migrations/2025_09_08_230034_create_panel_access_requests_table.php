@@ -16,6 +16,8 @@ return new class extends Migration {
             $table->foreignId('state_id')->constrained('states');
             $table->foreignId('requested_by')->constrained('users');
             $table->foreignId('reviewed_by')->nullable()->constrained('users');
+            $table->string('request_reason')->nullable();
+            $table->string('justification')->nullable();
             $table->text('rejection_reason')->nullable();
             $table->timestamp('reviewed_at')->nullable();
             $table->timestamps();
