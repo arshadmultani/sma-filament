@@ -286,18 +286,21 @@ class DoctorResource extends Resource implements HasShieldPermissions
 
                 Section::make('Portal Access')
                     ->collapsible()
-                    ->columns(3)
+                    ->columns(4)
                     ->visible(fn($record) => $record->hasPanelAccessRequest())
                     ->schema([
                         TextEntry::make('panelAccessRequest.state.name')
                             ->label('Request Status')
                             ->badge()
                             ->color(fn($record) => $record->panelAccessRequest?->state->color ?? 'secondary'),
+                        TextEntry::make('panelAccessRequest.rejection_reason')
+                            ->label('Reason for Rejection')
+                            ->visible(fn($record) => !is_null($record->panelAccessRequest?->rejection_reason)),
                         TextEntry::make('panelAccessRequest.reviewed_at')
                             ->label('Reviewed')
                             ->placeholder('NA')
                             ->since()
-                            ->visible(fn($record) => !is_null($record->panelAccessRequest->reviewed_at)),
+                            ->visible(fn($record) => !is_null($record->panelAccessRequest?->reviewed_at)),
                         TextEntry::make('panelAccessRequest.created_at')
                             ->label('Requested')
                             ->since(),
@@ -354,7 +357,7 @@ class DoctorResource extends Resource implements HasShieldPermissions
                     ]),
                 Section::make('')
 
-                    ->columns(4)
+                    ->columns(3)
                     ->schema([
                         IconEntry::make('status')
                             ->icon(fn(string $state): string => match ($state) {
@@ -377,7 +380,11 @@ class DoctorResource extends Resource implements HasShieldPermissions
                             ->hidden(fn($record) => $record->tags->isEmpty())
                             ->badge(),
                         TextEntry::make('updated_at')->label('Updated')->since(),
-                        TextEntry::make('user.name')->label('Created By')
+                        TextEntry::make('user.name')->label('Created By'),
+                        TextEntry::make('user.division.name')
+                            ->label('Division')
+                            ->badge()
+                            ->color('gray'),
                     ]),
                 Section::make()
                     ->hidden(fn($record) => $record->attachment == null)

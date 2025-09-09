@@ -51,6 +51,13 @@ class State extends Model
         );
     }
 
+    public function isCancelled(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->category === StateCategory::CANCELLED,
+        );
+    }
+
     public function scopePending($query)
     {
         return $query->where('category', StateCategory::PENDING);

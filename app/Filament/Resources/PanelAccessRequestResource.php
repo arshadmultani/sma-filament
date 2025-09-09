@@ -121,8 +121,12 @@ class PanelAccessRequestResource extends Resource
                         TextEntry::make('state.name')
                             ->label('Status')
                             ->badge()
-                            ->color(fn($record) => $record->state->color)
-
+                            ->color(fn($record) => $record->state->color),
+                        TextEntry::make('request_reason')
+                            ->label('Reason for Request'),
+                        TextEntry::make('justification')
+                            ->visible(fn($record) => !is_null($record->justification))
+                            ->label('Remark'),
 
                     ]),
 
