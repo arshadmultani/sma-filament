@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use App\Enums\StateCategory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class State extends Model
@@ -40,21 +40,21 @@ class State extends Model
     public function isFinalized(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->category === StateCategory::FINALIZED,
+            get: fn () => $this->category === StateCategory::FINALIZED,
         );
     }
 
     public function isPending(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->category === StateCategory::PENDING,
+            get: fn () => $this->category === StateCategory::PENDING,
         );
     }
 
     public function isCancelled(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->category === StateCategory::CANCELLED,
+            get: fn () => $this->category === StateCategory::CANCELLED,
         );
     }
 
@@ -68,10 +68,13 @@ class State extends Model
         return $query->where('category', StateCategory::FINALIZED);
     }
 
+    public function scopeCancelled($query)
+    {
+        return $query->where('category', StateCategory::CANCELLED);
+    }
+
     /**
      * Define which relationships to check before deletion.
-     *
-     * @return array
      */
     public function getRelationsToCheckForDelete(): array
     {
