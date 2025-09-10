@@ -360,6 +360,7 @@ class DoctorResource extends Resource implements HasShieldPermissions
                     ->columns(3)
                     ->schema([
                         IconEntry::make('status')
+                            ->label('Approved?')
                             ->icon(fn(string $state): string => match ($state) {
                                 'Pending' => 'heroicon-o-clock',
                                 'Approved' => 'heroicon-o-check-circle',
@@ -380,7 +381,8 @@ class DoctorResource extends Resource implements HasShieldPermissions
                             ->hidden(fn($record) => $record->tags->isEmpty())
                             ->badge(),
                         TextEntry::make('updated_at')->label('Updated')->since(),
-                        TextEntry::make('user.name')->label('Created By'),
+                        TextEntry::make('user.name')
+                            ->label('Created By'),
                         TextEntry::make('user.division.name')
                             ->label('Division')
                             ->badge()
