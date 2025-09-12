@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\PanelAccessRequestResource\Pages;
 
 use App\Filament\Actions\ApproveAction;
+use App\Filament\Actions\CreateDoctorUser;
 use App\Filament\Actions\NextAction;
 use App\Filament\Actions\PreviousAction;
 use App\Filament\Actions\RejectAction;
@@ -18,7 +19,7 @@ class ViewPanelAccessRequest extends ViewRecord
 
     public function getTitle(): string
     {
-        return 'PR-'.$this->record->id;
+        return 'PR-' . $this->record->id;
     }
 
     protected function getHeaderActions(): array
@@ -30,15 +31,19 @@ class ViewPanelAccessRequest extends ViewRecord
         $actions[] = NextAction::make()
             ->extraAttributes(['class' => 'hidden sm:block']);
 
+        $actions[] = CreateDoctorUser::make()
+            ->hidden($this->record->doctor->hasLoginAccount())
+            ->visible(fn() => $this->record->state->isFinalized);
+
         $actions[] = ApproveAction::make(
-            'Portal Access Approved for '.$this->record->doctor->name,
-            fn () => $this->record->requester
+            'Portal Access Approved for ' . $this->record->doctor->name,
+            fn() => $this->record->requester
         )
             ->hidden($this->record->state->isFinalized);
 
         $actions[] = RejectAction::make(
-            'Portal Access Request Rejected for '.$this->record->doctor->name,
-            fn () => $this->record->requester
+            'Portal Access Request Rejected for ' . $this->record->doctor->name,
+            fn() => $this->record->requester
         )
             ->hidden($this->record->state->isCancelled);
 

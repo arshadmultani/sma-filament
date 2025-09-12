@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Forms;
+use App\Filament\Actions\ActivateUser;
 use Filament\Tables;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
@@ -12,18 +12,13 @@ use Filament\Resources\Resource;
 use App\Models\PanelAccessRequest;
 use Illuminate\Support\HtmlString;
 use Filament\Tables\Columns\TextColumn;
+use App\Filament\Actions\DeactivateUser;
 use App\Filament\Actions\ViewInfoAction;
-use App\Filament\Resources\UserResource;
-use Illuminate\Database\Eloquent\Builder;
-use App\Filament\Resources\DoctorResource;
 use Filament\Infolists\Components\Actions;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\Actions\Action;
-use Filament\Infolists\Components\RepeatableEntry;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\PanelAccessRequestResource\Pages;
-use App\Filament\Resources\PanelAccessRequestResource\RelationManagers;
 
 class PanelAccessRequestResource extends Resource
 {
@@ -32,9 +27,8 @@ class PanelAccessRequestResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-key';
 
     protected static ?string $navigationGroup = 'System';
+
     protected static ?string $modelLabel = 'Portal Request';
-
-
 
     public static function form(Form $form): Form
     {
@@ -53,6 +47,7 @@ class PanelAccessRequestResource extends Resource
                     ->label('Request ID')
                     ->prefix('PR-')
                     ->searchable()
+                    ->toggleable()
                     ->sortable(),
                 TextColumn::make('doctor.name')
                     ->label('Dr.')
@@ -61,9 +56,11 @@ class PanelAccessRequestResource extends Resource
                 TextColumn::make('requester.name')
                     ->label('Requested By')
                     ->searchable()
+                    ->toggleable()
                     ->sortable(),
                 TextColumn::make('requester.roles.name')
                     ->label('Role')
+                    ->toggleable()
                     ->badge()
                     ->color(fn($record) => $record->requester?->roleColor() ?? 'secondary'),
                 TextColumn::make('state.name')
@@ -72,18 +69,27 @@ class PanelAccessRequestResource extends Resource
                     ->color(fn($record) => $record->state->color)
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('hasLoginAccount')
+                    ->label('Portal A/c')
+                    ->getStateUsing(fn($record) => $record->doctor->hasLoginAccount() ? 'Yes' : 'No')
+                    ->toggleable()
+                    ->badge(fn($state) => $state === 'Yes' ? 'success' : 'danger')
+                    ->color(fn($state) => $state === 'Yes' ? 'success' : 'danger'),
                 TextColumn::make('reviewer.name')
                     ->label('Reviewed By')
                     ->placeholder('NA')
                     ->searchable()
+                    ->toggleable()
                     ->sortable(),
                 TextColumn::make('reviewed_at')
                     ->placeholder('NA')
+                    ->toggleable()
                     ->dateTime('d M y @ H:i'),
                 // ->default(fn($record) => $record->reviewed_at ?? 'NA'),
                 TextColumn::make('created_at')
                     ->label('Submitted On')
-                    ->dateTime('d M y @ H:i')
+                    ->toggleable()
+                    ->dateTime('d M y @ H:i'),
 
             ])
             ->filters([
@@ -109,6 +115,38 @@ class PanelAccessRequestResource extends Resource
     {
         return $infolist
             ->schema([
+                Section::make('Access Details')
+                    ->compact()
+                    ->collapsible()
+                    ->columns(4)
+                    ->visible(fn($record) => $record->doctor->hasLoginAccount())
+                    ->schema([
+                        TextEntry::make('hasLoginAccount')
+                            ->label('Login Account Exists ?')
+                            ->getStateUsing(fn($record) => $record->doctor->hasLoginAccount() ? 'Yes' : 'No')
+                            ->badge(fn($state) => $state === 'Yes' ? 'success' : 'danger')
+                            ->color(fn($state) => $state === 'Yes' ? 'success' : 'danger'),
+                        TextEntry::make('accountActive')
+                            ->label('Account Active ?')
+                            ->getStateUsing(function ($record) {
+                                $user = $record->doctor->userAccount();
+                                return $user && $user->is_active ? 'Yes' : 'No';
+                            })
+                            ->badge(fn($state) => $state === 'Yes' ? 'success' : 'danger')
+                            ->color(fn($state) => $state === 'Yes' ? 'success' : 'danger'),
+                        TextEntry::make('accountCreatedAt')
+                            ->label('Account Created At')
+                            ->getStateUsing(function ($record) {
+                                $user = $record->doctor->userAccount();
+                                return $user ? $user->created_at->format('d M Y @ H:i') : 'N/A';
+                            })
+                            ->placeholder('N/A'),
+                        Actions::make([
+                            DeactivateUser::make(),
+                            ActivateUser::make()
+                                ->visible(fn($record) => !$record->doctor->userAccount()?->is_active),
+                        ]),
+                    ]),
 
                 Section::make('Request Information')
                     ->compact()
@@ -119,10 +157,20 @@ class PanelAccessRequestResource extends Resource
                     ->schema([
                         TextEntry::make('doctor.name')
                             ->label('Doctor')
+                            ->helperText(fn($record) => $record->doctor->headquarter->name)
                             ->prefixAction(ViewInfoAction::for('doctor', DoctorResource::class, 'Doctor')),
                         TextEntry::make('requester.name')
                             ->label('Requested By')
+                            ->helperText(
+                                fn($record) => collect([
+                                    $record->requester->division?->name,
+                                    $record->requester->location?->name,
+                                ])->filter()->join(' - ')
+                            )
+                            ->hint(fn($record) => $record->requester->roles->first()?->name)
+                            ->hintColor(fn($record) => $record->requester->roleColor() ?? 'secondary')
                             ->prefixAction(ViewInfoAction::for('requester', UserResource::class, 'Requester')),
+
                         TextEntry::make('created_at')
                             ->label('Requested At')
                             ->dateTime('d-M-y @ H:i'),
@@ -177,20 +225,20 @@ class PanelAccessRequestResource extends Resource
                                         $line .= "\nRejection: " . $req->rejection_reason;
                                     }
 
-                                    return "• " . $line;
+                                    return '• ' . $line;
+
                                 });
 
                                 $result = $mappedRequests->join("\n\n");
+
                                 return new HtmlString(nl2br(e($result)));
                             })
                             ->placeholder('No other requests found')
                             ->hiddenLabel(),
                     ]),
 
-
             ]);
     }
-
 
     public static function getPages(): array
     {

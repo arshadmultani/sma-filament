@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Notifications\Notifiable;
 use App\Events\CustomerHeadquarterUpdated;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
@@ -60,11 +60,11 @@ class Doctor extends BaseModel
 
     protected $fillable = ['name', 'email', 'phone', 'qualification_id', 'profile_photo', 'user_id', 'headquarter_id', 'attachment', 'address', 'type', 'support_type', 'town', 'specialty_id'];
 
-
     protected $casts = [
         'attachment' => 'array',
         'practice_since' => 'date',
     ];
+
     protected $appends = ['profile_photo_url'];
 
     public function getProfilePhotoUrlAttribute()
@@ -83,6 +83,7 @@ class Doctor extends BaseModel
     {
         return $this->morphOne(User::class, 'userable');
     }
+
     public function products()
     {
         return $this->belongsToMany(Product::class);
@@ -97,6 +98,7 @@ class Doctor extends BaseModel
     {
         return $this->morphMany(KofolEntry::class, 'customer');
     }
+
     public function microsite()
     {
         return $this->hasOne(Microsite::class);
@@ -141,10 +143,12 @@ class Doctor extends BaseModel
     {
         return $this->headquarter?->name;
     }
+
     public function campaignEntries()
     {
         return $this->morphMany(CampaignEntry::class, 'customer');
     }
+
     public function tags()
     {
         return $this->belongsToMany(Tag::class, 'doctor_tag')->withTimestamps()->withPivot('user_id');
@@ -169,6 +173,19 @@ class Doctor extends BaseModel
     {
         return $this->panelAccessRequest && $this->panelAccessRequest->state_id === State::where('category', 'Finalized')->value('id');
     }
+
+    public function hasLoginAccount(): bool
+    {
+        return $this->loginAccount()->exists();
+    }
+
+    public function userAccount(): User|null
+    {
+        return User::where('userable_type', 'doctor')
+            ->where('userable_id', $this->id)
+            ->first();
+    }
+
     protected static function booted()
     {
         parent::booted();
