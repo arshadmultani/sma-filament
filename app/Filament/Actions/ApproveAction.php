@@ -21,13 +21,17 @@ class ApproveAction
                 try {
                     $approvedState = State::finalized()->first();
 
-                    if (! $approvedState) {
+                    if (!$approvedState) {
                         \Log::error('No finalized state found in database for approval action');
 
                         return;
                     }
 
                     $record->state_id = $approvedState->id;
+                    $record->reviewed_by = auth()->id();
+                    $record->reviewed_at = now();
+                    $record->rejection_reason = $record->rejection_reason ? null : $record->rejection_reason;
+
                     $record->save();
 
                     // Resolve recipient
@@ -49,7 +53,7 @@ class ApproveAction
                         $notification->sendToDatabase($user);
                     }
                 } catch (\Exception $e) {
-                    \Log::error('Error approving panel access request: '.$e->getMessage());
+                    \Log::error('Error approving panel access request: ' . $e->getMessage());
                 }
             });
     }

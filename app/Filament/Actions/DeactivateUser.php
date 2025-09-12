@@ -13,16 +13,16 @@ class DeactivateUser
     {
 
         return Action::make('deactivate_user')
-            ->label('Deactivate User')
+            ->label('Deactivate Account')
             ->color('danger')
             ->outlined()
             ->requiresConfirmation()
             ->visible(fn($record) => $record->doctor->userAccount()->is_active)
             ->icon('heroicon-o-user-minus')
             ->modalIcon('heroicon-o-user-minus')
-            ->modalHeading('Deactivate User Account')
+            ->modalHeading('Deactivate Temporarily')
             ->modalSubmitActionLabel('Deactivate Account')
-            ->modalDescription("This action will deactivate the user's login account temporarily and will prevent access to the portal. You can reactivate it later if needed.")
+            ->modalDescription("This action will deactivate login account temporarily and will prevent access to the portal. You can reactivate it later if needed.")
             ->action(function ($record, \App\Actions\User\DeactivateUser $deactivateUser) {
                 try {
 

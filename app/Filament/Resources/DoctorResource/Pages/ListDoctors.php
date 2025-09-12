@@ -6,6 +6,7 @@ use App\Filament\Exports\DoctorExporter;
 use App\Filament\Resources\DoctorResource;
 use Asmit\ResizedColumn\HasResizableColumn;
 use Filament\Actions;
+use Filament\Resources\Components\Tab;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\Auth;
 
@@ -24,6 +25,17 @@ class ListDoctors extends ListRecords
             //     ->visible(Auth::user()->can('force_delete_any_user'))
             //     ->label('Download All Doctors')
             //     ->color('primary'),
+        ];
+    }
+
+    public function getTabs(): array
+    {
+        return [
+            'all' => Tab::make(),
+            'Portal' => Tab::make()
+                ->modifyQueryUsing(function ($query) {
+                    return $query->whereHas('loginAccount');
+                })
         ];
     }
 }

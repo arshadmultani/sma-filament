@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Actions\ActivateUser;
+use Filament\Infolists\Components\IconEntry;
 use Filament\Tables;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
@@ -120,20 +121,23 @@ class PanelAccessRequestResource extends Resource
                     ->collapsible()
                     ->columns(4)
                     ->visible(fn($record) => $record->doctor->hasLoginAccount())
+                    ->headerActions([
+                        DeactivateUser::make(),
+                        ActivateUser::make()
+                            ->visible(fn($record) => !$record->doctor->userAccount()?->is_active),
+
+                    ])
                     ->schema([
-                        TextEntry::make('hasLoginAccount')
-                            ->label('Login Account Exists ?')
-                            ->getStateUsing(fn($record) => $record->doctor->hasLoginAccount() ? 'Yes' : 'No')
-                            ->badge(fn($state) => $state === 'Yes' ? 'success' : 'danger')
-                            ->color(fn($state) => $state === 'Yes' ? 'success' : 'danger'),
+                        IconEntry::make('hasLoginAccount')
+                            ->label('Portal A/c Exists ?')
+                            ->getStateUsing(fn($record) => $record->doctor->hasLoginAccount())
+                            ->trueIcon('heroicon-o-check-circle')
+                            ->falseIcon('heroicon-o-x-circle'),
                         TextEntry::make('accountActive')
-                            ->label('Account Active ?')
-                            ->getStateUsing(function ($record) {
-                                $user = $record->doctor->userAccount();
-                                return $user && $user->is_active ? 'Yes' : 'No';
-                            })
-                            ->badge(fn($state) => $state === 'Yes' ? 'success' : 'danger')
-                            ->color(fn($state) => $state === 'Yes' ? 'success' : 'danger'),
+                            ->label('A/c Status ')
+                            ->getStateUsing(fn($record) => $record->doctor->userAccount()?->is_active ? 'Active' : 'Inactive')
+                            ->badge(fn($state) => $state === 'Active' ? 'success' : 'danger')
+                            ->color(fn($state) => $state === 'Active' ? 'success' : 'danger'),
                         TextEntry::make('accountCreatedAt')
                             ->label('Account Created At')
                             ->getStateUsing(function ($record) {
@@ -142,9 +146,7 @@ class PanelAccessRequestResource extends Resource
                             })
                             ->placeholder('N/A'),
                         Actions::make([
-                            DeactivateUser::make(),
-                            ActivateUser::make()
-                                ->visible(fn($record) => !$record->doctor->userAccount()?->is_active),
+                            // DeactivateUser::make(),
                         ]),
                     ]),
 
@@ -187,6 +189,9 @@ class PanelAccessRequestResource extends Resource
                         TextEntry::make('reviewer.name')
                             ->label('Reviewed By')
                             ->visible(fn($record) => !is_null($record->reviewer)),
+                        TextEntry::make('rejection_reason')
+                            ->visible(fn($record) => filled($record->rejection_reason))
+                            ->label('Rejection Reason'),
                         TextEntry::make('reviewed_at')
                             ->label('Reviewed At')
                             ->dateTime('d-M-y @ H:i')

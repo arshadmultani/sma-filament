@@ -298,20 +298,32 @@ class DoctorResource extends Resource implements HasShieldPermissions
                 Section::make('Portal Access')
                     ->collapsible()
                     ->columns(4)
-                    ->visible(fn($record) => $record->hasPanelAccessRequest())
+                    ->visible(fn($record) =>
+                        $record->hasPanelAccessRequest() || $record->hasLoginAccount())
                     ->schema([
                         TextEntry::make('panelAccessRequest.state.name')
                             ->label('Request Status')
                             ->badge()
                             ->color(fn($record) => $record->panelAccessRequest?->state->color ?? 'secondary'),
+                        IconEntry::make('hasLoginAccount')
+                            ->label('Portal A/c')
+                            ->getStateUsing(fn($record) => $record->hasLoginAccount())
+                            ->trueIcon('heroicon-o-check-circle')
+                            ->falseIcon('heroicon-o-x-circle'),
+                        TextEntry::make('account_status')
+                            ->label('A/c Status')
+                            ->getStateUsing(fn($record) => $record->userAccount()?->is_active ? 'Active' : 'Inactive')
+                            ->badge(fn($state) => $state === 'Active' ? 'success' : 'danger')
+                            ->color(fn($state) => $state === 'Active' ? 'success' : 'danger')
+                            ->visible(fn($record) => $record->hasLoginAccount()),
                         TextEntry::make('panelAccessRequest.rejection_reason')
                             ->label('Reason for Rejection')
-                            ->visible(fn($record) => !is_null($record->panelAccessRequest?->rejection_reason)),
+                            ->visible(fn($record) => filled($record->panelAccessRequest?->rejection_reason)),
                         TextEntry::make('panelAccessRequest.reviewed_at')
                             ->label('Reviewed')
                             ->placeholder('NA')
                             ->since()
-                            ->visible(fn($record) => !is_null($record->panelAccessRequest?->reviewed_at)),
+                            ->visible(fn($record) => filled($record->panelAccessRequest?->reviewed_at)),
                         TextEntry::make('panelAccessRequest.created_at')
                             ->label('Requested')
                             ->since(),

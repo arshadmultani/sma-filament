@@ -11,13 +11,13 @@ class ActivateUser
     public static function make(): Action
     {
         return Action::make('activate_user')
-            ->label('Activate User')
-            ->color('success')
+            ->label('Activate Account')
+            ->color('primary')
             ->outlined()
             ->icon('heroicon-o-user-circle')
             ->requiresConfirmation()
-            ->modalHeading('Activate User Account')
-            ->modalSubheading("Are you sure you want to activate this user's account? This will allow them to log in to the portal.")
+            ->modalHeading('Activate Account')
+            ->modalSubheading("Are you sure you want to activate this account? This will allow them to log in to the portal.")
             ->modalButton('Activate')
             ->action(function ($record, \App\Actions\User\ActivateUser $activateUser) {
                 try {

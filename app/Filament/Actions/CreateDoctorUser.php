@@ -37,9 +37,6 @@ class CreateDoctorUser
                     ]);
                     Notification::make()
                         ->title('Doctor user created successfully.')
-                        ->body('A login has been created for Dr.' .
-                            $record->doctor->name . ' with email ' . $record->doctor->email .
-                            ' and password ' . $record->doctor->phone)
                         ->success()
                         ->send();
                 } catch (\Exception $e) {
