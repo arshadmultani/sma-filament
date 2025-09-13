@@ -7,6 +7,7 @@ use App\Filament\Actions\CreateDoctorUser;
 use App\Filament\Actions\NextAction;
 use App\Filament\Actions\PreviousAction;
 use App\Filament\Actions\RejectAction;
+use App\Filament\Actions\SendDoctorWelcomeEmailAction;
 use App\Filament\Pages\Concerns\CanPaginateViewRecord;
 use App\Filament\Resources\PanelAccessRequestResource;
 use Filament\Resources\Pages\ViewRecord;

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Actions\ActivateUser;
+use App\Filament\Actions\SendDoctorWelcomeEmailAction;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Tables;
 use Filament\Forms\Form;
@@ -146,8 +147,11 @@ class PanelAccessRequestResource extends Resource
                             })
                             ->placeholder('N/A'),
                         Actions::make([
-                            // DeactivateUser::make(),
+                            SendDoctorWelcomeEmailAction::make()
+                                ->visible(fn($record) => $record->doctor->hasLoginAccount() && $record->doctor->userAccount()?->is_active),
                         ]),
+                        TextEntry::make('email_sent_at')
+
                     ]),
 
                 Section::make('Request Information')

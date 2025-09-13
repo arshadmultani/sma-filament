@@ -4,11 +4,13 @@ namespace App\Filament\Actions;
 
 use App\Models\User;
 use App\Models\Doctor;
-use Filament\Notifications\Notification;
 use PhpParser\Comment\Doc;
 use Filament\Actions\Action;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
+use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
 class CreateDoctorUser
@@ -26,7 +28,7 @@ class CreateDoctorUser
             ->modalDescription("This action will create a login account for the doctor with last 5 digits of phone number as password.Kindly review the Portal Request and confirm.")
             ->action(function ($record) {
                 try {
-                    User::create([
+                    $data = ([
                         'name' => $record->doctor->name,
                         'email' => $record->doctor->email,
                         'phone_number' => $record->doctor->phone,
@@ -35,16 +37,35 @@ class CreateDoctorUser
                         'userable_id' => $record->doctor->id,
                         'division_id' => $record->doctor->headquarter->division_id
                     ]);
+
+                    Validator::make($data, [
+                        'email' => 'required|email|unique:users,email',
+                    ], [
+                        'email.unique' => 'A user with this email ' . $record->doctor->email . ' already exists. Please change email before creating the account.'
+                    ])->validate();
+
+                    User::create($data);
+
+
                     Notification::make()
                         ->title('Doctor user created successfully.')
                         ->success()
                         ->send();
+                } catch (ValidationException $e) {
+                    // Handle validation failure nicely
+                    Notification::make()
+                        ->title('Failed to create doctor user.')
+                        ->body($e->validator->errors()->first('email'))
+                        ->danger()
+                        ->send();
+
                 } catch (\Exception $e) {
                     Log::error('Error creating doctor user: ' . $e->getMessage());
 
                     Notification::make()
                         ->title('Failed to create doctor user.')
-                        ->body('An error occurred while creating the user.')
+                        // ->body('An error occurred while creating the user.')
+                        ->body($e->getMessage())
                         ->danger()
                         ->send();
                 }
