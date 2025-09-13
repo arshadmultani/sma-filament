@@ -12,6 +12,7 @@ use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Spatie\Permission\Models\Role;
 
 class CreateDoctorUser
 {
@@ -44,7 +45,10 @@ class CreateDoctorUser
                         'email.unique' => 'A user with this email ' . $record->doctor->email . ' already exists. Please change email before creating the account.'
                     ])->validate();
 
-                    User::create($data);
+                    $user = User::firstOrCreate($data);
+                    $role = Role::firstOrCreate(['name' => 'doctor']);
+
+                    $user->assignRole($role);
 
 
                     Notification::make()

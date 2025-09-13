@@ -40,7 +40,10 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-user-group';
+    // protected static ?string $navigationIcon = 'heroicon-o-user-group';
+
+    protected static ?string $navigationGroup = 'Users';
+
 
     protected static ?int $navigationSort = 2;
 
@@ -398,7 +401,7 @@ class UserResource extends Resource
         } else {
             // others cannot see admin or super_admin
             return $query->whereDoesntHave('roles', function ($query) {
-                $query->whereIn('name', ['super_admin', 'admin']);
+                $query->whereIn('name', ['super_admin', 'admin', 'doctor']);
             });
         }
     }

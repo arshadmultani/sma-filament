@@ -32,7 +32,7 @@ class ChemistResource extends Resource implements HasShieldPermissions
 
     protected static ?string $model = Chemist::class;
 
-    protected static ?string $navigationGroup = 'Customer';
+    protected static ?string $navigationGroup = 'Customers';
 
     public static function getPermissionPrefixes(): array
     {

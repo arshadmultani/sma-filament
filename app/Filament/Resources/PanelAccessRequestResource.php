@@ -26,8 +26,6 @@ class PanelAccessRequestResource extends Resource
 {
     protected static ?string $model = PanelAccessRequest::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-key';
-
     protected static ?string $navigationGroup = 'System';
 
     protected static ?string $modelLabel = 'Portal Request';
@@ -248,7 +246,10 @@ class PanelAccessRequestResource extends Resource
 
             ]);
     }
-
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
     public static function getPages(): array
     {
         return [

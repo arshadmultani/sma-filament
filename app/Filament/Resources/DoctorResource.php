@@ -64,7 +64,7 @@ class DoctorResource extends Resource implements HasShieldPermissions
 
     protected static ?string $model = Doctor::class;
 
-    protected static ?string $navigationGroup = 'Customer';
+    protected static ?string $navigationGroup = 'Customers';
 
     // protected static ?string $navigationIcon = 'heroicon-o-user';
 

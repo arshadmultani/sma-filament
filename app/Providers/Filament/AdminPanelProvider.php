@@ -70,11 +70,24 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->navigationGroups([
                 NavigationGroup::make()
+                    ->label('Users')
+                    ->icon('heroicon-o-user-group'),
+                NavigationGroup::make()
+                    ->label('Customers')
+                    ->icon('heroicon-o-currency-dollar'),
+                NavigationGroup::make()
                     ->label('Activities')
                     ->icon('heroicon-o-chart-bar'),
                 NavigationGroup::make()
-                    ->label('Customer')
-                    ->icon('heroicon-o-currency-dollar'),
+                    ->label('System')
+                    ->icon('heroicon-o-cog'),
+                NavigationGroup::make()
+                    ->label('Settings')
+                    ->icon('heroicon-o-cog'),
+
+
+
+
                 NavigationGroup::make()
                     ->label('Dr. Attributes')
                     ->icon('healthicons-o-doctor'),

@@ -11,7 +11,7 @@ return [
         'cluster' => null,
         'group' => 'System',
         'sort' => null,
-        'icon' => null,
+        'icon' => false,
         'default_sort_column' => 'created_at',
         'default_sort_direction' => 'desc',
         'datetime_format' => 'Y-m-d H:i:s',
@@ -34,11 +34,14 @@ return [
     'prune_crontab' => '0 0 * * *',
 
     'can_access' => [
-        'role' => ['super_admin', 'admin','PMT'],
+        'role' => ['super_admin', 'admin', 'PMT'],
     ],
 
     'pagination_page_options' => [
-        50, 100, 250, 500,
+        50,
+        100,
+        250,
+        500,
     ],
 
     'attachments_disk' => 'local',
