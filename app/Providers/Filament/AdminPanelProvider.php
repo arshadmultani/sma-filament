@@ -79,11 +79,11 @@ class AdminPanelProvider extends PanelProvider
                     ->label('Activities')
                     ->icon('heroicon-o-chart-bar'),
                 NavigationGroup::make()
-                    ->label('System')
-                    ->icon('heroicon-o-cog'),
+                    ->label('System'),
+                // ->icon('heroicon-o-cog'),
                 NavigationGroup::make()
-                    ->label('Settings')
-                    ->icon('heroicon-o-cog'),
+                    ->label('Settings'),
+                // ->icon('heroicon-o-cog'),
 
 
 
