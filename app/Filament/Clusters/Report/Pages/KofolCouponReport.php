@@ -10,12 +10,12 @@ use Filament\Tables\Grouping\Group;
 use Illuminate\Support\Facades\Cache;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Actions\ExportAction;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
 use Filament\Tables\Columns\Summarizers\Count;
 use Filament\Tables\Concerns\InteractsWithTable;
+use App\Filament\Exports\KofolEntryResourceExporter;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 
 
 
@@ -58,7 +58,8 @@ class KofolCouponReport extends Page implements HasTable
             $entryProductMap = [];
             foreach ($records as $record) {
                 $entry = $record->kofolEntry;
-                if (!$entry) continue;
+                if (!$entry)
+                    continue;
                 $products = Cache::remember("kofol_entry_products_{$entry->id}", 3600, function () use ($entry) {
                     $products = $entry->products ?? [];
                     if (is_string($products)) {
@@ -67,7 +68,7 @@ class KofolCouponReport extends Page implements HasTable
                     return is_array($products) ? $products : [];
                 });
                 foreach ($kofolProducts as $product) {
-                    $item = collect($products)->firstWhere('product_id', (string)$product->id);
+                    $item = collect($products)->firstWhere('product_id', (string) $product->id);
                     $entryProductMap[$entry->id][$product->id] = $item['quantity'] ?? '-';
                 }
             }
@@ -109,20 +110,45 @@ class KofolCouponReport extends Page implements HasTable
         ];
 
         // Add a column for each Kofol product, using precomputed quantities
+        // foreach ($kofolProducts as $product) {
+        //     $columns[] = TextColumn::make('kofolEntry.product_' . $product->id . '_qty')
+        //         ->label($product->name)
+        //         ->getStateUsing(function ($record) use ($product, &$precomputeProductQuantities) {
+        //             static $entryProductMap = null;
+        //             if ($entryProductMap === null) {
+        //                 // Precompute once per page
+        //                 $entryProductMap = $precomputeProductQuantities(func_get_args()[1] ?? []);
+        //             }
+        //             $entry = $record->kofolEntry;
+        //             if (!$entry)
+        //                 return '';
+        //             return $entryProductMap[$entry->id][$product->id] ?? '-';
+        //         });
+        // }
+
         foreach ($kofolProducts as $product) {
             $columns[] = TextColumn::make('kofolEntry.product_' . $product->id . '_qty')
                 ->label($product->name)
-                ->getStateUsing(function ($record) use ($product, &$precomputeProductQuantities) {
-                    static $entryProductMap = null;
-                    if ($entryProductMap === null) {
-                        // Precompute once per page
-                        $entryProductMap = $precomputeProductQuantities(func_get_args()[1] ?? []);
-                    }
+                ->getStateUsing(function ($record) use ($product, $precomputeProductQuantities) {
+                    static $entryProductMap = [];
+
                     $entry = $record->kofolEntry;
-                    if (!$entry) return '';
+                    if (!$entry) {
+                        return '';
+                    }
+
+                    // Lazy precompute only if this entry hasn't been cached yet
+                    if (!isset($entryProductMap[$entry->id])) {
+                        $entryProductMap = array_merge(
+                            $entryProductMap,
+                            $precomputeProductQuantities([$record])
+                        );
+                    }
+
                     return $entryProductMap[$entry->id][$product->id] ?? '-';
                 });
         }
+
 
         return $table
             ->paginated([50, 100, 250])
@@ -145,16 +171,18 @@ class KofolCouponReport extends Page implements HasTable
                     ->label('Zone'),
             ])
             ->columns($columns)
-            ->bulkActions([
-                ExportBulkAction::make('export')
-                // ->queue()
-            ])
             ->headerActions([
-                ExportAction::make('export')
-                    ->exports([
-                        ExcelExport::make()
-                            ->fromTable()
-                    ])
+                ExportAction::make()
+                    ->exporter(KofolEntryResourceExporter::class)
+                    ->label('Download Report')
+                    ->color('primary'),
+                // ExportAction::make('export')
+                //     ->exports([
+                //         ExcelExport::make()
+                //             ->fromTable()
+                //             ->queue()
+                //             ->withChunkSize(1000)
+                //     ])
             ]);
     }
 }
