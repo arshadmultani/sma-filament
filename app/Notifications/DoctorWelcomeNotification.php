@@ -8,6 +8,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
 
 class DoctorWelcomeNotification extends Notification implements ShouldQueue
 {
@@ -48,7 +49,8 @@ class DoctorWelcomeNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         $portalName = Config::get('app.name');
-        $maskedEmail = $this->maskEmail($this->email);
+        $maskedEmail = Str::of($this->email)->mask('*', 4, -4);
+        $maskedPhone = Str::of($this->phone)->mask('*', 2, -2);
 
         return (new MailMessage)
             ->subject("Welcome to {$portalName}")
@@ -57,11 +59,11 @@ class DoctorWelcomeNotification extends Notification implements ShouldQueue
             ->line("Your account has been created successfully, and you can now log in to access all features.")
             ->line("Here are your login details:")
             ->line("Email: {$maskedEmail}")
-            ->line("Password: Last 5 digits of your registered phone number")
-            ->line("👉 For security, we recommend that you log in and change your password immediately after your first login.")
-            ->action("Access the Portal", URL::to('/login'))
-            ->line("If you have any questions or face any issues, feel free to contact our support team.")
-            ->salutation("Best regards,\nThe {$portalName} Team");
+            ->line("Password: Last 5 digits of your registered phone number: {$maskedPhone}")
+            ->line("For security, we recommend that you log in and change your password immediately after your first login.")
+            ->action("Access the Portal", URL::to('/'))
+            ->salutation("Best regards,  
+            The {$portalName} Team");
     }
 
     /**
@@ -74,23 +76,5 @@ class DoctorWelcomeNotification extends Notification implements ShouldQueue
         return [
             //
         ];
-    }
-
-    /**
-     * Mask the email address for security
-     */
-    private function maskEmail(string $email): string
-    {
-        list($username, $domain) = explode('@', $email);
-
-        // Show first 2 characters and last character of username
-        $usernameLength = strlen($username);
-        if ($usernameLength <= 3) {
-            $maskedUsername = $username[0] . str_repeat('*', $usernameLength - 1);
-        } else {
-            $maskedUsername = substr($username, 0, 2) . str_repeat('*', $usernameLength - 3) . $username[$usernameLength - 1];
-        }
-
-        return $maskedUsername . '@' . $domain;
     }
 }

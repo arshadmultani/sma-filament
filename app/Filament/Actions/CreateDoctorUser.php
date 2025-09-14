@@ -2,6 +2,7 @@
 
 namespace App\Filament\Actions;
 
+use App\Models\Headquarter;
 use App\Models\User;
 use App\Models\Doctor;
 use PhpParser\Comment\Doc;
@@ -36,7 +37,9 @@ class CreateDoctorUser
                         'password' => Hash::make(substr($record->doctor->phone, -5)),
                         'userable_type' => Relation::getMorphAlias(Doctor::class),
                         'userable_id' => $record->doctor->id,
-                        'division_id' => $record->doctor->headquarter->division_id
+                        'division_id' => $record->doctor->headquarter->division_id,
+                        'location_type' => Relation::getMorphedModel('headquarter'),
+                        'location_id' => $record->doctor->headquarter->id,
                     ]);
 
                     Validator::make($data, [

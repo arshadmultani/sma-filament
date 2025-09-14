@@ -146,9 +146,13 @@ class PanelAccessRequestResource extends Resource
                             ->placeholder('N/A'),
                         Actions::make([
                             SendDoctorWelcomeEmailAction::make()
-                                ->visible(fn($record) => $record->doctor->hasLoginAccount() && $record->doctor->userAccount()?->is_active),
+                                ->visible(fn($record) => $record->doctor->hasLoginAccount() && $record->email_sent_at === null && $record->doctor->userAccount()?->is_active),
                         ]),
                         TextEntry::make('email_sent_at')
+                            ->label('Email Sent')
+                            ->date('d M Y @ H:i')
+                            ->visible(fn($record) => filled($record->email_sent_at))
+
 
                     ]),
 

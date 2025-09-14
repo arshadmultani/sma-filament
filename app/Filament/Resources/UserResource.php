@@ -305,7 +305,8 @@ class UserResource extends Resource
             )
             ->actions([
                 Tables\Actions\ViewAction::make(),
-                Impersonate::make(),
+                Impersonate::make()
+                    ->visible(fn($record) => !$record->trashed()),
                 // Tables\Actions\RestoreAction::make(),
                 // SendMailAction::make(),
             ])
