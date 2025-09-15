@@ -51,6 +51,11 @@ class MicrositeResource extends Resource implements HasShieldPermissions
     {
         return true;
     }
+    public static function canAccess(): bool
+    {
+        return !auth()->user()->hasRole('doctor');
+
+    }
 
     public static function form(Form $form): Form
     {

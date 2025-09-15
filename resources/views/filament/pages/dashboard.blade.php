@@ -1,35 +1,37 @@
 <x-filament-panels::page>
-    <div x-data="{ isMobile: window.innerWidth <= 768 }" x-init="window.addEventListener('resize', () => {
-        isMobile = window.innerWidth <= 768
-    })">
-        <template x-if="isMobile">
-            <div>
-                @livewire('greeting')
-                @livewire('campaign-card')
-                @livewire('customer-card')
 
-                @livewire('heading', ['title' => 'Kofol Products'])
-                @livewire(App\Filament\Resources\KofolEntryResource\Widgets\KofolProductTable::class)
+    @if (!auth()->user()->hasRole('doctor'))
+        <div x-data="{ isMobile: window.innerWidth <= 768 }" x-init="window.addEventListener('resize', () => {
+            isMobile = window.innerWidth <= 768
+        })">
+            <template x-if="isMobile">
+                <div>
+                    @livewire('greeting')
+                    @livewire('campaign-card')
+                    @livewire('customer-card')
 
-                @if (auth()->user()->can('view_user'))
-                    @livewire('heading', ['title' => 'Kofol Coupons'])
-                    @livewire(App\Filament\Resources\KofolEntryResource\Widgets\KofolCoupon::class)
-                @endif
-            </div>
-        </template>
-        <template x-if="!isMobile">
-            <div>
-                @livewire('greeting')
+                    @livewire('heading', ['title' => 'Kofol Products'])
+                    @livewire(App\Filament\Resources\KofolEntryResource\Widgets\KofolProductTable::class)
+
+                    @if (auth()->user()->can('view_user'))
+                        @livewire('heading', ['title' => 'Kofol Coupons'])
+                        @livewire(App\Filament\Resources\KofolEntryResource\Widgets\KofolCoupon::class)
+                    @endif
+                </div>
+            </template>
+            <template x-if="!isMobile">
+                <div>
+                    @livewire('greeting')
 
 
-                @livewire('heading', ['title' => 'Active Campaigns'])
+                    @livewire('heading', ['title' => 'Active Campaigns'])
 
-                {{-- <h1>{{ $this->getActiveCampaigns()->pluck('name') }}</h1>
+                    {{-- <h1>{{ $this->getActiveCampaigns()->pluck('name') }}</h1>
 
                 <h1>{{ $this->getActiveCampaigns()->count() }}</h1> --}}
 
 
-                {{-- @if ($this->getActiveCampaigns()->isNotEmpty())
+                    {{-- @if ($this->getActiveCampaigns()->isNotEmpty())
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         @foreach ($this->getActiveCampaigns() as $campaign)
                             <div class="p-4 border">
@@ -44,23 +46,26 @@
                     </div>
                 @endif --}}
 
-                @livewire(App\Filament\Widgets\CampaignOverview::class)
+                    @livewire(App\Filament\Widgets\CampaignOverview::class)
 
-                @livewire('heading', ['title' => 'Customers'])
-                @livewire(App\Filament\Widgets\CustomerOverview::class)
+                    @livewire('heading', ['title' => 'Customers'])
+                    @livewire(App\Filament\Widgets\CustomerOverview::class)
 
-                @livewire('heading', ['title' => 'Kofol Products'])
-                @livewire(App\Filament\Resources\KofolEntryResource\Widgets\KofolProductChart::class)
+                    @livewire('heading', ['title' => 'Kofol Products'])
+                    @livewire(App\Filament\Resources\KofolEntryResource\Widgets\KofolProductChart::class)
 
-                @livewire('heading', ['title' => 'Kofol Bookings'])
-                @livewire(App\Filament\Resources\KofolEntryResource\Widgets\KofolEntryBooking::class)
+                    @livewire('heading', ['title' => 'Kofol Bookings'])
+                    @livewire(App\Filament\Resources\KofolEntryResource\Widgets\KofolEntryBooking::class)
 
-                @if (auth()->user()->can('view_user'))
-                    @livewire('heading', ['title' => 'Kofol Coupons'])
-                    @livewire(App\Filament\Resources\KofolEntryResource\Widgets\KofolCoupon::class)
-                @endif
+                    @if (auth()->user()->can('view_user'))
+                        @livewire('heading', ['title' => 'Kofol Coupons'])
+                        @livewire(App\Filament\Resources\KofolEntryResource\Widgets\KofolCoupon::class)
+                    @endif
 
-            </div>
-        </template>
-    </div>
+                </div>
+            </template>
+        </div>
+        }
+    @endif
+
 </x-filament-panels::page>
