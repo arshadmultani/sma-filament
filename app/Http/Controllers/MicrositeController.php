@@ -9,8 +9,8 @@ class MicrositeController extends Controller
 {
     public function show($slug)
     {
-        $microsite = Microsite::where('url', $slug)->where('is_active', true)->firstOrFail();
+        $microsite = Microsite::where('url', $slug)->firstOrFail();
 
         return view('microsite.show', compact('microsite'));
     }
-} 
+}

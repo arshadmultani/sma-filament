@@ -27,11 +27,27 @@ class ViewMicrosite extends ViewRecord
     {
 
         $actions = [];
-        if (Gate::allows('updateStatus', $this->getRecord())) {
-            $actions[] = UpdateStateAction::make();
-        }
-        if (Gate::allows('activeStatus', $this->getRecord())) {
-            $actions[] = Action::make('activate')
+        // if (Gate::allows('updateStatus', $this->getRecord())) {
+        //     $actions[] = UpdateStateAction::make();
+        // }
+        $actions[] = ActionGroup::make([
+            Action::make('edit')
+                ->icon('heroicon-o-pencil')
+                ->color('primary')
+                ->hidden(fn() => !Gate::allows('update', $this->record))
+                ->label('Edit')
+                ->url(route('filament.admin.resources.microsites.edit', $this->record))
+                ->color('primary'),
+
+            SiteUrlAction::makeInfolist()->color('primary'),
+
+            DownloadQrAction::makeInfolist()
+                ->visible(fn($record) => $record->is_active && $record->state->isFinalized)
+                ->color('primary'),
+
+            Action::make('activate')
+                ->icon(fn() => $this->record->is_active ? 'heroicon-o-lock-closed' : 'heroicon-o-lock-open')
+                ->visible(fn() => Gate::allows('activeStatus', $this->getRecord()))
                 ->outlined()
                 ->label(fn() => $this->record->is_active ? 'Deactivate Website' : 'Activate Website')
                 ->color($this->record->is_active ? 'danger' : 'success')
@@ -47,20 +63,9 @@ class ViewMicrosite extends ViewRecord
                         ->title($this->record->is_active ? 'Microsite Activated' : 'Microsite Deactivated')
                         ->body($this->record->is_active ? 'The website is now active.' : 'The website has been deactivated.')
                         ->send();
-                });
-        }
-        $actions[] = ActionGroup::make([
-            Action::make('edit')
-                ->icon('heroicon-o-pencil')
-                ->color('primary')
-                ->hidden(fn() => !Gate::allows('update', $this->record))
-                ->label('Edit')
-                ->url(route('filament.admin.resources.microsites.edit', $this->record))
-                ->color('primary'),
-            SiteUrlAction::makeInfolist()->color('primary'),
-            DownloadQrAction::makeInfolist()
-                ->visible(fn($record) => $record->is_active && $record->status === 'Approved')
-                ->color('primary'),
+                })
+
+
         ])->icon('heroicon-m-bars-3-bottom-right');
 
         return $actions;

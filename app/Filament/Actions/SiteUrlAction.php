@@ -11,8 +11,7 @@ class SiteUrlAction
     {
         return InfolistAction::make('Site')
             ->label('Visit Site')
-            ->icon('heroicon-o-link')
-            ->visible(fn($record) => $record->is_active)
+            ->icon('heroicon-o-globe-alt')
             ->url(fn($record) => url('/doctor/' . $record->url))
             ->openUrlInNewTab();
     }

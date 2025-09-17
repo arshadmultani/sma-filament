@@ -11,6 +11,7 @@ class EditMicrosite extends EditRecord
     protected static string $resource = MicrositeResource::class;
 
     protected $doctorShowcases = [];
+    protected $doctorReviews = [];
 
     protected function getHeaderActions(): array
     {
@@ -32,6 +33,16 @@ class EditMicrosite extends EditRecord
                 ->toArray();
 
             $data['showcases_data'] = $showcases;
+            $data['has_any_showcase'] = !empty($showcases) ? 'yes' : 'no';
+
+
+            $reviews = $this->record->doctor->reviews()
+                ->select(['reviewer_name', 'review_text', 'rating'])
+                ->get()
+                ->toArray();
+
+            $data['reviews'] = $reviews;
+            $data['has_any_reviews'] = !empty($reviews) ? 'yes' : 'no';
         }
 
         return $data;
@@ -42,6 +53,11 @@ class EditMicrosite extends EditRecord
         if (isset($data['showcases_data'])) {
             $this->doctorShowcases = $data['showcases_data'];
             unset($data['showcases_data']);
+        }
+
+        if (isset($data['reviews'])) {
+            $this->doctorReviews = $data['reviews'];
+            unset($data['reviews']);
         }
 
         return $data;
@@ -62,6 +78,17 @@ class EditMicrosite extends EditRecord
                 }
             }
         }
+
+        if (isset($this->doctorReviews) && $this->record->doctor) {
+            $this->record->doctor->reviews()->delete();
+            foreach ($this->doctorReviews as $review) {
+                $this->record->doctor->reviews()->create([
+                    'reviewer_name' => $review['reviewer_name'],
+                    'review_text' => $review['review_text'],
+                ]);
+            }
+        }
+
         if (isset($this->data['profile_photo']) && $this->record->doctor) {
             $this->record->doctor->profile_photo = reset($this->data['profile_photo']);
             $this->record->doctor->save();

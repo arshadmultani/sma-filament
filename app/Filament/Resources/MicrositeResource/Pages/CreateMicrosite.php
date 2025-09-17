@@ -20,6 +20,7 @@ class CreateMicrosite extends CreateRecord
     protected static bool $canCreateAnother = false;
 
     protected $doctorShowcases = [];
+    protected $doctorReviews = [];
 
 
 
@@ -72,7 +73,29 @@ class CreateMicrosite extends CreateRecord
             unset($data['showcases_data']);
         }
 
+        if (isset($data['reviews'])) {
+            $this->doctorReviews = $data['reviews'];
+            unset($data['reviews']);
+        }
+
+
         return $data;
+    }
+
+    protected function getFormActions(): array
+    {
+        return [
+            Actions\Action::make('create')
+                ->label('Create Website')
+                ->action(fn() => $this->create())
+                ->keyBindings(['mod+s'])
+                ->requiresConfirmation()
+                ->modalHeading('Create Website')
+                ->modalIcon('heroicon-o-globe-alt')
+                ->modalDescription('Are you sure you want to create this website? You cannot edit this later. Only the doctor can do the changes. Please be sure all data is correct.')
+                ->modalSubmitActionLabel('Yes, create it'),
+            $this->getCancelFormAction(),
+        ];
     }
 
     protected function afterCreate(): void
@@ -93,6 +116,19 @@ class CreateMicrosite extends CreateRecord
                 'entryable_id' => $this->record->id,
                 'campaign_id' => $campaignId,
             ]);
+
+            if (!empty($this->doctorReviews)) {
+                foreach ($this->doctorReviews as $review) {
+                    $doctor->reviews()->create([
+                        'reviewer_name' => $review['reviewer_name'],
+                        'is_verified' => false,
+                        'state_id' => State::where('category', StateCategory::PENDING)->first()->id,
+                        'review_text' => $review['review_text'],
+                        'media_url' => $review['media_url'] ?? null,
+                        'media_type' => 'video'
+                    ]);
+                }
+            }
 
             if (!empty($this->doctorShowcases)) {
                 foreach ($this->doctorShowcases as $showcase) {
