@@ -185,6 +185,10 @@ class Doctor extends BaseModel
             ->where('userable_id', $this->id)
             ->first();
     }
+    public function getHasProfilePhotoAttribute(): bool
+    {
+        return filled($this->profile_photo);
+    }
 
     protected static function booted()
     {

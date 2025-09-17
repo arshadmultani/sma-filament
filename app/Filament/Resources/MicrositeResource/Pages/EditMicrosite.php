@@ -18,6 +18,10 @@ class EditMicrosite extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+    public function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('view', ['record' => $this->record]);
+    }
 
     protected function mutateFormDataBeforeFill(array $data): array
     {

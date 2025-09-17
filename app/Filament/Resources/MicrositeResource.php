@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use Filament\Forms;
+use Filament\Infolists\Components\ImageEntry;
 use Filament\Tables;
 use App\Models\Doctor;
 use App\Models\Campaign;
@@ -11,9 +12,11 @@ use App\Models\Microsite;
 use Filament\Tables\Table;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use App\Filament\Actions\SiteUrlAction;
 use Filament\Forms\Components\Repeater;
+use App\Infolists\Components\VideoEntry;
 use Filament\Notifications\Notification;
 use Filament\Forms\Components\FileUpload;
 use Illuminate\Database\Eloquent\Builder;
@@ -25,8 +28,14 @@ use Filament\Resources\RelationManagers\RelationManager;
 use App\Filament\Resources\MicrositeResource\RelationManagers;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use App\Filament\Resources\MicrositeResource\RelationManagers\ShowcasesRelationManager;
-use Filament\Forms\Components\Radio;
+use Illuminate\Support\Facades\Storage;
 
+
+/**
+ * 
+ *
+ *
+ */
 class MicrositeResource extends Resource implements HasShieldPermissions
 {
     public static function getPermissionPrefixes(): array
@@ -115,15 +124,7 @@ class MicrositeResource extends Resource implements HasShieldPermissions
                     ->label('Profile photo not uploaded for this doctor. Would you like to upload?')
                     ->reactive()
                     ->live()
-
-                    ->visible(function ($get) {
-                        $doctorId = $get('doctor_id');
-                        if (!$doctorId) {
-                            return false;
-                        }
-                        $doctor = Doctor::find($doctorId);
-                        return is_null($doctor?->profile_photo);
-                    })
+                    ->visible(fn($get) => $get('doctor_id') && !Doctor::find($get('doctor_id'))?->has_profile_photo)
                     ->required()
                     ->dehydrated(false)
                     ->inline()
@@ -241,6 +242,14 @@ class MicrositeResource extends Resource implements HasShieldPermissions
                             ->label('Status')
                             ->badge()
                             ->color(fn($record) => $record->state->color),
+                        VideoEntry::make('doctor.showcases')
+                            ->label('Doctor Videos')
+                            // ->muted()
+                            // ->disablePictureInPicture()
+                            ->controlsListNoDownload()
+                            ->getStateUsing(function ($record) {
+                                return $record->doctor->showcases->pluck('media_file_url')->filter()->toArray();
+                            })
                     ]),
 
             ]);
