@@ -105,9 +105,14 @@ class MicrositePolicy
     {
         return $user->can('reorder_microsite');
     }
-    
+
     public function updateStatus(User $user): bool
     {
         return $user->can('update_status_microsite');
+    }
+
+    public function activeStatus(User $user): bool
+    {
+        return $user->can('active_status_microsite');
     }
 }

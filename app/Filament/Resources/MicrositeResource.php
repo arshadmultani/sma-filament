@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use Filament\Forms;
-use Filament\Infolists\Components\ImageEntry;
 use Filament\Tables;
 use App\Models\Doctor;
 use App\Models\Campaign;
@@ -16,6 +15,9 @@ use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use App\Filament\Actions\SiteUrlAction;
 use Filament\Forms\Components\Repeater;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Illuminate\Support\Facades\Storage;
 use App\Infolists\Components\VideoEntry;
 use Filament\Notifications\Notification;
 use Filament\Forms\Components\FileUpload;
@@ -23,12 +25,13 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Infolists\Components\Section;
 use Filament\Notifications\Actions\Action;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\ImageEntry;
 use App\Filament\Resources\MicrositeResource\Pages;
 use Filament\Resources\RelationManagers\RelationManager;
 use App\Filament\Resources\MicrositeResource\RelationManagers;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
+use Rmsramos\Activitylog\Actions\ActivityLogTimelineTableAction;
 use App\Filament\Resources\MicrositeResource\RelationManagers\ShowcasesRelationManager;
-use Illuminate\Support\Facades\Storage;
 
 
 /**
@@ -48,6 +51,7 @@ class MicrositeResource extends Resource implements HasShieldPermissions
             'delete',
             'delete_any',
             'update_status',
+            'active_status',
         ];
     }
     protected static ?string $model = Microsite::class;
@@ -193,23 +197,26 @@ class MicrositeResource extends Resource implements HasShieldPermissions
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('doctor.name')
+                TextColumn::make('id')
+                    ->label('ID')
+                    ->prefix('DW-'),
+                TextColumn::make('doctor.name')
                     ->label('Doctor')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('campaignEntry.campaign.name')
+                TextColumn::make('campaignEntry.campaign.name')
                     ->searchable()
                     ->toggleable()
                     ->label('Campaign'),
-                Tables\Columns\IconColumn::make('is_active')
+                IconColumn::make('is_active')
                     ->label('Active')
                     ->boolean()
                     ->toggleable(),
-                Tables\Columns\TextColumn::make('state.name')
+                TextColumn::make('state.name')
                     ->label('Status')
                     ->toggleable()
                     ->badge()
                     ->color(fn($record) => $record->state->color),
-                Tables\Columns\TextColumn::make('user.name')->label('Submitted By')
+                TextColumn::make('user.name')->label('Submitted By')
                     ->searchable()
                     ->toggleable(),
             ])
@@ -218,7 +225,8 @@ class MicrositeResource extends Resource implements HasShieldPermissions
             ])
             ->actions([
                 SiteUrlAction::makeTable(),
-                Tables\Actions\ViewAction::make(),
+                // ActivityLogTimelineTableAction::make()->label('')
+                //     ->visible(auth()->user()->can('view_user')),
 
             ])
             ->bulkActions([
@@ -242,10 +250,17 @@ class MicrositeResource extends Resource implements HasShieldPermissions
                             ->label('Status')
                             ->badge()
                             ->color(fn($record) => $record->state->color),
+
+
+                    ]),
+                Section::make('Doctor Videos')
+                    ->compact()
+                    ->visible(fn($record) => $record->doctor->showcases->isNotEmpty())
+                    ->schema([
                         VideoEntry::make('doctor.showcases')
                             ->label('Doctor Videos')
-                            // ->muted()
-                            // ->disablePictureInPicture()
+                            ->muted()
+                            ->disablePictureInPicture()
                             ->controlsListNoDownload()
                             ->getStateUsing(function ($record) {
                                 return $record->doctor->showcases->pluck('media_file_url')->filter()->toArray();

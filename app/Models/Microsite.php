@@ -18,11 +18,6 @@ class Microsite extends Model implements IsCampaignEntry
 {
     use HasActivity, LogsActivity;
     protected $guarded = [];
-    protected $casts = [
-        'reviews' => 'array',
-    ];
-
-
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
