@@ -7,6 +7,7 @@ use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -39,7 +40,7 @@ use Illuminate\Support\Facades\Auth;
  * @property-read int|null $permissions_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Role> $roles
  * @property-read int|null $roles_count
- * 
+ * @property-read bool $isDoctorUser
  *
  * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newModelQuery()
@@ -561,5 +562,15 @@ class User extends Authenticatable implements FilamentUser
 
         // Default: only themselves
         return collect([$this->id]);
+    }
+
+    public function getisDoctorUserAttribute(): bool
+    {
+        return $this->userable_type === Relation::getMorphAlias(Doctor::class) && $this->userable_id !== null;
+    }
+
+    public function getDoctorUserAttribute(): Doctor|null
+    {
+        return $this->isDoctorUser ? $this->userable : null;
     }
 }

@@ -190,6 +190,11 @@ class Doctor extends BaseModel
         return filled($this->profile_photo);
     }
 
+    public function getHasMicrositeAttribute(): bool
+    {
+        return $this->microsite()->exists();
+    }
+
     protected static function booted()
     {
         parent::booted();
