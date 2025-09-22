@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use Agencetwogether\HooksHelper\HooksHelperPlugin;
 use App\Filament\Auth\CustomLogin;
+use App\Http\Middleware\RedirectToProperPanelMiddleware;
 use Asmit\ResizedColumn\ResizedColumnPlugin;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Enums\ThemeMode;
@@ -159,39 +160,40 @@ class AdminPanelProvider extends PanelProvider
             ->databaseNotifications()
 
             ->authMiddleware([
+                RedirectToProperPanelMiddleware::class,
                 Authenticate::class,
             ]);
     }
 
     public function boot(): void
     {
-        FilamentView::registerRenderHook(
-            'panels::topbar.after',
-            function (): string {
-                if (request()->routeIs('filament.admin.auth.*')) {
-                    return '';
-                }
-                // Use manually specified pages for tabs
-                $pages = $this->tabPages;
-                $tabs = [];
-                foreach ($pages as $pageClass) {
-                    if (!class_exists($pageClass) || !is_subclass_of($pageClass, \Filament\Pages\Page::class)) {
-                        continue;
-                    }
-                    $tabs[] = [
-                        'label' => method_exists($pageClass, 'getNavigationLabel') ? $pageClass::getNavigationLabel() : ($pageClass::$navigationLabel ?? $pageClass::$title ?? class_basename($pageClass)),
-                        'icon' => $pageClass::$navigationIcon ?? 'heroicon-o-document-text',
-                        'url' => $pageClass::getUrl(),
-                        'active' => request()->routeIs('filament.admin.pages.' . \Illuminate\Support\Str::kebab(class_basename($pageClass))),
-                    ];
-                }
+        // FilamentView::registerRenderHook(
+        //     'panels::topbar.after',
+        //     function (): string {
+        //         if (request()->routeIs('filament.admin.auth.*')) {
+        //             return '';
+        //         }
+        //         // Use manually specified pages for tabs
+        //         $pages = $this->tabPages;
+        //         $tabs = [];
+        //         foreach ($pages as $pageClass) {
+        //             if (!class_exists($pageClass) || !is_subclass_of($pageClass, \Filament\Pages\Page::class)) {
+        //                 continue;
+        //             }
+        //             $tabs[] = [
+        //                 'label' => method_exists($pageClass, 'getNavigationLabel') ? $pageClass::getNavigationLabel() : ($pageClass::$navigationLabel ?? $pageClass::$title ?? class_basename($pageClass)),
+        //                 'icon' => $pageClass::$navigationIcon ?? 'heroicon-o-document-text',
+        //                 'url' => $pageClass::getUrl(),
+        //                 'active' => request()->routeIs('filament.admin.pages.' . \Illuminate\Support\Str::kebab(class_basename($pageClass))),
+        //             ];
+        //         }
 
-                return Blade::render(
-                    'components.filament-header-tabs',
-                    ['tabs' => $tabs]
-                );
-            }
-        );
+        //         return Blade::render(
+        //             'components.filament-header-tabs',
+        //             ['tabs' => $tabs]
+        //         );
+        //     }
+        // );
         // MOBILE BOTTOM NAV HOOK
         FilamentView::registerRenderHook(
             'panels::body.end',

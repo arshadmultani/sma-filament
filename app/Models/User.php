@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Filament\Models\Contracts\FilamentUser;
+use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -101,8 +102,26 @@ class User extends Authenticatable implements FilamentUser
     public function canAccessPanel(Panel $panel): bool
     {
         return $this->is_active;
+
+    }
+    public function panelId(): string
+    {
+        $userRole = $this->roles->first()?->name;
+
+        return match ($userRole) {
+            'doctor' => 'doctor',
+            default => 'admin',
+        };
     }
 
+    public function panelRoute(): string
+    {
+        $userRole = $this->roles->first()?->name;
+        return match ($userRole) {
+            'doctor' => Dashboard::getUrl(panel: 'doctor'),
+            default => Dashboard::getUrl(panel: 'admin'),
+        };
+    }
     /**
      * The attributes that should be hidden for serialization.
      *

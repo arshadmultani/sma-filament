@@ -5,6 +5,8 @@ namespace App\Providers;
 use App\Models\User;
 use BezhanSalleh\FilamentShield\Commands;
 use BezhanSalleh\FilamentShield\FilamentShield;
+use Filament\Http\Responses\Auth\Contracts\LoginResponse;
+use Filament\Http\Responses\Auth\Contracts\LogoutResponse;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Carbon\CarbonImmutable;
@@ -39,12 +41,20 @@ use Laravel\Telescope\TelescopeServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
+
+    public $singletons = [
+        LoginResponse::class => \App\Http\Responses\LoginResponse::class,
+        LogoutResponse::class => \App\Http\Responses\LogoutResponse::class
+    ];
+
+
     /**
      * Register any application services.
      */
     public function register(): void
     {
         $this->registerTelescope();
+
 
     }
 

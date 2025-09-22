@@ -65,7 +65,10 @@
                 </div>
             </template>
         </div>
-        }
+    @else
+        <div>
+            Hi Doc!
+        </div>
     @endif
 
 </x-filament-panels::page>
