@@ -12,7 +12,7 @@ class SiteUrlAction
         return InfolistAction::make('Site')
             ->label('Visit Site')
             ->icon('heroicon-o-globe-alt')
-            ->url(fn($record) => url('/doctor/' . $record->url))
+            ->url(fn($record) => route('microsite.show', ['slug' => $record->url]))
             ->openUrlInNewTab();
     }
 
@@ -22,7 +22,7 @@ class SiteUrlAction
             ->label('Site')
             ->icon('heroicon-o-link')
             ->visible(fn($record) => $record->is_active)
-            ->url(fn($record) => url('/doctor/' . $record->url))
+            ->url(fn($record) => route('microsite.show', ['slug' => $record->url]))
             ->openUrlInNewTab();
     }
 }

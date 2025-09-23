@@ -9,7 +9,10 @@ class MicrositeController extends Controller
 {
     public function show($slug)
     {
-        $microsite = Microsite::where('url', $slug)->firstOrFail();
+        $microsite = Microsite::withoutGlobalScopes()
+            ->where('url', $slug)
+            ->with(['doctor' => fn($query) => $query->withoutGlobalScopes()])
+            ->firstOrFail();
 
         return view('microsite.show', compact('microsite'));
     }

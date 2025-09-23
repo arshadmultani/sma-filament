@@ -199,7 +199,7 @@ class AdminPanelProvider extends PanelProvider
             'panels::body.end',
             function (): string {
                 // Show the mobile nav on all Filament admin pages except auth pages
-                if (!request()->routeIs('filament.admin.auth.*')) {
+                if (!request()->routeIs('filament.admin.auth.*') && !auth()->user()->hasRole('doctor')) {
                     return Blade::render('filament.admin.mobile-bottom-nav');
                 }
 
