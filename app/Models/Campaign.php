@@ -85,6 +85,13 @@ class Campaign extends Model
             ->all();
     }
 
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true)
+            ->whereDate('start_date', '<=', now())
+            ->whereDate('end_date', '>=', now());
+    }
+
     /**
      * Scope to get campaigns by entry type and active status
      */

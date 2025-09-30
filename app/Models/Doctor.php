@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Observers\DoctorObserver;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Notifications\Notifiable;
-use App\Events\CustomerHeadquarterUpdated;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 
 /**
  * @property int $id
@@ -54,6 +55,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  *
  * @mixin \Eloquent
  */
+
+#[ObservedBy(DoctorObserver::class)]
 class Doctor extends BaseModel
 {
     use HasFactory, Notifiable;
@@ -193,19 +196,5 @@ class Doctor extends BaseModel
     public function getHasMicrositeAttribute(): bool
     {
         return $this->microsite()->exists();
-    }
-
-    protected static function booted()
-    {
-        parent::booted();
-        static::deleting(function ($doctor) {
-            $doctor->products()->detach();
-            $doctor->tags()->detach();
-        });
-        static::updated(function ($doctor) {
-            if ($doctor->isDirty('headquarter_id')) {
-                event(new CustomerHeadquarterUpdated($doctor, $doctor->headquarter_id));
-            }
-        });
     }
 }

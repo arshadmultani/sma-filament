@@ -357,6 +357,7 @@ class MicrositeResource extends Resource implements HasShieldPermissions
                                 VideoEntry::make('media_file_url')
                                     ->label('Review Video')
                                     ->muted()
+                                    ->visible(fn($record) => $record->doctor->reviews->isNotEmpty())
                                     ->disablePictureInPicture()
                                     ->controlsListNoDownload()
 

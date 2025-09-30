@@ -28,25 +28,14 @@ class CreateMicrosite extends CreateRecord
     {
         $doctor = Doctor::find($data['doctor_id']);
 
-        // if (!empty($data['profile_photo'])) {
-        //     $doctor->profile_photo = $data['profile_photo'];
-        //     $doctor->save();
-        // }
-        // unset($data['profile_photo']);
-
-
-        // Split into parts
         $parts = explode(' ', trim($doctor->name));
 
-        // Remove "Dr" or "Dr." prefix if present
         if (isset($parts[0]) && in_array(strtolower(trim($parts[0])), ['dr', 'dr.'])) {
-            array_shift($parts); // remove the prefix
+            array_shift($parts);
         }
 
-        // Slugify the remaining full name
         $slug = Str::slug(implode(' ', $parts));
 
-        // Generate unique URL
         do {
             $random = Str::lower(Str::random(5));
             $url = $slug . '-' . $random;

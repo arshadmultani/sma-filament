@@ -32,7 +32,10 @@ class Microsite extends Model implements IsCampaignEntry
     {
         return $this->belongsTo(MicrositeTemplate::class);
     }
-
+    public function getRouteKeyName()
+    {
+        return 'url';
+    }
     protected static function booted()
     {
         parent::booted();
