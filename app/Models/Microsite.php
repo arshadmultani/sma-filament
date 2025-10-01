@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\HasActivity;
 use App\Contracts\IsCampaignEntry;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Spatie\Activitylog\LogOptions;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Model;
@@ -31,6 +32,11 @@ class Microsite extends Model implements IsCampaignEntry
     public function template()
     {
         return $this->belongsTo(MicrositeTemplate::class);
+    }
+
+    public function reviews(): HasManyThrough
+    {
+        return $this->hasManyThrough(Review::class, Doctor::class, 'id', 'doctor_id', 'doctor_id', 'id');
     }
     public function getRouteKeyName()
     {

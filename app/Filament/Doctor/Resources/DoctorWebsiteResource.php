@@ -2,9 +2,9 @@
 
 namespace App\Filament\Doctor\Resources;
 
+use App\Filament\Doctor\Resources\DoctorWebsiteResource\RelationManagers\ReviewsRelationManager;
 use Exception;
 use Filament\Forms;
-use Filament\Infolists\Components\TextEntry;
 use Filament\Tables;
 use App\Models\Doctor;
 use Filament\Forms\Form;
@@ -15,21 +15,30 @@ use App\Models\Scopes\TeamScope;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Facades\Log;
 use Filament\Forms\Components\Radio;
+use App\Actions\Review\ApproveReview;
+use Illuminate\Support\Facades\Crypt;
 use Filament\Support\Enums\FontWeight;
 use App\Filament\Actions\SiteUrlAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Notifications\Notification;
 use App\Models\Scopes\TeamHierarchyScope;
 use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Actions\CreateAction;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\Placeholder;
+use Filament\Infolists\Components\Actions;
 use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\Actions\Action;
+use Filament\Infolists\Components\RepeatableEntry;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Doctor\Resources\DoctorWebsiteResource\Pages;
+use Filament\Infolists\Components\Actions\Action as infoaction;
 use App\Filament\Doctor\Resources\DoctorWebsiteResource\RelationManagers;
-use Illuminate\Support\Facades\Crypt;
 
 class DoctorWebsiteResource extends Resource
 {
@@ -170,20 +179,61 @@ class DoctorWebsiteResource extends Resource
                             ->weight(FontWeight::Bold)
                             ->getStateUsing(fn($record) => $record->is_active ? 'Active' : 'Inactive')
                             ->color(fn($record) => $record->is_active ? 'success' : 'danger'),
-                        TextEntry::make('reviews_count')
-                            ->label('Total Reviews')
-                            ->weight(FontWeight::Bold)
-                            ->getStateUsing(fn($record) => $record->reviews ?? 0),
-                    ])
+                        // TextEntry::make('reviews_count')
+                        //     ->label('Total Reviews')
+                        //     ->weight(FontWeight::Bold)
+                        //     ->getStateUsing(fn($record) => $record->reviews ?? 0),
+                        Actions::make([
+                            Action::make('ass')
+                                ->label('Approve Reviews')
+                                ->color('success')
+                                ->icon('heroicon-o-check-circle')
+                                ->action(function (Microsite $record) {
+                                    Notification::make()
+                                        ->success()
+                                        ->title('Reviews Approved')
+                                        ->body('All pending reviews have been approved successfully.')
+                                        ->send();
+                                })
+                        ])
+                    ]),
+                // Section::make('Reviews')
+                //     ->compact()
+                //     // ->collapsible()
+                //     ->schema([
+                //         RepeatableEntry::make('doctor.reviews')
+                //             ->label('')
+                //             ->columns(3)
+                //             ->schema([
+                //                 TextEntry::make('reviewer_name')
+                //                     ->label('Patient Name')
+                //                     ->weight(FontWeight::Bold),
+                //                 // TextEntry::make('review_text')
+                //                 //     ->label('Review Text'),
+                //                 // TextEntry::make('created_at')
+                //                 //     ->label('Date')
+                //                 //     ->date('M d, Y'),
+                //                 IconEntry::make('is_verified')
+                //                     ->label('Review Verified')
+                //                     ->boolean(),
+
+
+                //             ]),
+                //     ]),
             ]);
     }
-
+    public static function getRelations(): array
+    {
+        return [
+            ReviewsRelationManager::class,
+        ];
+    }
     public static function getPages(): array
     {
         return [
             'index' => Pages\ListDoctorWebsites::route('/'),
             'create' => Pages\CreateDoctorWebsite::route('/create'),
-            'edit' => Pages\EditDoctorWebsite::route('/{record:url}/edit'),
+            'edit' => Pages\EditDoctorWebsite::route('/{record}/edit'),
             'view' => Pages\ViewDoctorWebsite::route('/{record}'),
         ];
     }
