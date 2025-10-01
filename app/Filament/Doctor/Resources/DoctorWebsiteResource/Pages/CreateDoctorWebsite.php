@@ -46,6 +46,7 @@ class CreateDoctorWebsite extends CreateRecord
         $doctor = DoctorWebsiteResource::currentDoctor();
 
         unset($data['profile_photo']);
+        unset($data['practice_since']);
 
 
         $parts = explode(' ', trim($doctor->name));
@@ -85,6 +86,11 @@ class CreateDoctorWebsite extends CreateRecord
             $doctor->profile_photo = $formData['profile_photo'];
             $doctor->save();
         }
+        if (isset($formData['practice_since']) && $doctor) {
+            $doctor->practice_since = $formData['practice_since'];
+            $doctor->save();
+        }
+
 
         if ($this->campaign) {
             $this->record->campaignEntry()->create([

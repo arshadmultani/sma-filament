@@ -2,7 +2,6 @@
 
 namespace App\Filament\Doctor\Resources;
 
-use App\Filament\Doctor\Resources\DoctorWebsiteResource\RelationManagers\ReviewsRelationManager;
 use Exception;
 use Filament\Forms;
 use Filament\Tables;
@@ -16,6 +15,7 @@ use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Facades\Log;
+use App\Forms\Components\YearSelect;
 use Filament\Forms\Components\Radio;
 use App\Actions\Review\ApproveReview;
 use Illuminate\Support\Facades\Crypt;
@@ -23,6 +23,7 @@ use Filament\Support\Enums\FontWeight;
 use App\Filament\Actions\SiteUrlAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use App\Models\Scopes\TeamHierarchyScope;
 use Filament\Forms\Components\FileUpload;
@@ -33,12 +34,14 @@ use Filament\Infolists\Components\Actions;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
+use App\Filament\Actions\DynamicFieldEditAction;
 use Filament\Infolists\Components\Actions\Action;
 use Filament\Infolists\Components\RepeatableEntry;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Doctor\Resources\DoctorWebsiteResource\Pages;
 use Filament\Infolists\Components\Actions\Action as infoaction;
 use App\Filament\Doctor\Resources\DoctorWebsiteResource\RelationManagers;
+use App\Filament\Doctor\Resources\DoctorWebsiteResource\RelationManagers\ReviewsRelationManager;
 
 class DoctorWebsiteResource extends Resource
 {
@@ -95,14 +98,17 @@ class DoctorWebsiteResource extends Resource
                 FileUpload::make('profile_photo')
                     ->label('Upload New Profile Photo')
                     ->visible(fn($get, $context) => $get('change_photo') === 'yes' || $context === 'edit')
-                    // ->dehydrated(false)
                     ->visibility('private')
                     ->disk('s3')
                     ->directory('doctors/profile_photos')
                     ->maxSize(2048)
                     ->helperText('Upload a profile photo for the doctor.'),
 
-
+                YearSelect::make('practice_since')
+                    ->label('Practicing Since')
+                    ->placeholder('Select Year')
+                    ->hidden(filled($doctor->practice_since))
+                    ->required(fn() => empty($doctor->practice_since)),
 
             ]);
     }
@@ -183,20 +189,24 @@ class DoctorWebsiteResource extends Resource
                         //     ->label('Total Reviews')
                         //     ->weight(FontWeight::Bold)
                         //     ->getStateUsing(fn($record) => $record->reviews ?? 0),
-                        Actions::make([
-                            Action::make('ass')
-                                ->label('Approve Reviews')
-                                ->color('success')
-                                ->icon('heroicon-o-check-circle')
-                                ->action(function (Microsite $record) {
-                                    Notification::make()
-                                        ->success()
-                                        ->title('Reviews Approved')
-                                        ->body('All pending reviews have been approved successfully.')
-                                        ->send();
-                                })
-                        ])
+
                     ]),
+                Section::make('Your Information')
+                    ->compact()
+                    ->collapsible()
+                    ->columns(4)
+                    ->schema([
+                        TextEntry::make('doctor.practice_since')
+                            ->label('Practicing Since')
+                            ->weight(FontWeight::Bold)
+                            ->date('Y')
+                            ->prefixAction(self::getEditPracticeSinceAction()),
+                        TextEntry::make('doctor.phone')
+                            ->label('Phone Number')
+                            ->prefixAction(self::getEditPhoneNumberAction()),
+
+
+                    ])
                 // Section::make('Reviews')
                 //     ->compact()
                 //     // ->collapsible()
@@ -236,5 +246,84 @@ class DoctorWebsiteResource extends Resource
             'edit' => Pages\EditDoctorWebsite::route('/{record}/edit'),
             'view' => Pages\ViewDoctorWebsite::route('/{record}'),
         ];
+    }
+
+    private static function getEditPracticeSinceAction(): Action
+    {
+        return Action::make('edit-practice-since')
+            ->color('primary')
+            ->icon('heroicon-o-pencil')
+            ->modalWidth('sm')
+            ->form([
+                YearSelect::make('practice_since')
+                    ->label('Practicing Since')
+                    ->placeholder('Select Year')
+                    ->required(),
+            ])
+            ->action(function (array $data, Microsite $record) {
+                try {
+                    DoctorWebsiteResource::currentDoctor()->update([
+                        'practice_since' => $data['practice_since'],
+                    ]);
+                    Notification::make()
+                        ->title('Practice Since updated successfully.')
+                        ->success()
+                        ->send();
+                    redirect(request()->header('Referer'));
+
+                } catch (Exception $e) {
+                    // Log the exception for debugging
+                    Log::error('Failed to update practice since: ' . $e->getMessage());
+
+                    // Notify the user that something went wrong
+                    Notification::make()
+                        ->title('Update failed')
+                        ->body('Something went wrong. Please try again.')
+                        ->danger()
+                        ->send();
+                }
+            });
+    }
+
+    private static function getEditPhoneNumberAction(): Action
+    {
+        return Action::make('edit-phone-number')
+            ->color('primary')
+            ->icon('heroicon-o-pencil')
+            ->modalWidth('sm')
+            ->form([
+                TextInput::make('phone')
+                    ->label('Phone Number')
+                    ->maxLength(10)
+                    ->minLength(10)
+                    ->tel()
+                    ->telRegex('/^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\.\/0-9]*$/')
+                    ->required()
+                    ->prefix('+91')
+                    ->placeholder('10 digit phone number'),
+            ])
+            ->action(function (array $data, Microsite $record) {
+                try {
+                    DoctorWebsiteResource::currentDoctor()->update([
+                        'phone' => $data['phone'],
+                    ]);
+                    Notification::make()
+                        ->title('Phone Number updated successfully.')
+                        ->success()
+                        ->send();
+                    redirect(request()->header('Referer'));
+
+                } catch (Exception $e) {
+                    // Log the exception for debugging
+                    Log::error('Failed to update phone number: ' . $e->getMessage());
+
+                    // Notify the user that something went wrong
+                    Notification::make()
+                        ->title('Update failed')
+                        ->body('Something went wrong. Please try again.')
+                        ->danger()
+                        ->send();
+                }
+            });
     }
 }

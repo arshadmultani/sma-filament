@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 
 /**
+ * 
+ *
  * @property int $id
  * @property string $name
  * @property string $email
@@ -32,7 +34,6 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
  * @property-read int|null $kofol_entries_count
  * @property-read \App\Models\Qualification|null $qualification
  * @property-read \App\Models\User|null $user
- *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Doctor newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Doctor newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Doctor query()
@@ -52,7 +53,34 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Doctor whereType($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Doctor whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Doctor whereUserId($value)
- *
+ * @property int|null $specialty_id
+ * @property \Carbon\CarbonImmutable|null $practice_since
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CampaignEntry> $campaignEntries
+ * @property-read int|null $campaign_entries_count
+ * @property-read bool $has_microsite
+ * @property-read bool $has_profile_photo
+ * @property-read mixed $headquarter_name
+ * @property-read mixed $profile_photo_url
+ * @property-read \App\Models\User|null $loginAccount
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Merit> $merits
+ * @property-read int|null $merits_count
+ * @property-read \App\Models\Microsite|null $microsite
+ * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
+ * @property-read int|null $notifications_count
+ * @property-read \App\Models\PanelAccessRequest|null $panelAccessRequest
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Product> $products
+ * @property-read int|null $products_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Review> $reviews
+ * @property-read int|null $reviews_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Showcase> $showcases
+ * @property-read int|null $showcases_count
+ * @property-read \App\Models\Specialty|null $specialty
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Tag> $tags
+ * @property-read int|null $tags_count
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Doctor approved()
+ * @method static \Database\Factories\DoctorFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Doctor wherePracticeSince($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Doctor whereSpecialtyId($value)
  * @mixin \Eloquent
  */
 
