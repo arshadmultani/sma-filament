@@ -186,7 +186,7 @@ class MicrositeResource extends Resource implements HasShieldPermissions
                             ->visibility('private')
                             ->maxSize(10240) //TODO - make it configurable
                             ->maxFiles(1)
-                            ->directory('microsite/doctor_showcases')
+                            ->directory('microsite/showcases')
                             ->label('Upload Video')
                             ->acceptedFileTypes(['video/mp4', 'video/x-m4v'])
                             ->helperText('Upload Doctor\'s introduction video, it will be used in the website.')

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Doctor\Resources;
 
+use App\Filament\Doctor\Resources\DoctorWebsiteResource\RelationManagers\ShowcasesRelationManager;
 use Exception;
 use Filament\Forms;
 use Filament\Tables;
@@ -32,8 +33,10 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\Placeholder;
 use Filament\Infolists\Components\Actions;
 use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\Fieldset;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\ImageEntry;
 use App\Filament\Actions\DynamicFieldEditAction;
 use Filament\Infolists\Components\Actions\Action;
 use Filament\Infolists\Components\RepeatableEntry;
@@ -175,13 +178,13 @@ class DoctorWebsiteResource extends Resource
     {
         return $infolist
             ->schema([
-                Section::make('Website Stats')
+                Section::make('Website Status')
                     ->compact()
                     ->collapsible()
                     ->columns(4)
                     ->schema([
                         TextEntry::make('is_active')
-                            ->label('Status')
+                            ->label('Site')
                             ->weight(FontWeight::Bold)
                             ->getStateUsing(fn($record) => $record->is_active ? 'Active' : 'Inactive')
                             ->color(fn($record) => $record->is_active ? 'success' : 'danger'),
@@ -191,51 +194,40 @@ class DoctorWebsiteResource extends Resource
                         //     ->getStateUsing(fn($record) => $record->reviews ?? 0),
 
                     ]),
-                Section::make('Your Information')
+                Section::make('Personal Information')
                     ->compact()
                     ->collapsible()
                     ->columns(4)
                     ->schema([
-                        TextEntry::make('doctor.practice_since')
-                            ->label('Practicing Since')
-                            ->weight(FontWeight::Bold)
-                            ->date('Y')
-                            ->prefixAction(self::getEditPracticeSinceAction()),
+                        TextEntry::make('doctor.email')
+                            ->label('Email Address'),
                         TextEntry::make('doctor.phone')
                             ->label('Phone Number')
                             ->prefixAction(self::getEditPhoneNumberAction()),
+                        TextEntry::make('doctor.practice_since')
+                            ->label('Practicing Since')
+                            ->date('Y')
+                            ->prefixAction(self::getEditPracticeSinceAction()),
+                        TextEntry::make('doctor.qualification.name')
+                            ->label('Qualification'),
+                        ImageEntry::make('doctor.profile_photo')
+                            ->label('Profile Photo')
+                            ->circular()
+                            ->helperText(fn() => self::currentDoctor()?->profile_photo ? 'Current profile photo' : 'No profile photo set')
+                            ->disk('s3')
+                            ->visibility('private')
+                            ->action(self::getEditProfilePhotoAction()),
+                        Actions::make([self::getEditProfilePhotoAction()])
 
 
                     ])
-                // Section::make('Reviews')
-                //     ->compact()
-                //     // ->collapsible()
-                //     ->schema([
-                //         RepeatableEntry::make('doctor.reviews')
-                //             ->label('')
-                //             ->columns(3)
-                //             ->schema([
-                //                 TextEntry::make('reviewer_name')
-                //                     ->label('Patient Name')
-                //                     ->weight(FontWeight::Bold),
-                //                 // TextEntry::make('review_text')
-                //                 //     ->label('Review Text'),
-                //                 // TextEntry::make('created_at')
-                //                 //     ->label('Date')
-                //                 //     ->date('M d, Y'),
-                //                 IconEntry::make('is_verified')
-                //                     ->label('Review Verified')
-                //                     ->boolean(),
-
-
-                //             ]),
-                //     ]),
             ]);
     }
     public static function getRelations(): array
     {
         return [
             ReviewsRelationManager::class,
+            ShowcasesRelationManager::class
         ];
     }
     public static function getPages(): array
@@ -250,48 +242,25 @@ class DoctorWebsiteResource extends Resource
 
     private static function getEditPracticeSinceAction(): Action
     {
-        return Action::make('edit-practice-since')
-            ->color('primary')
-            ->icon('heroicon-o-pencil')
-            ->modalWidth('sm')
-            ->form([
+        return self::createEditAction(
+            'edit-practice-since',
+            'practice_since',
+            [
                 YearSelect::make('practice_since')
                     ->label('Practicing Since')
                     ->placeholder('Select Year')
                     ->required(),
-            ])
-            ->action(function (array $data, Microsite $record) {
-                try {
-                    DoctorWebsiteResource::currentDoctor()->update([
-                        'practice_since' => $data['practice_since'],
-                    ]);
-                    Notification::make()
-                        ->title('Practice Since updated successfully.')
-                        ->success()
-                        ->send();
-                    redirect(request()->header('Referer'));
-
-                } catch (Exception $e) {
-                    // Log the exception for debugging
-                    Log::error('Failed to update practice since: ' . $e->getMessage());
-
-                    // Notify the user that something went wrong
-                    Notification::make()
-                        ->title('Update failed')
-                        ->body('Something went wrong. Please try again.')
-                        ->danger()
-                        ->send();
-                }
-            });
+            ],
+            fieldLabel: 'Practice Since'
+        );
     }
 
     private static function getEditPhoneNumberAction(): Action
     {
-        return Action::make('edit-phone-number')
-            ->color('primary')
-            ->icon('heroicon-o-pencil')
-            ->modalWidth('sm')
-            ->form([
+        return self::createEditAction(
+            'edit-phone-number',
+            'phone',
+            [
                 TextInput::make('phone')
                     ->label('Phone Number')
                     ->maxLength(10)
@@ -301,23 +270,55 @@ class DoctorWebsiteResource extends Resource
                     ->required()
                     ->prefix('+91')
                     ->placeholder('10 digit phone number'),
-            ])
-            ->action(function (array $data, Microsite $record) {
+            ],
+            fieldLabel: 'Phone Number'
+        )->modalDescription('This phone number will be displayed on your website.');
+    }
+
+
+    private static function getEditProfilePhotoAction(): Action
+    {
+        return self::createEditAction(
+            'edit-profile-photo',
+            'profile_photo',
+            [
+                FileUpload::make('profile_photo')
+                    ->label('Profile Photo')
+                    ->disk('s3')
+                    ->visibility('private')
+                    ->image()
+                    ->directory('doctors/profile_photos')
+                    ->maxSize(2048)
+                    ->required(),
+            ],
+            'Profile Photo'
+        )
+            ->label('Set Profile Photo')
+            ->outlined();
+    }
+
+    private static function createEditAction(string $name, string $field, array $formSchema, string $fieldLabel): Action
+    {
+        return Action::make($name)
+            ->color('primary')
+            ->icon('heroicon-o-pencil')
+            ->modalWidth('sm')
+            ->form($formSchema)
+            ->action(function (array $data) use ($field, $fieldLabel) {
                 try {
-                    DoctorWebsiteResource::currentDoctor()->update([
-                        'phone' => $data['phone'],
+                    self::currentDoctor()->update([
+                        $field => $data[$field],
                     ]);
                     Notification::make()
-                        ->title('Phone Number updated successfully.')
+                        ->title("{$fieldLabel} updated successfully.")
                         ->success()
                         ->send();
+
                     redirect(request()->header('Referer'));
 
                 } catch (Exception $e) {
-                    // Log the exception for debugging
-                    Log::error('Failed to update phone number: ' . $e->getMessage());
+                    Log::error("Failed to update {$fieldLabel}: " . $e->getMessage());
 
-                    // Notify the user that something went wrong
                     Notification::make()
                         ->title('Update failed')
                         ->body('Something went wrong. Please try again.')

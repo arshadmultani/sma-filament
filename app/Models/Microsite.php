@@ -38,6 +38,11 @@ class Microsite extends Model implements IsCampaignEntry
     {
         return $this->hasManyThrough(Review::class, Doctor::class, 'id', 'doctor_id', 'doctor_id', 'id');
     }
+
+    public function showcases(): HasManyThrough
+    {
+        return $this->hasManyThrough(Showcase::class, Doctor::class, 'id', 'doctor_id', 'doctor_id', 'id');
+    }
     public function getRouteKeyName()
     {
         return 'url';
