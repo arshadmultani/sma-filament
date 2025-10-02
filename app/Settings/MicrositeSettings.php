@@ -12,6 +12,7 @@ class MicrositeSettings extends Settings
     public int $max_review_video_size;
     public int $max_review_image_size;
     public int $review_count;
+    public array $panel_access_reasons;
 
     public static function group(): string
     {

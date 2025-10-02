@@ -3,10 +3,11 @@
 namespace App\Filament\Clusters\ActivitySettings\Pages;
 
 use Filament\Forms;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Pages\SettingsPage;
 use App\Settings\MicrositeSettings;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\TextInput;
 use App\Filament\Clusters\ActivitySettings;
 
@@ -109,6 +110,20 @@ class ManageMicrosite extends SettingsPage
                             ->minValue(1)
                             ->maxValue(50),
 
+                    ]),
+                Section::make('Portal Request Settings')
+                    ->columns(1)
+                    ->schema([
+                        KeyValue::make('panel_access_reasons')
+                            ->label('Portal Request Reasons')
+                            ->addActionLabel('Add Reason')
+                            ->keyLabel('Reason Key')
+                            ->valueLabel('Reason Description')
+                            ->helperText('Define reasons for panel access. E.g: interest_shown => Doctor has shown interest')
+                            ->disableAddingRows(false)
+                            ->disableEditingKeys(false)
+                            ->disableDeletingRows(true)
+                            ->rules(['array', 'min:1', 'max:10'])
                     ])
 
             ]);

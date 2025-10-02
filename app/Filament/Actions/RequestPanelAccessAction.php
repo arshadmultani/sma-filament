@@ -13,6 +13,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Support\View\Components\Modal;
+use App\Settings\MicrositeSettings;
 
 
 
@@ -33,13 +34,7 @@ class RequestPanelAccessAction
                     ->required()
                     ->native(false)
                     ->placeholder('Select Reason')
-                    ->options(([
-                        'interest_shown' => 'Doctor has shown interest',
-                        'high_volume_patients' => 'Doctor has high patient volume',
-                        'speicalist_doctor' => 'Specialist Doctor',
-                        'other' => 'Other',
-
-                    ])),
+                    ->options((new MicrositeSettings())->panel_access_reasons),
                 Textarea::make('justification')
                     ->label('Remark(optional)')
                     ->autosize()

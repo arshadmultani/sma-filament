@@ -110,8 +110,8 @@ class DoctorWebsiteResource extends Resource
                 YearSelect::make('practice_since')
                     ->label('Practicing Since')
                     ->placeholder('Select Year')
-                    ->hidden(filled($doctor->practice_since))
-                    ->required(fn() => empty($doctor->practice_since)),
+                    ->hidden(filled($doctor?->practice_since))
+                    ->required(fn() => empty($doctor?->practice_since)),
 
             ]);
     }
