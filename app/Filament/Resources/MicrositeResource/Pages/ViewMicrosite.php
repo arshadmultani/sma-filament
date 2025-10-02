@@ -39,10 +39,9 @@ class ViewMicrosite extends ViewRecord
                 ->url(route('filament.admin.resources.microsites.edit', $this->record))
                 ->color('primary'),
 
-            SiteUrlAction::makeInfolist()->color('primary'),
+            SiteUrlAction::make()->color('primary'),
 
-            DownloadQrAction::makeInfolist()
-                ->visible(fn($record) => $record->is_active && $record->state->isFinalized)
+            DownloadQrAction::make()
                 ->color('primary'),
 
             Action::make('activate')

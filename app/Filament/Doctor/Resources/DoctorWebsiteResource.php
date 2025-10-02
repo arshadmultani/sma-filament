@@ -2,7 +2,6 @@
 
 namespace App\Filament\Doctor\Resources;
 
-use App\Filament\Doctor\Resources\DoctorWebsiteResource\RelationManagers\ShowcasesRelationManager;
 use Exception;
 use Filament\Forms;
 use Filament\Tables;
@@ -30,6 +29,7 @@ use App\Models\Scopes\TeamHierarchyScope;
 use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Actions\CreateAction;
 use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Actions\DownloadQrAction;
 use Filament\Forms\Components\Placeholder;
 use Filament\Infolists\Components\Actions;
 use Filament\Infolists\Components\Section;
@@ -45,6 +45,7 @@ use App\Filament\Doctor\Resources\DoctorWebsiteResource\Pages;
 use Filament\Infolists\Components\Actions\Action as infoaction;
 use App\Filament\Doctor\Resources\DoctorWebsiteResource\RelationManagers;
 use App\Filament\Doctor\Resources\DoctorWebsiteResource\RelationManagers\ReviewsRelationManager;
+use App\Filament\Doctor\Resources\DoctorWebsiteResource\RelationManagers\ShowcasesRelationManager;
 
 class DoctorWebsiteResource extends Resource
 {
@@ -188,6 +189,14 @@ class DoctorWebsiteResource extends Resource
                             ->weight(FontWeight::Bold)
                             ->getStateUsing(fn($record) => $record->is_active ? 'Active' : 'Inactive')
                             ->color(fn($record) => $record->is_active ? 'success' : 'danger'),
+                        Actions::make([
+                            SiteUrlAction::makeAction()
+                                ->label('Visit Site')
+                                ->outlined(),
+                            DownloadQrAction::makeInfolist()
+                                ->outlined()
+
+                        ])
                         // TextEntry::make('reviews_count')
                         //     ->label('Total Reviews')
                         //     ->weight(FontWeight::Bold)
