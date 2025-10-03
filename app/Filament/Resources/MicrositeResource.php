@@ -354,12 +354,13 @@ class MicrositeResource extends Resource implements HasShieldPermissions
                                     ->label('Doctor Approval')
                                     ->badge()
                                     ->color(fn($record) => $record->state->color),
-                                VideoEntry::make('media_file_url')
-                                    ->label('Review Video')
-                                    ->muted()
-                                    ->visible(fn($record) => $record->doctor->reviews->isNotEmpty())
-                                    ->disablePictureInPicture()
-                                    ->controlsListNoDownload()
+                                //TODO:add review relation manager
+                                // VideoEntry::make('media_file_url')
+                                //     ->label('Review Video')
+                                //     ->muted()
+                                //     ->visible(fn($record) => $record->doctor->reviews?->isNotEmpty())
+                                //     ->disablePictureInPicture()
+                                //     ->controlsListNoDownload()
 
                             ]),
 

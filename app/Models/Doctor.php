@@ -160,6 +160,13 @@ class Doctor extends BaseModel
         return $this->belongsTo(Specialty::class);
     }
 
+    public function experienceYears(): int|null
+    {
+        return $this->practice_since
+            ? max(1, $this->practice_since->diffInYears(now()))
+            : null;
+    }
+
     public function isApproved(): bool
     {
         return $this->status === 'Approved';

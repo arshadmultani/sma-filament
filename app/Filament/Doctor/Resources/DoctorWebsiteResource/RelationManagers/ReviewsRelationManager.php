@@ -145,7 +145,7 @@ class ReviewsRelationManager extends RelationManager
                         $data['doctor_id'] = auth()->user()->userable_id;
                         $data['is_verified'] = false;
                         $data['state_id'] = State::pending()->first()->id;
-                        $data['submitted_by'] = auth()->user()->name;
+
 
                         if (isset($data['media_url'])) {
                             $mimeType = Storage::mimeType($data['media_url']);
