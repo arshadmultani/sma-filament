@@ -10,4 +10,8 @@ class ListDoctorWebsites extends ListRecords
 {
     protected static string $resource = DoctorWebsiteResource::class;
 
+    public function getTitle(): string|\Illuminate\Contracts\Support\Htmlable
+    {
+        return 'Website';
+    }
 }
