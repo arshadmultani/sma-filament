@@ -40,21 +40,21 @@ class State extends Model
     public function isFinalized(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->category === StateCategory::FINALIZED,
+            get: fn() => $this->category === StateCategory::FINALIZED,
         );
     }
 
     public function isPending(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->category === StateCategory::PENDING,
+            get: fn() => $this->category === StateCategory::PENDING,
         );
     }
 
     public function isCancelled(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->category === StateCategory::CANCELLED,
+            get: fn() => $this->category === StateCategory::CANCELLED,
         );
     }
 

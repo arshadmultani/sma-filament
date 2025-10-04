@@ -1,50 +1,34 @@
 <?php
 
-namespace App\Filament\Doctor\Resources\DoctorWebsiteResource\RelationManagers;
+namespace App\Filament\Resources\MicrositeResource\RelationManagers;
 
 use Filament\Forms;
-use Filament\Infolists\Components\IconEntry;
 use Filament\Tables;
 use App\Models\State;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
-use Filament\Infolists\Infolist;
 use App\Settings\MicrositeSettings;
-use Filament\Forms\Components\Radio;
-use App\Actions\Review\ApproveReview;
-use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Textarea;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ViewAction;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Support\Facades\Storage;
-use App\Infolists\Components\VideoEntry;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
-use Filament\Tables\Actions\ActionGroup;
 use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\DeleteAction;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Infolists\Components\Actions;
-use Filament\Forms\Components\ToggleButtons;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Components\ImageEntry;
-use App\Filament\Actions\Reviews\RejectReview;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Filament\Doctor\Resources\DoctorWebsiteResource;
 use Filament\Resources\RelationManagers\RelationManager;
-use App\Filament\Actions\Reviews\ApproveReview as ApproveReviewAction;
 
 class ReviewsRelationManager extends RelationManager
 {
     protected static string $relationship = 'reviews';
+
     public function isReadOnly(): bool
     {
         return false;
     }
+
 
     public function form(Form $form): Form
     {
@@ -100,16 +84,10 @@ class ReviewsRelationManager extends RelationManager
                         }
                     ])
                     ->helperText(fn() => "Upload a video (max " . (app(MicrositeSettings::class)->max_showcase_video_size / 1024) . "MB) or image (max " . (app(MicrositeSettings::class)->max_showcase_image_size / 1024) . "MB). Supported formats: JPG, PNG, MP4, MOV, AVI"),
-                ToggleButtons::make('is_verified')
-                    ->label('Do you want to show this review on your website?')
-                    ->boolean()
-                    ->inline()
-                    ->required()
-                    ->grouped(),
+
 
             ]);
     }
-
     public function table(Table $table): Table
     {
         return $table
@@ -124,9 +102,6 @@ class ReviewsRelationManager extends RelationManager
                 TextColumn::make('reviewer_name')
                     ->label('Reviewer')
                     ->limit(15),
-                IconColumn::make('is_verified')
-                    ->label('Verfication'),
-
             ])
             ->filters([
                 //
@@ -136,9 +111,10 @@ class ReviewsRelationManager extends RelationManager
                     ->outlined()
                     ->icon('heroicon-o-plus')
                     ->label('New Review')
+                    ->modalDescription('Add at least one of the following: review text or upload file. Do not leave both empty.')
                     ->createAnother(false)
-                    ->before(function (CreateAction $action, array $data) {
-                        $doctor = DoctorWebsiteResource::currentDoctor();
+                    ->before(function (CreateAction $action, array $data, RelationManager $livewire) {
+                        $doctor = $livewire->getOwnerRecord()->doctor;
                         if ($doctor->reviews()->count() >= app(MicrositeSettings::class)->review_count) {
                             Notification::make()
                                 ->title('You can only add up to ' . app(MicrositeSettings::class)->review_count . ' reviews.')
@@ -154,9 +130,12 @@ class ReviewsRelationManager extends RelationManager
                             $action->halt();
                         }
                     })
-                    ->mutateFormDataUsing(function (array $data) {
-                        $data['doctor_id'] = auth()->user()->userable_id;
-                        $data['is_verified'] = $data['is_verified'] ?? null;
+                    ->mutateFormDataUsing(function (array $data, RelationManager $livewire) {
+                        $doctor = $livewire->getOwnerRecord()->doctor;
+
+                        $data['doctor_id'] = $doctor->id;
+                        $data['submitted_by_name'] = auth()->user()->name;
+                        $data['is_verified'] = false;
                         $data['state_id'] = State::pending()->first()->id;
 
 
@@ -172,62 +151,16 @@ class ReviewsRelationManager extends RelationManager
                     }),
             ])
             ->actions([
-                ActionGroup::make([
-                    ViewAction::make()
-                        ->color('primary')
-                        ->modalHeading(fn($record) => 'Patient: ' . $record->reviewer_name),
-                    ApproveReviewAction::makeTable()
-                        ->visible(fn($record) => !$record->is_verified),
-                    RejectReview::makeTable(),
-                    EditAction::make()
-                        ->color('primary')
-                        ->modalHeading(fn($record) => 'Patient: ' . $record->reviewer_name),
-                    DeleteAction::make()
-                ]),
+                Tables\Actions\EditAction::make()
+                    ->visible(auth()->user()->can('view_user')),
+                Tables\Actions\DeleteAction::make()
+                    ->visible(auth()->user()->can('view_user')),
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
+                    // Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
-    }
-
-    public function infolist(Infolist $infolist): Infolist
-    {
-        return $infolist
-            ->schema([
-                TextEntry::make('submitted_by_name')
-                    ->label('Submitted By')
-                    ->visible(fn($record) => $record->submitted_by_name),
-                TextEntry::make('review_text')
-                    ->label('Review Text')
-                    ->visible(fn($record) => $record->review_text),
-                IconEntry::make('is_verified')
-                    ->label('Verified')
-                    ->boolean(),
-                TextEntry::make('verified_at')
-                    ->label('Verified At')
-                    ->since()
-                    ->visible(fn($record) => $record->is_verified),
-                TextEntry::make('media_type')
-                    ->label('Media Type')
-                    ->badge(),
-                TextEntry::make('state.name')
-                    ->label('Status')
-                    ->badge()
-                    ->color(fn($record) => $record->state->color),
-                TextEntry::make('created_at')
-                    ->label('Upload')
-                    ->since(),
-                // Conditional media display based on type
-                ImageEntry::make('media_file_url')
-                    ->label('Media')
-                    ->visible(fn($record) => $record->media_type === 'image')
-                    ->height(200),
-                VideoEntry::make('media_file_url')
-                    ->label('Media')
-                    ->visible(fn($record) => $record->media_type === 'video')
-                    ->controls()
-                    ->controlsListNoDownload(),
             ]);
     }
 }

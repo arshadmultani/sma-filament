@@ -81,7 +81,7 @@ class DoctorWebsiteResource extends Resource
                     ->schema([
                         Placeholder::make('profile')
                             ->label('')
-                            ->helperText('Current profile photo')
+                            ->helperText(fn() => $doctor?->profile_photo ? 'Current profile photo' : 'No profile photo set')
                             ->columns(2)
                             ->content(function () use ($doctor): HtmlString {
                                 return new HtmlString(("<img src='" . $doctor->profile_photo_url . "'>"));
@@ -194,8 +194,7 @@ class DoctorWebsiteResource extends Resource
                                 ->label('Visit Site')
                                 ->outlined(),
                             DownloadQrAction::makeInfolist()
-                                ->outlined()
-
+                                ->outlined(),
                         ])
                         // TextEntry::make('reviews_count')
                         //     ->label('Total Reviews')
