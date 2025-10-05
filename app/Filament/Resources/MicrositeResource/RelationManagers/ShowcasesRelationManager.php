@@ -6,11 +6,13 @@ use Filament\Forms;
 use Filament\Tables;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Filament\Infolists\Infolist;
 use App\Settings\MicrositeSettings;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Support\Facades\Storage;
+use App\Infolists\Components\VideoEntry;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Tables\Actions\ActionGroup;
@@ -18,6 +20,8 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\DeleteAction;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\ImageEntry;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Resources\RelationManagers\RelationManager;
 
@@ -137,8 +141,11 @@ class ShowcasesRelationManager extends RelationManager
                     ViewAction::make()
                         ->modalHeading(fn($record) => $record->title),
                     EditAction::make()
-                        ->modalHeading(fn($record) => $record->title),
+                        ->modalHeading(fn($record) => $record->title)
+                        ->visible(auth()->user()->can('view_user')),
                     DeleteAction::make()
+                        ->visible(auth()->user()->can('view_user')),
+
                 ]),
 
             ])
@@ -148,5 +155,31 @@ class ShowcasesRelationManager extends RelationManager
                 ]),
             ]);
     }
+
+    public function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                TextEntry::make('media_type')
+                    ->label('Media Type')
+                    ->badge(),
+                TextEntry::make('created_at')
+                    ->label('Upload')
+                    ->since(),
+                // Conditional media display based on type
+                ImageEntry::make('media_file_url')
+                    ->label('Media')
+                    ->visible(fn($record) => $record->media_type === 'image')
+                    ->height(200),
+                VideoEntry::make('media_file_url')
+                    ->label('Media')
+                    ->visible(fn($record) => $record->media_type === 'video')
+                    ->controls()
+                    ->controlsListNoDownload(),
+
+
+            ]);
+    }
+
 
 }

@@ -161,93 +161,6 @@ class MicrositeResource extends Resource implements HasShieldPermissions
                     ->required(fn($get) => $get('has_profile_photo') === 'yes')
                     ->visible(fn($get) => $get('has_profile_photo') === 'yes')
                     ->helperText('Upload a profile photo for the doctor.'),
-
-                // Radio::make('has_any_showcase')
-                //     ->label('Add Promotional/Introduction Video')
-                //     ->helperText('Select Yes if you want to add a video of the Doctor\'s introduction/information.')
-                //     ->required()
-                //     ->reactive()
-                //     ->dehydrated(false)
-                //     ->inline()
-                //     ->inlineLabel(false)
-                //     ->options([
-                //         'yes' => 'Yes',
-                //         'no' => 'No',
-                //     ]),
-                // Repeater::make('showcases_data')
-                //     ->columnSpanFull()
-                //     ->collapsible()
-                //     ->visible(fn($get, $context) => $get('has_any_showcase') === 'yes' || $context === 'edit')
-                //     ->required(fn($get) => $get('has_any_showcase') === 'yes')
-                //     ->label('Doctor\'s Video')
-                //     ->deletable(false)
-                //     ->maxItems(1)
-                //     ->schema([
-                //         // Forms\Components\TextInput::make('title')
-                //         //     ->label('Title')
-                //         //     ->required(),
-                //         // Forms\Components\Textarea::make('description')
-                //         //     ->label('Description')
-                //         //     ->rows(3),
-                //         FileUpload::make('media_url')
-                //             ->disk('s3')
-                //             ->visibility('private')
-                //             ->maxSize(10240) //TODO - make it configurable
-                //             ->maxFiles(1)
-                //             ->directory('microsite/showcases')
-                //             ->label('Upload Video')
-                //             ->acceptedFileTypes(['video/mp4', 'video/x-m4v'])
-                //             ->helperText('Upload Doctor\'s introduction video, it will be used in the website.')
-                //             ->required(),
-                //     ])
-                //     ->defaultItems(1)
-                //     ->addActionLabel('Add Another Showcase')
-                //     ->deleteAction(
-                //         fn($action) => $action->requiresConfirmation()
-                //     ),
-                // Radio::make('has_any_reviews')
-                //     ->label('Do you want to add patient reviews?')
-                //     ->reactive()
-                //     ->live()
-                //     ->required()
-                //     ->dehydrated(false)
-                //     ->inline()
-                //     ->options([
-                //         'yes' => 'Yes',
-                //         'no' => 'No',
-                //     ]),
-                // Repeater::make('reviews')
-                //     ->columnSpanFull()
-                //     ->visibleOn('create')
-                //     ->visible(fn($get, $context) => $get('has_any_reviews') === 'yes' || $context === 'edit')
-                //     ->required(fn($get) => $get('has_any_reviews') === 'yes')
-                //     ->label('Patient Reviews')
-                //     ->schema([
-                //         TextInput::make('reviewer_name')
-                //             ->label('Patient Name')
-                //             ->required()
-                //             ->distinct(),
-                //         Textarea::make('review_text')
-                //             ->label('Patient\'s Review(optional)')
-                //             ->distinct()
-                //             ->maxLength(300),
-                //         FileUpload::make('media_url')
-                //             ->label('Upload Video')
-                //             ->distinct()
-                //             ->maxSize(10240) //TODO - make it configurable
-                //             ->disk('s3')
-                //             ->visibility('private')
-                //             ->directory('microsite/review_images')
-                //             ->maxFiles(1)
-                //             ->acceptedFileTypes(['video/mp4', 'video/x-m4v'])
-                //             ->helperText('If the patient has provided a video, please upload it here.'),
-                //     ])
-                //     ->defaultItems(1)
-                //     ->addActionLabel('Add Another Review')
-                //     ->deleteAction(
-                //         fn($action) => $action->requiresConfirmation()
-                //     ),
-
             ]);
     }
 
@@ -327,53 +240,20 @@ class MicrositeResource extends Resource implements HasShieldPermissions
                         TextEntry::make('created_at')->label('Created On')
                             ->dateTime('M d, Y')
                     ]),
-                Section::make('Doctor Video')
-                    ->compact()
-                    ->collapsible()
-                    ->visible(fn($record) => $record->doctor->showcases->isNotEmpty())
-                    ->schema([
-                        VideoEntry::make('doctor.showcases')
-                            ->label('Doctor Videos')
-                            ->muted()
-                            ->disablePictureInPicture()
-                            ->controlsListNoDownload()
-                            ->getStateUsing(function ($record) {
-                                return $record->doctor->showcases->pluck('media_file_url')->filter()->toArray();
-                            })
-                    ]),
-                // Section::make('Patient Reviews')
+                // Section::make('Doctor Video')
                 //     ->compact()
                 //     ->collapsible()
-                //     ->visible(fn($record) => $record->doctor->reviews->isNotEmpty())
+                //     ->visible(fn($record) => $record->doctor->showcases->isNotEmpty())
                 //     ->schema([
-                //         RepeatableEntry::make('doctor.reviews')
-                //             ->label('Patient Reviews')
-                //             ->columns(4)
-                //             ->schema([
-                //                 TextEntry::make('reviewer_name')
-                //                     ->label('Patient Name'),
-                //                 TextEntry::make('review_text')
-                //                     ->label('Review'),
-                //                 // TextEntry::make('created_at')
-                //                 //     ->label('Submitted On')->dateTime('M d, Y'),
-                //                 TextEntry::make('verified_at')
-                //                     ->default('Not Verified'),
-                //                 TextEntry::make('state.name')
-                //                     ->label('Doctor Approval')
-                //                     ->badge()
-                //                     ->color(fn($record) => $record->state->color),
-                //TODO:add review relation manager
-                // VideoEntry::make('media_file_url')
-                //     ->label('Review Video')
-                //     ->muted()
-                //     ->visible(fn($record) => $record->doctor->reviews?->isNotEmpty())
-                //     ->disablePictureInPicture()
-                //     ->controlsListNoDownload()
-
-                // ]),
-
-                // ]),
-
+                //         VideoEntry::make('doctor.showcases')
+                //             ->label('Doctor Videos')
+                //             ->muted()
+                //             ->disablePictureInPicture()
+                //             ->controlsListNoDownload()
+                //             ->getStateUsing(function ($record) {
+                //                 return $record->doctor->showcases->pluck('media_file_url')->filter()->toArray();
+                //             })
+                //     ]),
             ]);
     }
     public static function getPages(): array

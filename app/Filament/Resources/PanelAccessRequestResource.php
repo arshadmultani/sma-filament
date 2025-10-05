@@ -42,6 +42,7 @@ class PanelAccessRequestResource extends Resource
     {
         return $table
             ->defaultSort('created_at', 'desc')
+            ->paginated([20, 50, 100])
             ->columns([
                 TextColumn::make('id')
                     ->label('Request ID')
@@ -78,11 +79,13 @@ class PanelAccessRequestResource extends Resource
                 TextColumn::make('reviewer.name')
                     ->label('Reviewed By')
                     ->placeholder('NA')
+                    ->visible(auth()->user()->can('view_user'))
                     ->searchable()
                     ->toggleable()
                     ->sortable(),
                 TextColumn::make('reviewed_at')
                     ->placeholder('NA')
+                    ->visible(auth()->user()->can('view_user'))
                     ->toggleable()
                     ->dateTime('d M y @ H:i'),
                 // ->default(fn($record) => $record->reviewed_at ?? 'NA'),
@@ -152,9 +155,9 @@ class PanelAccessRequestResource extends Resource
                             ->label('Email Sent')
                             ->date('d M Y @ H:i')
                             ->visible(fn($record) => filled($record->email_sent_at)),
-                        TextEntry::make('emailSender.name')
-                            ->label('Email Sent By')
-                            ->visible(fn($record) => filled($record->email_sent_by))
+                        // TextEntry::make('emailSender.name')
+                        //     ->label('Email Sent By')
+                        //     ->visible(fn($record) => filled($record->email_sent_by))
 
 
                     ]),

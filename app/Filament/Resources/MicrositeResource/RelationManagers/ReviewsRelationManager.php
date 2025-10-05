@@ -8,15 +8,23 @@ use App\Models\State;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
+use Filament\Infolists\Infolist;
 use App\Settings\MicrositeSettings;
 use Filament\Forms\Components\Textarea;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Support\Facades\Storage;
+use App\Infolists\Components\VideoEntry;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Actions\CreateAction;
+use Filament\Tables\Actions\DeleteAction;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\ImageEntry;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Resources\RelationManagers\RelationManager;
 
@@ -100,7 +108,7 @@ class ReviewsRelationManager extends RelationManager
             ->recordTitleAttribute('reviewer_name')
             ->columns([
                 TextColumn::make('reviewer_name')
-                    ->label('Reviewer')
+                    ->label('Patient Name')
                     ->limit(15),
             ])
             ->filters([
@@ -151,9 +159,10 @@ class ReviewsRelationManager extends RelationManager
                     }),
             ])
             ->actions([
-                Tables\Actions\EditAction::make()
+                ViewAction::make(),
+                EditAction::make()
                     ->visible(auth()->user()->can('view_user')),
-                Tables\Actions\DeleteAction::make()
+                DeleteAction::make()
                     ->visible(auth()->user()->can('view_user')),
 
             ])
@@ -161,6 +170,48 @@ class ReviewsRelationManager extends RelationManager
                 Tables\Actions\BulkActionGroup::make([
                     // Tables\Actions\DeleteBulkAction::make(),
                 ]),
+            ]);
+    }
+
+    public function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                TextEntry::make('submitted_by_name')
+                    ->label('Submitted By')
+                    ->visible(fn($record) => $record->submitted_by_name),
+                TextEntry::make('review_text')
+                    ->label('Review Text')
+                    ->visible(fn($record) => $record->review_text),
+                IconEntry::make('is_verified')
+                    ->label('Verified')
+                    ->boolean(),
+                TextEntry::make('verified_at')
+                    ->label('Verified At')
+                    ->since()
+                    ->visible(fn($record) => $record->is_verified),
+                TextEntry::make('media_type')
+                    ->label('Media Type')
+                    ->visible(fn($record) => $record->media_type)
+                    ->badge(),
+                TextEntry::make('state.name')
+                    ->label('Status')
+                    ->badge()
+                    ->color(fn($record) => $record->state->color),
+                TextEntry::make('created_at')
+                    ->label('Upload')
+                    ->since(),
+                // Conditional media display based on type
+                ImageEntry::make('media_file_url')
+                    ->label('Media')
+                    ->visible(fn($record) => $record->media_type === 'image')
+                    ->height(200),
+                VideoEntry::make('media_file_url')
+                    ->label('Media')
+                    ->visible(fn($record) => $record->media_type === 'video')
+                    ->controls()
+                    ->controlsListNoDownload(),
+
             ]);
     }
 }

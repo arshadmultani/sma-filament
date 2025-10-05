@@ -49,23 +49,23 @@ class CreateMicrosite extends CreateRecord
         $data['headquarter_id'] = $doctor->headquarter_id;
 
 
-        if (isset($data['doctor']['reviews'])) {
-            unset($data['doctor']['reviews']);
-        }
+        // if (isset($data['doctor']['reviews'])) {
+        //     unset($data['doctor']['reviews']);
+        // }
 
         if (isset($data['doctor'])) {
             unset($data['doctor']);
         }
 
-        if (isset($data['showcases_data'])) {
-            $this->doctorShowcases = $data['showcases_data'];
-            unset($data['showcases_data']);
-        }
+        // if (isset($data['showcases_data'])) {
+        //     $this->doctorShowcases = $data['showcases_data'];
+        //     unset($data['showcases_data']);
+        // }
 
-        if (isset($data['reviews'])) {
-            $this->doctorReviews = $data['reviews'];
-            unset($data['reviews']);
-        }
+        // if (isset($data['reviews'])) {
+        //     $this->doctorReviews = $data['reviews'];
+        //     unset($data['reviews']);
+        // }
 
 
         return $data;
@@ -106,29 +106,29 @@ class CreateMicrosite extends CreateRecord
                 'campaign_id' => $campaignId,
             ]);
 
-            if (!empty($this->doctorReviews)) {
-                foreach ($this->doctorReviews as $review) {
-                    $doctor->reviews()->create([
-                        'reviewer_name' => $review['reviewer_name'],
-                        'is_verified' => false,
-                        'state_id' => State::where('category', StateCategory::PENDING)->first()->id,
-                        'review_text' => $review['review_text'],
-                        'media_url' => $review['media_url'] ?? null,
-                        'media_type' => 'video'
-                    ]);
-                }
-            }
+            // if (!empty($this->doctorReviews)) {
+            //     foreach ($this->doctorReviews as $review) {
+            //         $doctor->reviews()->create([
+            //             'reviewer_name' => $review['reviewer_name'],
+            //             'is_verified' => false,
+            //             'state_id' => State::where('category', StateCategory::PENDING)->first()->id,
+            //             'review_text' => $review['review_text'],
+            //             'media_url' => $review['media_url'] ?? null,
+            //             'media_type' => 'video'
+            //         ]);
+            //     }
+            // }
 
-            if (!empty($this->doctorShowcases)) {
-                foreach ($this->doctorShowcases as $showcase) {
-                    $doctor->showcases()->create([
-                        'title' => $showcase['title'] ?? null,
-                        'description' => $showcase['description'] ?? null,
-                        'media_url' => $showcase['media_url'] ?? null,
-                        'media_type' => 'video', // Since we only accept videos
-                    ]);
-                }
-            }
+            // if (!empty($this->doctorShowcases)) {
+            //     foreach ($this->doctorShowcases as $showcase) {
+            //         $doctor->showcases()->create([
+            //             'title' => $showcase['title'] ?? null,
+            //             'description' => $showcase['description'] ?? null,
+            //             'media_url' => $showcase['media_url'] ?? null,
+            //             'media_type' => 'video', // Since we only accept videos
+            //         ]);
+            //     }
+            // }
         }
     }
 }
