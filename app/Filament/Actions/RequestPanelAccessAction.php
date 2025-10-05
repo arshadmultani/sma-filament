@@ -63,7 +63,7 @@ class RequestPanelAccessAction
                         // Create a new panel access request
                         PanelAccessRequest::create([
                             'doctor_id' => $record->id,
-                            'requested_by' => $user->id,
+                            'user_id' => $user->id,
                             'state_id' => State::pending()->value('id'),
                             'request_reason' => $data['request_reason'],
                             'justification' => $data['justification'],

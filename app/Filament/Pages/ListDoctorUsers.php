@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Models\User;
 use App\Models\Doctor;
 use Filament\Pages\Page;
+use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Table;
 use Filament\Resources\Components\Tab;
 use Filament\Tables\Columns\TextColumn;
@@ -52,11 +53,14 @@ class ListDoctorUsers extends Page implements HasTable
     public function table(Table $table): Table
     {
         return $table
-            ->query(User::query()->where('userable_type', Relation::getMorphAlias(Doctor::class)))
+            ->query(User::withTrashed()->where('userable_type', Relation::getMorphAlias(Doctor::class)))
             ->paginated([10, 25, 50, 100])
             ->columns([
                 TextColumn::make('name')->label('Name')
                     ->searchable()
+                    ->weight(FontWeight::Bold)
+                    ->extraAttributes(fn($record) => $record->trashed() ? ['style' => 'text-decoration: line-through;'] : [])
+                    ->tooltip(fn($record) => $record->trashed() ? 'This user is archived. You can restore' : 'This user is active')
                     ->sortable(),
                 TextColumn::make('email')
                     ->label('Email')
@@ -74,17 +78,15 @@ class ListDoctorUsers extends Page implements HasTable
                     ->toggleable(),
                 TextColumn::make('is_active')
                     ->label('Status')
+                    ->badge()
                     ->toggleable()
                     ->formatStateUsing(fn($record) => $record->is_active ? 'Active' : 'Inactive')
-                    ->colors([
-                        'success' => 1,
-                        'danger' => 0,
-                    ])
+                    ->color(fn($state) => $state ? 'success' : 'danger')
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->label('Created At')
                     ->toggleable()
-                    ->dateTime('d-M-Y H:i')
+                    ->since()
                     ->sortable(),
             ])
             ->actions([
@@ -93,7 +95,11 @@ class ListDoctorUsers extends Page implements HasTable
                     ->requiresConfirmation(),
                 ActionGroup::make([
                     DeleteAction::make()
-                        ->label('Delete User'),
+                        ->label('Delete User')
+                        ->before(function ($record) {
+                            $record->is_active = false;
+                            $record->save();
+                        }),
                     RestoreAction::make()
                         ->label('Restore')
                         ->visible(fn($record) => $record->trashed()),

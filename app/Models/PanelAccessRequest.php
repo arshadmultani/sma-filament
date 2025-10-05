@@ -2,8 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Scopes\TeamHierarchyScope;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+
+#[ScopedBy(TeamHierarchyScope::class),]
 
 class PanelAccessRequest extends Model
 {
@@ -25,11 +30,16 @@ class PanelAccessRequest extends Model
 
     public function requester()
     {
-        return $this->belongsTo(User::class, 'requested_by');
+        return $this->belongsTo(User::class, 'user_id');
     }
     public function reviewer()
     {
         return $this->belongsTo(User::class, 'reviewed_by');
+    }
+
+    public function emailSender()
+    {
+        return $this->belongsTo(User::class, 'email_sent_by');
     }
     public function state()
     {

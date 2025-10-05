@@ -14,12 +14,14 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('doctor_id')->constrained('doctors');
             $table->foreignId('state_id')->constrained('states');
-            $table->foreignId('requested_by')->constrained('users');
+            $table->foreignId('user_id')->constrained('users');
             $table->foreignId('reviewed_by')->nullable()->constrained('users');
             $table->string('request_reason')->nullable();
             $table->string('justification')->nullable();
             $table->text('rejection_reason')->nullable();
             $table->timestamp('reviewed_at')->nullable();
+            $table->timestamp('email_sent_at')->nullable();
+            $table->foreignId('email_sent_by')->nullable()->constrained('users');
             $table->timestamps();
         });
     }

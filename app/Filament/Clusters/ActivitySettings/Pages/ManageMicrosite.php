@@ -10,9 +10,12 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\TextInput;
 use App\Filament\Clusters\ActivitySettings;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
+
 
 class ManageMicrosite extends SettingsPage
 {
+    use HasPageShield;
     // protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
 
     protected static string $settings = MicrositeSettings::class;

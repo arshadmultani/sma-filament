@@ -151,7 +151,10 @@ class PanelAccessRequestResource extends Resource
                         TextEntry::make('email_sent_at')
                             ->label('Email Sent')
                             ->date('d M Y @ H:i')
-                            ->visible(fn($record) => filled($record->email_sent_at))
+                            ->visible(fn($record) => filled($record->email_sent_at)),
+                        TextEntry::make('emailSender.name')
+                            ->label('Email Sent By')
+                            ->visible(fn($record) => filled($record->email_sent_by))
 
 
                     ]),

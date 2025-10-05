@@ -214,6 +214,7 @@ class DoctorWebsiteResource extends Resource
                             ->prefixAction(self::getEditPhoneNumberAction()),
                         TextEntry::make('doctor.practice_since')
                             ->label('Practicing Since')
+                            ->default(now())
                             ->date('Y')
                             ->prefixAction(self::getEditPracticeSinceAction()),
                         TextEntry::make('doctor.qualification.name')

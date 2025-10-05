@@ -156,7 +156,7 @@ class ReviewsRelationManager extends RelationManager
                     })
                     ->mutateFormDataUsing(function (array $data) {
                         $data['doctor_id'] = auth()->user()->userable_id;
-                        $data['is_verified'] = $data['is_verified'] ?? null;
+                        // $data['is_verified'] = $data['is_verified'] ?? null;
                         $data['state_id'] = State::pending()->first()->id;
 
 

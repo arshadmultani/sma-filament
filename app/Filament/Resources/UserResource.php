@@ -62,7 +62,12 @@ class UserResource extends Resource
                                 /** @var \App\Models\User|null $user */
                                 $user = Auth::user();
                                 if (!$user?->hasRole('super_admin')) {
-                                    $query->where('name', '!=', 'super_admin');
+                                    $query->whereNotIn('name', [
+                                        'super_admin',
+                                        'admin',
+                                        'doctor',
+                                        $user?->getRoleNames()->first(), // remove the role the current user has
+                                    ]);
                                 }
                                 return $query->pluck('name', 'id');
                             })
