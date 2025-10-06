@@ -7,8 +7,18 @@
             <template x-if="isMobile">
                 <div>
                     @livewire('greeting')
-                    @livewire('campaign-card')
-                    @livewire('customer-card')
+                    </br>
+
+                    @livewire(App\Filament\Widgets\CampaignList::class)
+
+                    {{-- @livewire('campaign-card') --}}
+                    @livewire('heading', ['title' => 'Activities'])
+                    @livewire(App\Filament\Widgets\ActivityOverview::class)
+
+                    @livewire('heading', ['title' => 'Customers'])
+                    @livewire(App\Filament\Widgets\CustomerOverview::class)
+
+                    {{-- @livewire('customer-card') --}}
 
                     @livewire('heading', ['title' => 'Kofol Products'])
                     @livewire(App\Filament\Resources\KofolEntryResource\Widgets\KofolProductTable::class)
@@ -24,7 +34,7 @@
                     @livewire('greeting')
 
 
-                    @livewire('heading', ['title' => 'Active Campaigns'])
+
 
                     {{-- <h1>{{ $this->getActiveCampaigns()->pluck('name') }}</h1>
 
@@ -45,11 +55,24 @@
                         <p>No active campaigns found.</p>
                     </div>
                 @endif --}}
+                    @livewire('heading', ['title' => 'Active Campaigns'])
+                    {{-- @livewire(App\Filament\Widgets\CampaignOverview::class) --}}
+                    @livewire('heading', ['title' => ''])
+                    @livewire(App\Filament\Widgets\CampaignList::class)
 
-                    @livewire(App\Filament\Widgets\CampaignOverview::class)
+                    @livewire('heading', ['title' => 'Activities'])
+                    @livewire(App\Filament\Widgets\ActivityOverview::class)
 
                     @livewire('heading', ['title' => 'Customers'])
                     @livewire(App\Filament\Widgets\CustomerOverview::class)
+
+
+                    @livewire('heading', ['title' => 'Users'])
+                    @livewire(App\Filament\Widgets\UserOverview::class)
+
+
+                    {{-- @livewire(App\Filament\Widgets\CampaignOverview::class)
+
 
                     @livewire('heading', ['title' => 'Kofol Products'])
                     @livewire(App\Filament\Resources\KofolEntryResource\Widgets\KofolProductChart::class)
@@ -60,7 +83,7 @@
                     @if (auth()->user()->can('view_user'))
                         @livewire('heading', ['title' => 'Kofol Coupons'])
                         @livewire(App\Filament\Resources\KofolEntryResource\Widgets\KofolCoupon::class)
-                    @endif
+                    @endif --}}
 
                 </div>
             </template>

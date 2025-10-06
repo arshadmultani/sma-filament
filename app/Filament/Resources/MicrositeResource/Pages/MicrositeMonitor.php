@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\MicrositeResource\Pages;
 
+use App\Filament\Resources\MicrositeResource\Widgets\MicrositeOverview;
 use Filament\Resources\Pages\Page;
 use App\Filament\Widgets\CustomerOverview;
 use App\Filament\Resources\MicrositeResource;
@@ -14,12 +15,12 @@ class MicrositeMonitor extends Page
 
     public function getTitle(): string
     {
-        return 'Microsite Monitor';
+        return 'Doctor Website';
     }
     protected function getHeaderWidgets(): array
     {
         return [
-            CustomerOverview::class,
+            MicrositeOverview::class,
         ];
     }
 }

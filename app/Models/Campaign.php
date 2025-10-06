@@ -3,8 +3,11 @@
 namespace App\Models;
 
 use Carbon\Carbon;
-use App\Observers\CamapaignObserver;
+use App\Models\User;
+use App\Models\Division;
 use Illuminate\Support\Collection;
+use Spatie\Permission\Models\Role;
+use App\Observers\CamapaignObserver;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Scopes\CampaignVisibilityScope;
@@ -16,7 +19,7 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 class Campaign extends Model
 {
     use HasFactory;
-
+    // TODO:Drop is_active column, it is redundant with start_date and end_date
     protected $guarded = [];
 
     protected $casts = [
@@ -57,12 +60,12 @@ class Campaign extends Model
 
     public function divisions()
     {
-        return $this->belongsToMany(\App\Models\Division::class, 'campaign_division');
+        return $this->belongsToMany(Division::class, 'campaign_division');
     }
 
     public function roles()
     {
-        return $this->belongsToMany(\Spatie\Permission\Models\Role::class, 'campaign_role');
+        return $this->belongsToMany(Role::class, 'campaign_role');
     }
 
     public function tags()
@@ -77,7 +80,7 @@ class Campaign extends Model
     }
     public function getParticipantsAttribute()
     {
-        $headOfficeRoleNames = \Spatie\Permission\Models\Role::whereIn('id', \App\Models\User::headOfficeRoleIds())->pluck('name')->toArray();
+        $headOfficeRoleNames = Role::whereIn('id', User::headOfficeRoleIds())->pluck('name')->toArray();
         return $this->roles
             ->pluck('name')
             ->reject(fn($role) => in_array($role, $headOfficeRoleNames))
@@ -87,9 +90,8 @@ class Campaign extends Model
 
     public function scopeActive($query)
     {
-        return $query->where('is_active', true)
-            ->whereDate('start_date', '<=', now())
-            ->whereDate('end_date', '>=', now());
+        return $query->where('start_date', '<=', now())
+            ->where('end_date', '>=', now());
     }
 
     /**
@@ -117,13 +119,5 @@ class Campaign extends Model
         return Cache::remember($cacheKey, now()->addDays(1), function () use ($entryType) {
             return static::forEntryType($entryType)->pluck('name', 'id');
         });
-    }
-
-    public function test(): bool
-    {
-        if ($this->id <= 1) {
-            return true;
-        }
-        return false;
     }
 }
