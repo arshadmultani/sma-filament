@@ -364,6 +364,7 @@ class POBResource extends Resource implements HasShieldPermissions
     public static function getPages(): array
     {
         return [
+            'monitor' => Pages\POBMonitor::route('/monitor'),
             'index' => Pages\ListPOBS::route('/'),
             'create' => Pages\CreatePOB::route('/create'),
             'edit' => Pages\EditPOB::route('/{record}/edit'),

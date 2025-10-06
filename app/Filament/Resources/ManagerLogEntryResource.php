@@ -431,7 +431,7 @@ class ManagerLogEntryResource extends Resource
                     ->sortable()
                     ->toggleable(),
 
-                    TextColumn::make('doctors_met')
+                TextColumn::make('doctors_met')
                     ->toggleable()
                     ->label('Doctors Met')
                     ->sortable()
@@ -716,16 +716,17 @@ class ManagerLogEntryResource extends Resource
                 'activities.products.product',
                 'activities.callInputs',
 
-            ]) ->withCount([
-                'activities as converted_activities_count' => function ($query) {
-                    $query->where('doctor_converted', true);
-                }
-            ]);
+            ])->withCount([
+                    'activities as converted_activities_count' => function ($query) {
+                        $query->where('doctor_converted', true);
+                    }
+                ]);
     }
 
     public static function getPages(): array
     {
         return [
+            'monitor' => Pages\ManagerLogEntryMonitor::route('/monitor'),
             'index' => Pages\ListManagerLogEntries::route('/'),
             'create' => Pages\CreateManagerLogEntry::route('/create'),
             'edit' => Pages\EditManagerLogEntry::route('/{record}/edit'),

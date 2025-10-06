@@ -259,6 +259,7 @@ class MicrositeResource extends Resource implements HasShieldPermissions
     public static function getPages(): array
     {
         return [
+            'monitor' => Pages\MicrositeMonitor::route('/monitor'),
             'index' => Pages\ListMicrosites::route('/'),
             'create' => Pages\CreateMicrosite::route('/create'),
             'edit' => Pages\EditMicrosite::route('/{record}/edit'),
