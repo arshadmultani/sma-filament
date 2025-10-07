@@ -2,10 +2,11 @@
 
 namespace App\Filament\Resources\MicrositeResource\Pages;
 
-use App\Filament\Resources\MicrositeResource\Widgets\MicrositeOverview;
+use Filament\Actions\ViewAction;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\Page;
-use App\Filament\Widgets\CustomerOverview;
 use App\Filament\Resources\MicrositeResource;
+use App\Filament\Resources\MicrositeResource\Widgets\MicrositeOverview;
 
 class MicrositeMonitor extends Page
 {
@@ -16,6 +17,22 @@ class MicrositeMonitor extends Page
     public function getTitle(): string
     {
         return 'Doctor Website';
+    }
+    protected function getHeaderActions(): array
+    {
+        return [
+            ViewAction::make()
+                ->label('View')
+                ->icon('heroicon-o-eye')
+                ->outlined()
+                ->url($this->getResource()::getUrl('index')),
+            CreateAction::make()
+                ->label('New')
+                ->icon('heroicon-o-plus')
+                ->url($this->getResource()::getUrl('create')),
+
+        ];
+
     }
     protected function getHeaderWidgets(): array
     {

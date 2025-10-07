@@ -27,7 +27,7 @@ class CampaignList extends BaseWidget
             ->query(Campaign::active())
             ->heading('')
             ->emptyStateHeading('No Campaigns active at the moment')
-            ->recordUrl(fn($record) => Filament::getResourceUrl(Relation::getMorphedModel($record->allowed_entry_type), 'monitor'))
+            ->recordUrl(fn($record) => Filament::getResourceUrl(Relation::getMorphedModel($record->allowed_entry_type), 'index'))
             ->columns([
                 Split::make([
                     Stack::make([

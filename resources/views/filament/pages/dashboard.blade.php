@@ -57,7 +57,7 @@
                 @endif --}}
                     @livewire('heading', ['title' => 'Active Campaigns'])
                     {{-- @livewire(App\Filament\Widgets\CampaignOverview::class) --}}
-                    @livewire('heading', ['title' => ''])
+                    {{-- @livewire('heading', ['title' => '']) --}}
                     @livewire(App\Filament\Widgets\CampaignList::class)
 
                     @livewire('heading', ['title' => 'Activities'])

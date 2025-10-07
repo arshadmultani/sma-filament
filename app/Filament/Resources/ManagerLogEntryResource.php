@@ -20,6 +20,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\DatePicker;
 use Filament\Resources\Resource;
 use Filament\Forms\Form;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -382,6 +383,7 @@ class ManagerLogEntryResource extends Resource
     public static function table(\Filament\Tables\Table $table): \Filament\Tables\Table
     {
         return $table
+            ->paginated([10, 25, 50, 100])
             ->columns([
                 TextColumn::make('id')
                     ->label('ID')
@@ -429,13 +431,15 @@ class ManagerLogEntryResource extends Resource
                 TextColumn::make('converted_activities_count')
                     ->label('Conversion Count')
                     ->sortable()
-                    ->toggleable(),
+                    ->toggleable()
+                    ->summarize(Sum::make()->label('Total')),
 
                 TextColumn::make('doctors_met')
                     ->toggleable()
                     ->label('Doctors Met')
                     ->sortable()
-                    ->numeric(),
+                    ->numeric()
+                    ->summarize(Sum::make()->label('Total')),
 
             ])
             ->defaultSort('date', 'desc')
