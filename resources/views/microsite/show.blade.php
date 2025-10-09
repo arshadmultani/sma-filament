@@ -38,36 +38,24 @@
 
     @if ($microsite->is_active)
         <div class="max-w-md mx-auto my-0 ">
+            <div
+                class="bg-gradient-to-r from-amber-200 to-yellow-500 
+            rounded-xl 
+            m-2 
+            p-2
+            h-[30vh]
+            flex flex-col items-center justify-center ">
 
-            <x-microsite.header :microsite="$microsite" />
-            <div class="mx-4">
-                <p>
-                    Lorem ipsum, dolor sit amet consectetur adipisicing elit. Eligendi iure ipsa laborum sapiente.
-                    Totam, accusantium quae. Optio obcaecati placeat doloremque! Atque quae velit in laborum ipsam
-                    voluptatibus officia. Quisquam, non. Lorem ipsum, dolor sit amet consectetur adipisicing elit.
-                    Eligendi iure ipsa laborum sapiente. Totam, accusantium quae. Optio obcaecati placeat doloremque!
-                    Atque quae velit in laborum ipsam voluptatibus officia. Quisquam, non. Lorem ipsum, dolor sit amet
-                    consectetur adipisicing elit. Eligendi iure ipsa laborum sapiente. Totam, accusantium quae. Optio
-                    obcaecati placeat doloremque! Atque quae velit in laborum ipsam voluptatibus officia. Quisquam,
-                    non. Lorem ipsum, dolor sit amet consectetur adipisicing elit. Eligendi iure ipsa laborum sapiente.
-                    Totam, accusantium quae. Optio obcaecati placeat doloremque! Atque quae velit in laborum ipsam
-                    voluptatibus officia. Quisquam, non. Lorem ipsum, dolor sit amet consectetur adipisicing elit.
-                    Eligendi iure ipsa laborum sapiente. Totam, accusantium quae. Optio obcaecati placeat doloremque!
-                    Atque quae velit in laborum ipsam voluptatibus officia. Quisquam, non. Lorem ipsum dolor sit amet
-                    consectetur adipisicing elit. Harum officiis, laudantium quibusdam sequi a ducimus corrupti officia
-                    vitae totam consequuntur rem veritatis voluptas facere sunt explicabo, nisi omnis nobis eos! Quasi,
-                    modi tenetur? Quae, aperiam? Quidem cupiditate porro fuga culpa alias magnam recusandae nesciunt,
-                    odit, blanditiis saepe velit minima! Dicta, asperiores. Nulla neque a maxime dolore repellat.
-                    Dolor, hic magni. Debitis, natus fugit? Molestias suscipit animi praesentium obcaecati modi repellat
-                    quisquam dignissimos, libero maiores officiis laudantium possimus facilis odio numquam nam, est
-                    minima similique odit inventore earum, vel voluptatibus iure! Consequuntur odit dolorem cumque sed
-                    aperiam provident ipsum modi soluta similique, ea odio doloremque numquam aut qui, velit impedit
-                    voluptas error deleniti, sunt laudantium sequi accusantium incidunt. Quis, cumque asperiores.
-                    Corporis repudiandae quisquam omnis. Ducimus fuga rem in atque, inventore quaerat quibusdam vel
-                    dolorem perferendis libero consequuntur molestiae. Cumque, quis veritatis. Tenetur labore fugit fuga
-                    neque quis molestias excepturi eaque?
-                </p>
+                <img src="{{ $microsite->doctor->profile_photo_url }}" alt="{{ $microsite->doctor->name }}"
+                    class="rounded-full w-24 h-24 object-cover mb-2" />
+                <h1>{{ $microsite->doctor->profile_photo_url }}</h1>
+                <p>{{ $microsite->doctor->qualification->name }}</p>
             </div>
+            <div>Stats</div>
+            <div>About</div>
+        </div>
+
+
 
 
 
