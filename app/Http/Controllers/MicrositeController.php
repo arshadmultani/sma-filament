@@ -11,9 +11,13 @@ class MicrositeController extends Controller
     {
         $microsite = Microsite::withoutGlobalScopes()
             ->where('url', $slug)
-            ->with(['doctor' => fn($query) => $query->withoutGlobalScopes()])
+            ->with(['doctor.showcases' => fn($query) => $query->withoutGlobalScopes()])
             ->firstOrFail();
+        $groupedShowcases = $microsite->doctor->showcases->groupBy('media_type');
 
-        return view('microsite.show', compact('microsite'));
+        return view(
+            'microsite.show',
+            ['microsite' => $microsite, 'groupedShowcases' => $groupedShowcases]
+        );
     }
 }

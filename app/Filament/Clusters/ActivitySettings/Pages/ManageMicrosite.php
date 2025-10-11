@@ -39,7 +39,7 @@ class ManageMicrosite extends SettingsPage
                             ->numeric()
                             ->minValue(1)
                             ->suffix('MB')
-                            ->maxValue(10)
+                            ->maxValue(100)
                             ->formatStateUsing(function ($state) {
                                 return $state ? $state / 1024 : null;
                             })
@@ -81,7 +81,7 @@ class ManageMicrosite extends SettingsPage
                             ->numeric()
                             ->minValue(1)
                             ->suffix('MB')
-                            ->maxValue(10)
+                            ->maxValue(100)
                             ->formatStateUsing(function ($state) {
                                 return $state ? $state / 1024 : null;
                             })

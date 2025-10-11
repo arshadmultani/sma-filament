@@ -3,11 +3,13 @@
 namespace App\Filament\Resources\MicrositeResource\RelationManagers;
 
 use Filament\Forms;
+use Filament\Forms\Components\RichEditor;
 use Filament\Tables;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Infolists\Infolist;
 use App\Settings\MicrositeSettings;
+use Filament\Forms\Components\Radio;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
@@ -39,18 +41,42 @@ class ShowcasesRelationManager extends RelationManager
             ->columns(1)
             ->schema([
                 TextInput::make('title')
-                    ->label('Title of Photo/Video')
+                    ->label('Title of Photo/Video/Text')
                     ->required()
                     ->maxLength(50)
-                    ->placeholder('Dr. Video, Clinic Tour')
+                    ->placeholder('Dr. Video, Clinic Tour,About Doctor')
                     ->helperText('Provide a brief title for your photo or video.'),
+                Radio::make('showcase_type')
+                    ->label('Showcase Type')
+                    ->options([
+                        'text' => 'Text',
+                        'media' => 'Video/Image',
+                    ])
+                    ->required()
+                    ->dehydrated(false)
+                    ->live()
+                    ->inline()
+                    ->helperText('Select the type of showcase you are adding.'),
+                RichEditor::make('description')
+                    ->label('Description')
+                    ->visible(fn($get) => $get('showcase_type') === 'text')
+                    ->required(fn($get) => $get('showcase_type') === 'text')
+                    ->live()
+                    ->disableToolbarButtons([
+                        'attachFiles',
+                        'codeBlock',
+                        'blockquote',
+                        'link',
+                        'strike',
+                    ]),
                 FileUpload::make('media_url')
                     ->label('Upload Media')
                     ->disk('s3')
                     ->visibility('private')
                     ->directory('microsite/showcases')
                     ->maxFiles(1)
-                    ->required()
+                    ->visible(fn($get) => $get('showcase_type') === 'media')
+                    ->required(fn($get) => $get('showcase_type') === 'media')
                     ->acceptedFileTypes([
                         'image/jpeg',
                         'image/png',
@@ -132,7 +158,9 @@ class ShowcasesRelationManager extends RelationManager
                             $mimeType = Storage::mimeType($data['media_url']);
                             $data['media_type'] = str_contains($mimeType, 'video') ? 'video' : 'image';
                         }
-
+                        if (isset($data['description'])) {
+                            $data['media_type'] = 'text';
+                        }
                         return $data;
                     }),
             ])
@@ -176,6 +204,10 @@ class ShowcasesRelationManager extends RelationManager
                     ->visible(fn($record) => $record->media_type === 'video')
                     ->controls()
                     ->controlsListNoDownload(),
+                TextEntry::make('description')
+                    ->label('Description')
+                    ->visible(fn($record) => $record->media_type === 'text')
+                    ->html(),
 
 
             ]);
