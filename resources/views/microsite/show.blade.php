@@ -68,7 +68,7 @@
                 <div class="w-full flex flex-col items-center justify-around h-full">
                     <div class="p-2">
                         <img src="{{ $microsite->doctor->profile_photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($microsite->doctor->name) . '&background=random' }}"
-                            alt="{{ $microsite->doctor->name }}"
+                            alt="{{ $microsite->doctor->name }}" loading="lazy"
                             class="rounded-full w-24 h-24 sm:w-32 sm:h-32 object-cover mb-2 shadow-md" />
                     </div>
 
@@ -134,7 +134,7 @@
                                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
                                     @foreach ($groupedShowcases['image'] as $showcase)
                                         <div class="bg-white/40 backdrop-blur-md rounded-xl shadow-md overflow-hidden">
-                                            <img src="{{ $showcase->media_file_url }}"
+                                            <img src="{{ $showcase->media_file_url }}" loading="lazy"
                                                 alt="{{ $showcase->title ?? 'Doctor showcase image' }}"
                                                 @click="open = true; imageUrl = '{{ $showcase->media_file_url }}'"
                                                 class="w-full h-40 p-1 rounded-xl object-cover transition-transform duration-200 hover:scale-105 cursor-pointer">
@@ -153,7 +153,7 @@
                                 @foreach ($groupedShowcases['video'] as $showcase)
                                     <div class="bg-white/40 backdrop-blur-md rounded-xl shadow-md overflow-hidden">
                                         <video src="{{ $showcase->media_file_url }}" controls controlsList="nodownload"
-                                            class="w-full h-60 object-cover rounded-xl p-1 "
+                                            class="w-full h-60 object-cover rounded-xl p-1 " loading="lazy"
                                             @click="open = true; imageUrl = '{{ $showcase->media_file_url }}'">
                                             Your browser does not support the video tag.
                                         </video>
@@ -195,11 +195,11 @@
                                         <p class="text-sm text-gray-600">{{ $review->review_text }}</p>
                                     @endif
                                     @if ($review->media_type == 'image' && $review->media_file_url)
-                                        <img src="{{ $review->media_file_url }}" alt="Review Image"
+                                        <img src="{{ $review->media_file_url }}" alt="Review Image" loading="lazy"
                                             @click="open = true; imageUrl = '{{ $review->media_file_url }}'"
                                             class="mt-2 w-full h-40 object-cover rounded-lg cursor-pointer">
                                     @elseif($review->media_type == 'video' && $review->media_file_url)
-                                        <video src="{{ $review->media_file_url }}" controls
+                                        <video src="{{ $review->media_file_url }}" controls loading="lazy"
                                             class="mt-2 w-full object-contain rounded-lg">
                                             Your browser does not support the video tag.
                                         </video>
