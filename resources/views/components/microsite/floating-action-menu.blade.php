@@ -4,8 +4,8 @@
     share() {
         if (navigator.share) {
             navigator.share({
-                title: `Dr. {{ $microsite->doctor->name }}'s Microsite`,
-                text: 'Check out the profile of Dr. {{ $microsite->doctor->name }}.',
+                title: `Dr. {{ $microsite->doctor->name }}'s Website`,
+                text: 'Check out the website of Dr. {{ $microsite->doctor->name }}.',
                 url: window.location.href,
             }).catch((error) => console.log('Error sharing', error));
         } else {
