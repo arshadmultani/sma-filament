@@ -40,7 +40,10 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-user-group';
+    // protected static ?string $navigationIcon = 'heroicon-o-user-group';
+
+    protected static ?string $navigationGroup = 'Users';
+
 
     protected static ?int $navigationSort = 2;
 
@@ -59,7 +62,12 @@ class UserResource extends Resource
                                 /** @var \App\Models\User|null $user */
                                 $user = Auth::user();
                                 if (!$user?->hasRole('super_admin')) {
-                                    $query->where('name', '!=', 'super_admin');
+                                    $query->whereNotIn('name', [
+                                        'super_admin',
+                                        'admin',
+                                        'doctor',
+                                        $user?->getRoleNames()->first(), // remove the role the current user has
+                                    ]);
                                 }
                                 return $query->pluck('name', 'id');
                             })
@@ -246,14 +254,7 @@ class UserResource extends Resource
                 TextColumn::make('name')->searchable()->sortable(),
                 TextColumn::make('roles.name')
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
-                        'RSM' => 'danger',
-                        'ASM' => 'warning',
-                        'DSA' => 'info',
-                        'ZSM' => 'success',
-                        'NSM' => 'primary',
-                        default => 'primary'
-                    })
+                    ->color(fn($record) => $record->roleColor() ?? 'secondary')
                     ->label('Desgn.')
                     ->sortable()
                     ->searchable(),
@@ -309,7 +310,8 @@ class UserResource extends Resource
             )
             ->actions([
                 Tables\Actions\ViewAction::make(),
-                Impersonate::make(),
+                Impersonate::make()
+                    ->visible(fn($record) => !$record->trashed()),
                 // Tables\Actions\RestoreAction::make(),
                 // SendMailAction::make(),
             ])
@@ -405,7 +407,7 @@ class UserResource extends Resource
         } else {
             // others cannot see admin or super_admin
             return $query->whereDoesntHave('roles', function ($query) {
-                $query->whereIn('name', ['super_admin', 'admin']);
+                $query->whereIn('name', ['super_admin', 'admin', 'doctor']);
             });
         }
     }

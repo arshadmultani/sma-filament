@@ -2,13 +2,15 @@
 
 namespace App\Traits;
 
-use App\Models\CampaignEntry;
-use App\Models\Headquarter;
-use App\Models\State;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
+use App\Models\State;
+use App\Models\Headquarter;
+use App\Models\CampaignEntry;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 trait HasActivity
 {

@@ -2,11 +2,17 @@
 
 namespace App\Models;
 
-use App\Events\CustomerHeadquarterUpdated;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Observers\DoctorObserver;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 
 /**
+ * 
+ *
  * @property int $id
  * @property string $name
  * @property string $email
@@ -28,7 +34,6 @@ use Illuminate\Notifications\Notifiable;
  * @property-read int|null $kofol_entries_count
  * @property-read \App\Models\Qualification|null $qualification
  * @property-read \App\Models\User|null $user
- *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Doctor newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Doctor newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Doctor query()
@@ -48,24 +53,68 @@ use Illuminate\Notifications\Notifiable;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Doctor whereType($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Doctor whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Doctor whereUserId($value)
- *
+ * @property int|null $specialty_id
+ * @property \Carbon\CarbonImmutable|null $practice_since
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CampaignEntry> $campaignEntries
+ * @property-read int|null $campaign_entries_count
+ * @property-read bool $has_microsite
+ * @property-read bool $has_profile_photo
+ * @property-read mixed $headquarter_name
+ * @property-read mixed $profile_photo_url
+ * @property-read \App\Models\User|null $loginAccount
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Merit> $merits
+ * @property-read int|null $merits_count
+ * @property-read \App\Models\Microsite|null $microsite
+ * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
+ * @property-read int|null $notifications_count
+ * @property-read \App\Models\PanelAccessRequest|null $panelAccessRequest
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Product> $products
+ * @property-read int|null $products_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Review> $reviews
+ * @property-read int|null $reviews_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Showcase> $showcases
+ * @property-read int|null $showcases_count
+ * @property-read \App\Models\Specialty|null $specialty
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Tag> $tags
+ * @property-read int|null $tags_count
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Doctor approved()
+ * @method static \Database\Factories\DoctorFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Doctor wherePracticeSince($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Doctor whereSpecialtyId($value)
  * @mixin \Eloquent
  */
+
+#[ObservedBy(DoctorObserver::class)]
 class Doctor extends BaseModel
 {
     use HasFactory, Notifiable;
 
     protected $fillable = ['name', 'email', 'phone', 'qualification_id', 'profile_photo', 'user_id', 'headquarter_id', 'attachment', 'address', 'type', 'support_type', 'town', 'specialty_id'];
 
-
     protected $casts = [
         'attachment' => 'array',
+        'practice_since' => 'date',
     ];
+
+    protected $appends = ['profile_photo_url'];
+
+    public function getProfilePhotoUrlAttribute()
+    {
+        return $this->profile_photo
+            ? Storage::temporaryUrl($this->profile_photo, now()->addMinutes(5))
+            : null;
+    }
 
     public function user()
     {
         return $this->belongsTo(User::class)->withTrashed();
     }
+
+    public function loginAccount(): MorphOne
+    {
+        return $this->morphOne(User::class, 'userable');
+    }
+
     public function products()
     {
         return $this->belongsToMany(Product::class);
@@ -80,9 +129,25 @@ class Doctor extends BaseModel
     {
         return $this->morphMany(KofolEntry::class, 'customer');
     }
+
     public function microsite()
     {
         return $this->hasOne(Microsite::class);
+    }
+
+    public function merits()
+    {
+        return $this->hasMany(Merit::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function showcases()
+    {
+        return $this->hasMany(Showcase::class);
     }
 
     public function qualification()
@@ -93,6 +158,13 @@ class Doctor extends BaseModel
     public function specialty()
     {
         return $this->belongsTo(Specialty::class);
+    }
+
+    public function experienceYears(): int|null
+    {
+        return $this->practice_since
+            ? max(1, $this->practice_since->diffInYears(now()))
+            : null;
     }
 
     public function isApproved(): bool
@@ -109,10 +181,12 @@ class Doctor extends BaseModel
     {
         return $this->headquarter?->name;
     }
+
     public function campaignEntries()
     {
         return $this->morphMany(CampaignEntry::class, 'customer');
     }
+
     public function tags()
     {
         return $this->belongsToMany(Tag::class, 'doctor_tag')->withTimestamps()->withPivot('user_id');
@@ -123,17 +197,39 @@ class Doctor extends BaseModel
         return ['microsites', 'kofolEntries'];
     }
 
-    protected static function booted()
+    public function panelAccessRequest(): HasOne
     {
-        parent::booted();
-        static::deleting(function ($doctor) {
-            $doctor->products()->detach();
-            $doctor->tags()->detach();
-        });
-        static::updated(function ($doctor) {
-            if ($doctor->isDirty('headquarter_id')) {
-                event(new CustomerHeadquarterUpdated($doctor, $doctor->headquarter_id));
-            }
-        });
+        return $this->hasOne(PanelAccessRequest::class)->latestOfMany();
+    }
+
+    public function hasPanelAccessRequest(): bool
+    {
+        return $this->panelAccessRequest()->exists();
+    }
+
+    public function panelRequestApproved(): bool
+    {
+        return $this->panelAccessRequest && $this->panelAccessRequest->state_id === State::where('category', 'Finalized')->value('id');
+    }
+
+    public function hasLoginAccount(): bool
+    {
+        return $this->loginAccount()->exists();
+    }
+
+    public function userAccount(): User|null
+    {
+        return User::where('userable_type', 'doctor')
+            ->where('userable_id', $this->id)
+            ->first();
+    }
+    public function getHasProfilePhotoAttribute(): bool
+    {
+        return filled($this->profile_photo);
+    }
+
+    public function getHasMicrositeAttribute(): bool
+    {
+        return $this->microsite()->exists();
     }
 }

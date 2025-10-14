@@ -396,6 +396,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
     public static function getPages(): array
     {
         return [
+            'monitor' => Pages\KofolEntryMonitor::route('/monitor'),
             'index' => Pages\ListKofolEntries::route('/'),
             'create' => Pages\CreateKofolEntry::route('/create'),
             'edit' => Pages\EditKofolEntry::route('/{record}/edit'),

@@ -4,8 +4,11 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Filament\Models\Contracts\FilamentUser;
+use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -26,6 +29,9 @@ use Illuminate\Support\Facades\Auth;
  * @property int|null $division_id
  * @property string|null $location_type
  * @property int|null $location_id
+ * @property string|null $userable_type
+ * @property int|null $userable_id
+ * @property bool $is_active
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read \App\Models\Division|null $division
  * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent|null $location
@@ -35,6 +41,7 @@ use Illuminate\Support\Facades\Auth;
  * @property-read int|null $permissions_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Role> $roles
  * @property-read int|null $roles_count
+ * @property-read bool $isDoctorUser
  *
  * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newModelQuery()
@@ -87,13 +94,34 @@ class User extends Authenticatable implements FilamentUser
         'division_id',
         'location_type',
         'location_id',
+        'is_active',
+        'userable_type',
+        'userable_id',
     ];
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->roles->isNotEmpty();
+        return $this->is_active;
+
+    }
+    public function panelId(): string
+    {
+        $userRole = $this->roles->first()?->name;
+
+        return match ($userRole) {
+            'doctor' => 'doctor',
+            default => 'admin',
+        };
     }
 
+    public function panelRoute(): string
+    {
+        $userRole = $this->roles->first()?->name;
+        return match ($userRole) {
+            'doctor' => Dashboard::getUrl(panel: 'doctor'),
+            default => Dashboard::getUrl(panel: 'admin'),
+        };
+    }
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -114,8 +142,23 @@ class User extends Authenticatable implements FilamentUser
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
     }
+    public function roleColor(): string
+    {
+        $roleName = $this->roles->first()?->name;
+        return match ($roleName) {
+            'RSM' => 'danger',
+            'ASM' => 'warning',
+            'DSA' => 'info',
+            'ZSM' => 'success',
+            'NSM' => 'primary',
+            'admin', 'super_admin' => 'gray',
+            default => 'secondary',
+        };
+    }
+
 
     // Add head office role names here for DRY purposes
     public static function headOfficeRoleIds(): array
@@ -124,6 +167,11 @@ class User extends Authenticatable implements FilamentUser
             'name',
             ['admin', 'super_admin', 'PMT', 'GM', 'ZTM', 'Sales Manager']
         )->pluck('id')->toArray();
+    }
+
+    public function userable(): MorphTo
+    {
+        return $this->morphTo();
     }
 
     public function division()
@@ -533,5 +581,15 @@ class User extends Authenticatable implements FilamentUser
 
         // Default: only themselves
         return collect([$this->id]);
+    }
+
+    public function getisDoctorUserAttribute(): bool
+    {
+        return $this->userable_type === Relation::getMorphAlias(Doctor::class) && $this->userable_id !== null;
+    }
+
+    public function getDoctorUserAttribute(): Doctor|null
+    {
+        return $this->isDoctorUser ? $this->userable : null;
     }
 }

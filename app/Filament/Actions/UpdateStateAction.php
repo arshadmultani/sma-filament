@@ -25,7 +25,7 @@ class UpdateStateAction
                 Select::make('state_id')
                     ->native(false)
                     ->label('Status')
-                    ->options(fn($record) => State::query()
+                    ->options(fn ($record) => State::query()
                         ->where('is_active', true)
                         ->where('id', '!=', $record?->state_id)
                         ->whereNot('category', StateCategory::DRAFT)
@@ -45,7 +45,7 @@ class UpdateStateAction
 
                     Notification::make()
                         ->title('Status updated successfully')
-                        ->body('Status updated to ' . $newState->name)
+                        ->body('Status updated to '.$newState->name)
                         ->success()
                         ->send();
 
@@ -67,7 +67,7 @@ class UpdateStateAction
                         ->send();
 
                     // Log the error for debugging
-                    Log::error('UpdateStateAction error: ' . $e->getMessage(), [
+                    Log::error('UpdateStateAction error: '.$e->getMessage(), [
                         'record_id' => $record->id ?? 'unknown',
                         'state_id' => $data['state_id'] ?? 'unknown',
                     ]);
@@ -104,7 +104,7 @@ class UpdateStateAction
                 if ($totalRecords > self::$bulkProcessLimit) {
                     Notification::make()
                         ->title('Bulk Limit Exceeded')
-                        ->body('Please select fewer than ' . self::$bulkProcessLimit . ' records at a time.')
+                        ->body('Please select fewer than '.self::$bulkProcessLimit.' records at a time.')
                         ->warning()
                         ->send();
 
@@ -124,7 +124,7 @@ class UpdateStateAction
 
                         } catch (\Exception $e) {
                             $failedUpdates++;
-                            Log::error('Bulk update failed for record: ' . ($record->id ?? 'unknown'), [
+                            Log::error('Bulk update failed for record: '.($record->id ?? 'unknown'), [
                                 'error' => $e->getMessage(),
                             ]);
                         }
@@ -145,7 +145,7 @@ class UpdateStateAction
                 }
 
                 // Build success message
-                $message = "Status updated to {$newState->name} for " . ($totalRecords - $failedUpdates) . " of {$totalRecords} records.";
+                $message = "Status updated to {$newState->name} for ".($totalRecords - $failedUpdates)." of {$totalRecords} records.";
 
                 if ($failedUpdates > 0) {
                     $message .= " {$failedUpdates} records failed to update.";
@@ -155,10 +155,10 @@ class UpdateStateAction
                 $notificationTitle = $failedUpdates > 0 ? 'Bulk update completed with issues' : 'Bulk update successful';
 
                 Notification::make()
-                            ->title($notificationTitle)
-                            ->body($message)
+                    ->title($notificationTitle)
+                    ->body($message)
                     ->{$notificationType}()
-                        ->send();
+                    ->send();
             })
             ->color('primary')
             ->icon('heroicon-o-arrow-path');

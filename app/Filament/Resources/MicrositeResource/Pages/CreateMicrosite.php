@@ -2,30 +2,39 @@
 
 namespace App\Filament\Resources\MicrositeResource\Pages;
 
-use App\Filament\Resources\MicrositeResource;
+use App\Models\State;
+use Filament\Actions;
 use App\Models\Doctor;
 use App\Models\Microsite;
-use Filament\Actions;
-use Filament\Resources\Pages\CreateRecord;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use App\Enums\StateCategory;
+use Illuminate\Support\Facades\Auth;
+use Filament\Resources\Pages\CreateRecord;
+use App\Filament\Resources\MicrositeResource;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Log;
 
 class CreateMicrosite extends CreateRecord
 {
     protected static string $resource = MicrositeResource::class;
     protected static bool $canCreateAnother = false;
 
+    protected $doctorShowcases = [];
+    protected $doctorReviews = [];
 
-    public function getRedirectUrl(): string
-    {
-        return $this->getResource()::getUrl('index');
-    }
+
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $doctor = Doctor::find($data['doctor_id']);
-        $firstName = explode(' ', $doctor->name)[0];
-        $slug = Str::slug($firstName);
+
+        $parts = explode(' ', trim($doctor->name));
+
+        if (isset($parts[0]) && in_array(strtolower(trim($parts[0])), ['dr', 'dr.'])) {
+            array_shift($parts);
+        }
+
+        $slug = Str::slug(implode(' ', $parts));
 
         do {
             $random = Str::lower(Str::random(5));
@@ -33,28 +42,69 @@ class CreateMicrosite extends CreateRecord
         } while (Microsite::where('url', $url)->exists());
 
         $data['url'] = $url;
-        $data['is_active'] = false;
-        $data['status'] = 'Pending';
-        $data['user_id'] = Auth::user()->id;
 
-        if (isset($data['doctor']['reviews'])) {
-            unset($data['doctor']['reviews']);
-        }
+        $data['user_id'] = Auth::user()->id;
+        $data['is_active'] = true;
+        $data['state_id'] = State::where('category', StateCategory::PENDING)->first()->id;
+        $data['headquarter_id'] = $doctor->headquarter_id;
+
+
+        // if (isset($data['doctor']['reviews'])) {
+        //     unset($data['doctor']['reviews']);
+        // }
 
         if (isset($data['doctor'])) {
             unset($data['doctor']);
         }
 
+        // if (isset($data['showcases_data'])) {
+        //     $this->doctorShowcases = $data['showcases_data'];
+        //     unset($data['showcases_data']);
+        // }
+
+        // if (isset($data['reviews'])) {
+        //     $this->doctorReviews = $data['reviews'];
+        //     unset($data['reviews']);
+        // }
+
+
         return $data;
+    }
+
+    protected function getFormActions(): array
+    {
+        return [
+            Actions\Action::make('create')
+                ->label('Create Website')
+                ->action(fn() => $this->create())
+                ->keyBindings(['mod+s'])
+                ->requiresConfirmation()
+                ->modalHeading('Create Website')
+                ->modalIcon('heroicon-o-globe-alt')
+                ->modalDescription('Are you sure you want to create this website? You cannot edit this later. Only the doctor can do the changes. Please be sure all data is correct.')
+                ->modalSubmitActionLabel('Yes, create it'),
+            $this->getCancelFormAction(),
+        ];
     }
 
     protected function afterCreate(): void
     {
         $campaignId = $this->data['campaign_id'];
-        $this->record->campaignEntry()->create([
-            'campaign_id' => $campaignId,
-            'customer_id' => $this->record->doctor_id,
-            'customer_type' => $this->record->customer_type,
-        ]);
+
+        $doctor = $this->record->doctor;
+
+        Log::info('Doctor Profile Photo: ', ['profile_photo' => $this->data['profile_photo']]);
+        $doctor->profile_photo = reset($this->data['profile_photo']);
+        // dd($doctor->profile_photo);
+        $doctor->save();
+        Log::info('Doctor profile photo  after: ', ['profile_photo' => $doctor->profile_photo]);
+
+        if ($doctor) {
+            $doctor->campaignEntries()->create([
+                'entryable_type' => 'microsite',
+                'entryable_id' => $this->record->id,
+                'campaign_id' => $campaignId,
+            ]);
+        }
     }
 }

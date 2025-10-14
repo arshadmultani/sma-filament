@@ -2,23 +2,47 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Actions\SiteUrlAction;
-use App\Filament\Resources\MicrositeResource\Pages;
-use App\Filament\Resources\MicrositeResource\RelationManagers;
-use App\Models\Campaign;
-use App\Models\Microsite;
 use Filament\Forms;
-use Filament\Forms\Components\Repeater;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
+use App\Models\Doctor;
+use App\Models\Campaign;
+use Filament\Forms\Form;
+use App\Models\Microsite;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 use Filament\Infolists\Infolist;
+use Filament\Resources\Resource;
+use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Select;
+use App\Filament\Actions\SiteUrlAction;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Textarea;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Illuminate\Support\Facades\Storage;
+use App\Infolists\Components\VideoEntry;
+use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
+use Filament\Forms\Components\FileUpload;
+use Illuminate\Database\Eloquent\Builder;
 use Filament\Infolists\Components\Section;
+use Filament\Notifications\Actions\Action;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\RepeatableEntry;
+use App\Filament\Resources\MicrositeResource\Pages;
+use Filament\Resources\RelationManagers\RelationManager;
+use App\Filament\Resources\MicrositeResource\RelationManagers;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
+use Rmsramos\Activitylog\Actions\ActivityLogTimelineTableAction;
+use App\Filament\Resources\MicrositeResource\RelationManagers\ReviewsRelationManager;
+use App\Filament\Resources\MicrositeResource\RelationManagers\ShowcasesRelationManager;
 
+
+/**
+ * 
+ *
+ *
+ */
 class MicrositeResource extends Resource implements HasShieldPermissions
 {
     public static function getPermissionPrefixes(): array
@@ -31,6 +55,7 @@ class MicrositeResource extends Resource implements HasShieldPermissions
             'delete',
             'delete_any',
             'update_status',
+            'active_status',
         ];
     }
     protected static ?string $model = Microsite::class;
@@ -41,85 +66,151 @@ class MicrositeResource extends Resource implements HasShieldPermissions
 
     public static function shouldRegisterNavigation(): bool
     {
-        return false;
+        return true;
+    }
+    public static function canAccess(): bool
+    {
+        return !auth()->user()->hasRole('doctor');
+
+    }
+    public static function getRelations(): array
+    {
+        return [
+            ReviewsRelationManager::class,
+            ShowcasesRelationManager::class
+        ];
     }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('campaign_id')
+                Select::make('campaign_id')
                     ->label('Campaign')
-                    ->options(function () {
-                        return Campaign::query()
-                            ->where('allowed_entry_type', 'microsite')
-                            ->where('is_active', true)
-                            ->pluck('name', 'id');
-                    })
-                    ->required()
-                    ->preload()
-                    ->searchable()
+                    ->placeholder('Select Campaign')
                     ->dehydrated(false)
-                    ->native(false),
-                Forms\Components\Select::make('doctor_id')
-                    ->relationship('doctor', 'name')
+                    ->reactive()
+                    ->native(false)
+                    ->preload()
+                    ->required()
+                    ->searchable()
+                    ->noSearchResultsMessage('No Active Campaigns found')
+                    ->options(function () {
+                        return Campaign::getForEntryType('microsite');
+                    }),
+                Select::make('doctor_id')
+                    ->relationship('doctor', 'name', fn($query) => $query->approved())
+                    ->label('Doctor Name')
+                    ->placeholder('Select Doctor')
+                    ->unique(ignoreRecord: true)
+                    ->reactive()
+                    ->live()
+                    ->noSearchResultsMessage('Doctor not found')
+                    ->optionsLimit(50)
                     ->required()
                     ->preload()
                     ->searchable()
-                    ->native(false),
-                Forms\Components\FileUpload::make('message')
-                    ->columnSpanFull()
-                    ->label('Doctor Video Message (Optional)')
-                    ->acceptedFileTypes(['video/*'])
-                    ->maxSize(10240),
-                Repeater::make('reviews')
-                    ->columnSpanFull()
-                    ->schema([
-                        Forms\Components\TextInput::make('reviewer_name')
-                            ->required(),
-                        Forms\Components\FileUpload::make('video')
-                            ->required(),
+                    ->native(false)
+                    ->validationMessages([
+                        'required' => 'Please select a doctor.',
+                        'unique' => 'This doctor is already associated with a microsite.',
+                    ])
+                    ->afterStateUpdated(function ($state) {
+                        if (is_null($state)) {
+                            return;
+                        }
+                        $existingMicrosite = Microsite::where('doctor_id', $state)->first();
+
+                        if ($existingMicrosite) {
+                            $doctor = Doctor::find($state);
+                            Notification::make()
+                                ->warning()
+                                ->title('Website Already Exists')
+                                ->body("A microsite for {$doctor->name} is already available.")
+                                ->actions([
+                                    Action::make('view')
+                                        ->label('Click here to view')
+                                        ->url(MicrositeResource::getUrl('view', ['record' => $existingMicrosite->id]))
+                                ])
+                                ->send();
+                        }
+                    }),
+                Radio::make('has_profile_photo')
+                    ->label('Profile photo not uploaded for this doctor. Would you like to upload?')
+                    ->reactive()
+                    ->live()
+                    ->visible(fn($get) => $get('doctor_id') && !Doctor::find($get('doctor_id'))?->has_profile_photo)
+                    ->required()
+                    ->dehydrated(false)
+                    ->inline()
+                    ->inlineLabel(false)
+                    ->options([
+                        'yes' => 'Yes',
+                        'no' => 'No',
                     ]),
+                FileUpload::make('profile_photo')
+                    ->dehydrated(false)
+                    ->hint('max 2MB')
+                    ->label('Profile Photo')
+                    ->disk('s3')
+                    ->visibility('private')
+                    ->maxSize(2048)
+                    ->directory('doctors/profile_photos')
+                    ->maxFiles(1)
+                    ->image()
+                    ->required(fn($get) => $get('has_profile_photo') === 'yes')
+                    ->visible(fn($get) => $get('has_profile_photo') === 'yes')
+                    ->helperText('Upload a profile photo for the doctor.'),
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('id', 'desc')
             ->columns([
-                Tables\Columns\TextColumn::make('doctor.name')->searchable(),
-                Tables\Columns\TextColumn::make('campaignEntry.campaign.name')
+                TextColumn::make('id')
+                    ->label('ID')
+                    ->sortable()
+                    ->toggleable()
+                    ->prefix('DW-'),
+                TextColumn::make('doctor.name')
+                    ->label('Doctor')
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('campaignEntry.campaign.name')
                     ->searchable()
                     ->toggleable()
                     ->label('Campaign'),
-                Tables\Columns\IconColumn::make('is_active')
+                IconColumn::make('is_active')
                     ->label('Active')
                     ->boolean()
+                    ->sortable()
                     ->toggleable(),
-                Tables\Columns\TextColumn::make('status')->label('Status')
-                    ->toggleable()
-                    ->badge()
-                    ->color(fn(string $state): string => match ($state) {
-                        'Pending' => 'warning',
-                        'Approved' => 'primary',
-                        'Rejected' => 'danger',
-                        default => 'secondary'
-                    }),
-                Tables\Columns\TextColumn::make('user.name')->label('Submitted By')
+                // TextColumn::make('state.name')
+                //     ->label('Status')
+                //     ->toggleable()
+                //     ->badge()
+                //     ->color(fn($record) => $record->state->color),
+                TextColumn::make('user.name')->label('Submitted By')
                     ->searchable()
                     ->toggleable(),
+                TextColumn::make('created_at')
+                    ->label('Created On')
+                    ->dateTime('M d, Y')
             ])
             ->filters([
                 //
             ])
             ->actions([
                 SiteUrlAction::makeTable(),
-                Tables\Actions\ViewAction::make(),
+                // ActivityLogTimelineTableAction::make()->label('')
+                //     ->visible(auth()->user()->can('view_user')),
 
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    // Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -129,26 +220,46 @@ class MicrositeResource extends Resource implements HasShieldPermissions
         return $infolist
             ->schema([
                 Section::make()
-                    ->columns(3)
+                    ->compact()
+                    ->columns(4)
                     ->schema([
                         TextEntry::make('doctor.name'),
                         TextEntry::make('campaignEntry.campaign.name')->label('Campaign'),
                         // TextEntry::make('is_active')->boolean(),
-                        TextEntry::make('status'),
+                        TextEntry::make('is_active')
+                            ->label('Website Status')
+                            ->badge()
+                            ->color(fn($record) => $record->is_active ? 'success' : 'danger')
+                            ->getStateUsing(fn($record) => $record->is_active ? 'Active' : 'Inactive'),
+                        // TextEntry::make('state.name')
+                        //     ->label('Status')
+                        //     ->badge()
+                        //     ->color(fn($record) => $record->state->color),
+                        TextEntry::make('user.name')->label('Submitted By')
+                            ->hint(fn($record) => $record->user->roles->first()?->name),
+                        TextEntry::make('created_at')->label('Created On')
+                            ->dateTime('M d, Y')
                     ]),
-
+                // Section::make('Doctor Video')
+                //     ->compact()
+                //     ->collapsible()
+                //     ->visible(fn($record) => $record->doctor->showcases->isNotEmpty())
+                //     ->schema([
+                //         VideoEntry::make('doctor.showcases')
+                //             ->label('Doctor Videos')
+                //             ->muted()
+                //             ->disablePictureInPicture()
+                //             ->controlsListNoDownload()
+                //             ->getStateUsing(function ($record) {
+                //                 return $record->doctor->showcases->pluck('media_file_url')->filter()->toArray();
+                //             })
+                //     ]),
             ]);
     }
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
-    }
-
     public static function getPages(): array
     {
         return [
+            'monitor' => Pages\MicrositeMonitor::route('/monitor'),
             'index' => Pages\ListMicrosites::route('/'),
             'create' => Pages\CreateMicrosite::route('/create'),
             'edit' => Pages\EditMicrosite::route('/{record}/edit'),

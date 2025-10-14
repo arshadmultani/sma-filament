@@ -110,4 +110,8 @@ class DoctorPolicy
     {
         return $user->can('update_status_doctor');
     }
+    public function requestPanelAccess(User $user): bool
+    {
+        return $user->can('request_panel_access_doctor');
+    }
 }
