@@ -72,7 +72,7 @@ class PanelAccessRequestResource extends Resource
                     ->sortable(),
                 TextColumn::make('hasLoginAccount')
                     ->label('Portal A/c')
-                    ->getStateUsing(fn($record) => $record->doctor->hasLoginAccount() ? 'Yes' : 'No')
+                    ->getStateUsing(fn($record) => $record->doctor?->hasLoginAccount() ? 'Yes' : 'No')
                     ->toggleable()
                     ->badge(fn($state) => $state === 'Yes' ? 'success' : 'danger')
                     ->color(fn($state) => $state === 'Yes' ? 'success' : 'danger'),
