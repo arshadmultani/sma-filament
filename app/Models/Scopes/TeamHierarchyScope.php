@@ -40,6 +40,12 @@ class TeamHierarchyScope implements Scope
                 $this->filterByLocation($query, $model, 'region', $user->region_id);
             } elseif ($user->hasRole('ZSM') && $user->zone_id) {
                 $this->filterByLocation($query, $model, 'zone', $user->zone_id);
+            } elseif ($user->hasRole('PMT') && $user->division_id) {
+                if (method_exists($model, 'user')) {
+                    $query->orWhereHas('user', function ($q) use ($user) {
+                        $q->where('division_id', $user->division_id);
+                    });
+                }
             }
         });
     }

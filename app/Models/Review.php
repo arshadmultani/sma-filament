@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class Review extends Model
@@ -39,5 +40,17 @@ class Review extends Model
     public function verified(): bool
     {
         return filled($this->verified_at);
+    }
+
+    public static function booted()
+    {
+        parent::booted();
+
+        static::deleting(function ($review) {
+            if ($review->media_url && Storage::disk('s3')->exists($review->media_url)) {
+                Storage::disk('s3')->delete($review->media_url);
+                Log::info("Deleted media file for review ID {$review->id} at {$review->media_url}");
+            }
+        });
     }
 }

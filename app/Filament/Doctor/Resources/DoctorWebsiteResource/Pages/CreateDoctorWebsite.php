@@ -2,20 +2,21 @@
 
 namespace App\Filament\Doctor\Resources\DoctorWebsiteResource\Pages;
 
-use App\Models\Campaign;
-use App\Models\Scopes\CampaignVisibilityScope;
+use App\Models\POB;
 use App\Models\State;
 use Filament\Actions;
 use App\Models\Doctor;
+use App\Models\Campaign;
 use App\Models\Microsite;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
 use App\Enums\StateCategory;
 use Illuminate\Support\Facades\Log;
-use Filament\Resources\Pages\CreateRecord;
-use App\Filament\Doctor\Resources\DoctorWebsiteResource;
-use Filament\Notifications\Notification;
 use Filament\Support\Exceptions\Halt;
+use Filament\Notifications\Notification;
+use Filament\Resources\Pages\CreateRecord;
+use App\Models\Scopes\CampaignVisibilityScope;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use App\Filament\Doctor\Resources\DoctorWebsiteResource;
 
 class CreateDoctorWebsite extends CreateRecord
 {
@@ -103,7 +104,7 @@ class CreateDoctorWebsite extends CreateRecord
 
     protected function beforeCreate(): void
     {
-        $this->campaign = Campaign::query()
+        $this->campaign = Campaign::query()->withoutGlobalScopes()
             ->forEntryType(Relation::getMorphAlias(Microsite::class))
             ->active()
             ->first();

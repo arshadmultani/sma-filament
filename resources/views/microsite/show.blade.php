@@ -79,7 +79,8 @@
                 w-[90%] rounded-xl p-3 m-3 mx-auto max-w-sm
                 flex justify-around text-center">
                         <div>
-                            <p class="text-base sm:text-lg font-semibold drop-shadow-sm">5 yrs</p>
+                            <p class="text-base sm:text-lg font-semibold drop-shadow-sm">
+                                {{ $microsite->doctor->experienceYears() }} yr+</p>
                             <p class="text-xs sm:text-sm text-gray-700/80">Experience</p>
                         </div>
                         <div>
