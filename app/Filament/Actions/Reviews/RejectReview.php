@@ -29,8 +29,7 @@ class RejectReview
             ->action(function ($record) {
                 try {
                     $record->update([
-                        'is_verified' => false,
-                        'verified_at' => now(),
+                        'verified_at' => null,
                         'state_id' => State::cancelled()->first()->id,
                     ]);
 

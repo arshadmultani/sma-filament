@@ -143,7 +143,6 @@ class ReviewsRelationManager extends RelationManager
 
                         $data['doctor_id'] = $doctor->id;
                         $data['submitted_by_name'] = auth()->user()->name;
-                        $data['is_verified'] = false;
                         $data['state_id'] = State::pending()->first()->id;
 
 
@@ -183,13 +182,14 @@ class ReviewsRelationManager extends RelationManager
                 TextEntry::make('review_text')
                     ->label('Review Text')
                     ->visible(fn($record) => $record->review_text),
-                IconEntry::make('is_verified')
+                IconEntry::make('verified_at')
                     ->label('Verified')
+                    ->getStateUsing(fn($record) => (bool) $record->verified_at)
                     ->boolean(),
                 TextEntry::make('verified_at')
                     ->label('Verified At')
                     ->since()
-                    ->visible(fn($record) => $record->is_verified),
+                    ->visible(fn($record) => $record->verified_at),
                 TextEntry::make('media_type')
                     ->label('Media Type')
                     ->visible(fn($record) => $record->media_type)

@@ -22,7 +22,6 @@ class ApproveReview
             ->action(function ($record) {
                 try {
                     $record->update([
-                        'is_verified' => true,
                         'verified_at' => now(),
                         'state_id' => State::finalized()->first()->id,
                     ]);

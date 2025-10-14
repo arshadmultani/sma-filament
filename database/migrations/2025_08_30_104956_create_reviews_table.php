@@ -26,13 +26,9 @@ return new class extends Migration {
             $table->string('media_type')->nullable()->comment("e.g., 'video', 'image'");
 
             // Moderation
-            $table->boolean('is_verified')->nullable();
             $table->foreignId('state_id')->nullable()->constrained('states');
-
-            // Fields for Verification System
-            $table->string('verification_token')->unique()->nullable();
-            $table->timestamp('verification_expires_at')->nullable();
             $table->timestamp('verified_at')->nullable();
+
             $table->timestamps();
         });
     }

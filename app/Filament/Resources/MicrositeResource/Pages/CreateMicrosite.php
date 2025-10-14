@@ -105,30 +105,6 @@ class CreateMicrosite extends CreateRecord
                 'entryable_id' => $this->record->id,
                 'campaign_id' => $campaignId,
             ]);
-
-            // if (!empty($this->doctorReviews)) {
-            //     foreach ($this->doctorReviews as $review) {
-            //         $doctor->reviews()->create([
-            //             'reviewer_name' => $review['reviewer_name'],
-            //             'is_verified' => false,
-            //             'state_id' => State::where('category', StateCategory::PENDING)->first()->id,
-            //             'review_text' => $review['review_text'],
-            //             'media_url' => $review['media_url'] ?? null,
-            //             'media_type' => 'video'
-            //         ]);
-            //     }
-            // }
-
-            // if (!empty($this->doctorShowcases)) {
-            //     foreach ($this->doctorShowcases as $showcase) {
-            //         $doctor->showcases()->create([
-            //             'title' => $showcase['title'] ?? null,
-            //             'description' => $showcase['description'] ?? null,
-            //             'media_url' => $showcase['media_url'] ?? null,
-            //             'media_type' => 'video', // Since we only accept videos
-            //         ]);
-            //     }
-            // }
         }
     }
 }

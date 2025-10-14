@@ -13,7 +13,6 @@ class Review extends Model
 
     protected $casts = [
         'rating' => 'integer',
-        'is_verified' => 'boolean',
         'review_date' => 'datetime',
         'verification_expires_at' => 'datetime',
         'verified_at' => 'datetime',
@@ -36,5 +35,9 @@ class Review extends Model
         }
 
         return null;
+    }
+    public function verified(): bool
+    {
+        return filled($this->verified_at);
     }
 }

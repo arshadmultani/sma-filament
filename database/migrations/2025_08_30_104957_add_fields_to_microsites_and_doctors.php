@@ -65,6 +65,7 @@ return new class extends Migration {
             $table->dropForeign(['headquarter_id']);
             $table->dropColumn('headquarter_id');
             $table->string('status')->nullable()->after('headquarter_id');
+            $table->dropColumn('design_settings');
         });
     }
 };

@@ -100,12 +100,18 @@ class ReviewsRelationManager extends RelationManager
                         }
                     ])
                     ->helperText(fn() => "Upload a video (max " . (app(MicrositeSettings::class)->max_showcase_video_size / 1024) . "MB) or image (max " . (app(MicrositeSettings::class)->max_showcase_image_size / 1024) . "MB). Supported formats: JPG, PNG, MP4, MOV, AVI"),
-                ToggleButtons::make('is_verified')
+                Radio::make('verified_at')
                     ->label('Do you want to show this review on your website?')
+                    ->formatStateUsing(fn($state) => (bool) $state)
+                    ->dehydrateStateUsing(fn($state) => $state ? now() : null)
                     ->boolean()
+                    ->options([
+                        1 => 'Yes',
+                        0 => 'No',
+                    ])
                     ->inline()
-                    ->required()
-                    ->grouped(),
+                    ->required(),
+
 
             ]);
     }
@@ -124,9 +130,10 @@ class ReviewsRelationManager extends RelationManager
                 TextColumn::make('reviewer_name')
                     ->label('Reviewer')
                     ->limit(15),
-                IconColumn::make('is_verified')
-                    ->label('Verfication'),
-
+                IconColumn::make('verified_at')
+                    ->label('Verification')
+                    ->getStateUsing(fn($record) => (bool) $record->verified_at)
+                    ->boolean(),
             ])
             ->filters([
                 //
@@ -156,7 +163,6 @@ class ReviewsRelationManager extends RelationManager
                     })
                     ->mutateFormDataUsing(function (array $data) {
                         $data['doctor_id'] = auth()->user()->userable_id;
-                        // $data['is_verified'] = $data['is_verified'] ?? null;
                         $data['state_id'] = State::pending()->first()->id;
 
 
@@ -177,8 +183,9 @@ class ReviewsRelationManager extends RelationManager
                         ->color('primary')
                         ->modalHeading(fn($record) => 'Patient: ' . $record->reviewer_name),
                     ApproveReviewAction::makeTable()
-                        ->visible(fn($record) => !$record->is_verified),
-                    RejectReview::makeTable(),
+                        ->hidden(fn($record) => $record->verified_at),
+                    RejectReview::makeTable()
+                        ->visible(fn($record) => $record->verified_at),
                     EditAction::make()
                         ->color('primary')
                         ->modalHeading(fn($record) => 'Patient: ' . $record->reviewer_name),
@@ -201,15 +208,17 @@ class ReviewsRelationManager extends RelationManager
                 TextEntry::make('review_text')
                     ->label('Review Text')
                     ->visible(fn($record) => $record->review_text),
-                IconEntry::make('is_verified')
+                IconEntry::make('verified_at')
                     ->label('Verified')
+                    ->getStateUsing(fn($record) => (bool) $record->verified_at)
                     ->boolean(),
                 TextEntry::make('verified_at')
                     ->label('Verified At')
                     ->since()
-                    ->visible(fn($record) => $record->is_verified),
+                    ->visible(fn($record) => $record->verified_at),
                 TextEntry::make('media_type')
                     ->label('Media Type')
+                    ->default('text')
                     ->badge(),
                 TextEntry::make('state.name')
                     ->label('Status')
@@ -221,8 +230,7 @@ class ReviewsRelationManager extends RelationManager
                 // Conditional media display based on type
                 ImageEntry::make('media_file_url')
                     ->label('Media')
-                    ->visible(fn($record) => $record->media_type === 'image')
-                    ->height(200),
+                    ->visible(fn($record) => $record->media_type === 'image'),
                 VideoEntry::make('media_file_url')
                     ->label('Media')
                     ->visible(fn($record) => $record->media_type === 'video')

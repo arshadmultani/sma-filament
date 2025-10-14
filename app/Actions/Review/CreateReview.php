@@ -17,7 +17,6 @@ class CreateReview
             'media_url' => $data['media_url'] ?? null,
             'verified_at' => $data['verified_at'] ?? null,
             'state_id' => State::pending()->first()->id,
-            'is_verified' => false,
 
         ]);
     }
