@@ -13,7 +13,10 @@ class MicrositeController extends Controller
         try {
             $microsite = Microsite::withoutGlobalScopes()
                 ->where('url', $slug)
-                ->with(['doctor' => fn($query) => $query->withoutGlobalScopes()])
+                ->with([
+                    'doctor' => fn($query) => $query->withoutGlobalScopes(),
+                    'doctor.reviews' => fn($query) => $query->whereNotNull('verified_at')->latest(),
+                ])
                 ->firstOrFail();
 
         } catch (ModelNotFoundException $e) {

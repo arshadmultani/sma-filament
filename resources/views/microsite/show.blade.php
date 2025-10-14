@@ -41,14 +41,29 @@
     </style>
 </head>
 
-<body class="font-[Funnel Sans] ">
+<body class="font-[Funnel Sans] " x-data="{ open: false, imageUrl: '' }">
+
+    {{-- ALPINE.JS LIGHTBOX COMPONENT --}}
+    <div x-show="open" x-on:keydown.escape.window="open = false" style="display: none;"
+        class="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-80">
+
+        {{-- CLOSE BUTTON --}}
+        <button x-on:click="open = false" class="absolute top-4 right-4 text-white text-3xl">&times;</button>
+
+        {{-- IMAGE DISPLAY --}}
+        <div x-on:click.away="open = false" class="p-4">
+            <img :src="imageUrl" alt="Lightbox Image" class="max-w-full max-h-[90vh] object-contain">
+        </div>
+    </div>
+    {{-- END LIGHTBOX COMPONENT --}}
 
     @if ($microsite->is_active)
         <div class="max-w-md mx-auto my-0">
             <div class="bg-white/60 backdrop-blur-md rounded-xl m-2 p-2 shadow-md">
                 <div class="w-full flex flex-col items-center justify-around h-full">
                     <div class="p-2">
-                        <img src="{{ $microsite->doctor->profile_photo_url }}" alt="{{ $microsite->doctor->name }}"
+                        <img src="{{ $microsite->doctor->profile_photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($microsite->doctor->name) . '&background=random' }}"
+                            alt="{{ $microsite->doctor->name }}"
                             class="rounded-full w-24 h-24 sm:w-32 sm:h-32 object-cover mb-2 border-2 border-sky-200" />
                     </div>
 
@@ -113,10 +128,9 @@
                                     <div class="bg-white/40 backdrop-blur-md rounded-xl shadow-md overflow-hidden">
                                         <img src="{{ $showcase->media_file_url }}"
                                             alt="{{ $showcase->title ?? 'Doctor showcase image' }}"
-                                            class="w-full h-40 object-cover transition-transform duration-200 hover:scale-105">
-                                        @if ($showcase->description)
-                                            <p class="text-xs text-gray-600 mt-1 px-2 py-1">{!! str($showcase->description)->sanitizeHtml() !!}</p>
-                                        @endif
+                                            @click="open = true; imageUrl = '{{ $showcase->media_file_url }}'"
+                                            class="w-full h-40 p-1 rounded-xl object-cover transition-transform duration-200 hover:scale-105 cursor-pointer">
+                                        <div class="font-regular text-md px-3 m-2">{{ $showcase->title }}</div>
                                     </div>
                                 @endforeach
                             </div>
@@ -130,13 +144,11 @@
                                 Videos</h3>
                             @foreach ($groupedShowcases['video'] as $showcase)
                                 <div class="bg-white/40 backdrop-blur-md rounded-xl shadow-md overflow-hidden">
-                                    <video src="{{ $showcase->media_file_url }}" controls
-                                        class="w-full h-60 object-cover rounded-lg">
+                                    <video src="{{ $showcase->media_file_url }}" controls controlsList="nodownload"
+                                        class="w-full h-60 object-cover rounded-xl p-1 ">
                                         Your browser does not support the video tag.
                                     </video>
-                                    @if ($showcase->description)
-                                        <p class="text-xs text-gray-600 mt-1 px-2 py-1">{!! str($showcase->description)->sanitizeHtml() !!}</p>
-                                    @endif
+                                    <div class="font-regular text-md px-3 m-2">{{ $showcase->title }}</div>
                                 </div>
                             @endforeach
                         </div>
@@ -157,32 +169,35 @@
                         class="flex justify-center p-2 text-xl font-semibold shadow-md backdrop-blur-md rounded-xl text-gray-800">
                         Reviews
                     </h2>
-                    @if ($microsite->doctor->reviews->isEmpty())
-                        <p class="text-gray-600 text-center">No reviews yet. Be the first to leave a review!</p>
-                    @endif
-                    @foreach ($microsite->doctor->reviews as $review)
-                        <div class="border-b border-gray-200 p-4 bg-white/40 backdrop-blur-md rounded-lg  shadow-sm">
-                            <div class="flex items-center justify-between my-2 py-2 border-b">
-                                <h3 class="font-semibold">{{ $review->reviewer_name }}</h3>
-                                <p class="font-light text-sm text-gray-500">{{ $review->created_at->diffForHumans() }}
-                                </p>
+                    @forelse ($microsite->doctor->reviews as $review)
+                        @if ($review->verified())
+                            <div
+                                class="border-b border-gray-200 p-4 bg-white/40 backdrop-blur-md rounded-lg  shadow-sm">
+                                <div class="flex items-center justify-between my-2 py-2 border-b">
+                                    <h3 class="font-medium">{{ $review->reviewer_name }}</h3>
+                                    <p class="font-light text-sm text-gray-500">
+                                        {{ $review->created_at->diffForHumans() }}
+                                    </p>
+                                </div>
+
+                                @if ($review->review_text)
+                                    <p class="text-sm text-gray-600">{{ $review->review_text }}</p>
+                                @endif
+                                @if ($review->media_type == 'image' && $review->media_file_url)
+                                    <img src="{{ $review->media_file_url }}" alt="Review Image"
+                                        @click="open = true; imageUrl = '{{ $review->media_file_url }}'"
+                                        class="mt-2 w-full h-40 object-cover rounded-lg cursor-pointer">
+                                @elseif($review->media_type == 'video' && $review->media_file_url)
+                                    <video src="{{ $review->media_file_url }}" controls
+                                        class="mt-2 w-full h-60 object-cover rounded-lg">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                @endif
                             </div>
-
-                            @if ($review->review_text)
-                                <p class="text-sm text-gray-600">{{ $review->review_text }}</p>
-                            @endif
-                            @if ($review->media_type == 'image' && $review->media_file_url)
-                                <img src="{{ $review->media_file_url }}" alt="Review Image"
-                                    class="mt-2 w-full h-40 object-cover rounded-lg">
-                            @elseif($review->media_type == 'video' && $review->media_file_url)
-                                <video src="{{ $review->media_file_url }}" controls
-                                    class="mt-2 w-full h-60 object-cover rounded-lg">
-                                    Your browser does not support the video tag.
-                                </video>
-                            @endif
-
-                        </div>
-                    @endforeach
+                        @endif
+                    @empty
+                        <p class="text-gray-600 text-center">No reviews yet</p>
+                    @endforelse
 
                 </div>
             </div>
