@@ -41,7 +41,7 @@ class ShowcasesRelationManager extends RelationManager
             ->columns(1)
             ->schema([
                 TextInput::make('title')
-                    ->label('Title of Photo/Video')
+                    ->label('Title of Photo/Video/Text')
                     ->required()
                     ->maxLength(50)
                     ->placeholder('Dr. Video, Clinic Tour')
@@ -119,7 +119,7 @@ class ShowcasesRelationManager extends RelationManager
             ->defaultSort('created_at', 'desc')
             ->paginated(false)
             ->recordTitleAttribute('title')
-            ->description('Showcase yourself by adding your brief introduction video, clinic images/videos')
+            ->description('Showcase yourself by adding your brief introduction video, clinic images/videos or text to highlight your practice.')
             ->emptyStateIcon('heroicon-o-video-camera')
             ->columns([
                 TextColumn::make('title')

@@ -30,17 +30,21 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Actions\CreateAction;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Actions\DownloadQrAction;
+use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\Placeholder;
 use Filament\Infolists\Components\Actions;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\Fieldset;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\ColorEntry;
 use Filament\Infolists\Components\ImageEntry;
 use App\Filament\Actions\DynamicFieldEditAction;
+use App\Filament\Actions\MicrositeDesignSettings;
 use Filament\Infolists\Components\Actions\Action;
 use Filament\Infolists\Components\RepeatableEntry;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Actions\SetMicrositeDesignSettings;
 use App\Filament\Doctor\Resources\DoctorWebsiteResource\Pages;
 use Filament\Infolists\Components\Actions\Action as infoaction;
 use App\Filament\Doctor\Resources\DoctorWebsiteResource\RelationManagers;
@@ -201,6 +205,13 @@ class DoctorWebsiteResource extends Resource
                         //     ->weight(FontWeight::Bold)
                         //     ->getStateUsing(fn($record) => $record->reviews ?? 0),
 
+                    ]),
+                Section::make('Design Settings')
+                    ->compact()
+                    ->collapsible()
+                    ->columns(4)
+                    ->schema([
+                        Actions::make([SetMicrositeDesignSettings::make()])
                     ]),
                 Section::make('Personal Information')
                     ->compact()

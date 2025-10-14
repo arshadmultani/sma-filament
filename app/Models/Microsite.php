@@ -19,6 +19,16 @@ class Microsite extends Model implements IsCampaignEntry
 {
     use HasActivity, LogsActivity;
     protected $guarded = [];
+
+    protected $casts = [
+        'design_settings' => 'array',
+    ];
+
+    public function getBgColorAttribute()
+    {
+        return $this->design_settings['bg_color'] ?? null;
+    }
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
