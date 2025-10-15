@@ -26,7 +26,7 @@
 
     {{-- Call to Action: Call --}}
     <div class="flex flex-col items-center text-center">
-        <x-filament::icon-button icon="heroicon-o-phone" size="lg" :href="'tel:' . ($microsite->doctor->phone_number ?? '')" tag="a"
+        <x-filament::icon-button icon="heroicon-o-phone" size="lg" :href="'tel:' . ($microsite->doctor->phone ?? '')" tag="a"
             label="Call" />
         <span class="text-xs mt-1">Call</span>
     </div>
