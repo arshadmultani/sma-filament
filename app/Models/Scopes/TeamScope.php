@@ -17,7 +17,7 @@ class TeamScope implements Scope
     {
         $user = Auth::user();
 
-        if (! $user) {
+        if (!$user) {
             return;
         }
 
@@ -68,13 +68,17 @@ class TeamScope implements Scope
             return;
         }
         // PMT: records created by DSA, ASM, RSM under his division
-        if (method_exists($user, 'hasRole') && $user->hasRole(['PMT','GM'])) {
+        if (method_exists($user, 'hasRole') && $user->hasRole(['PMT', 'GM'])) {
             $userIds = \App\Models\User::where('division_id', $user->division_id)
                 ->whereHas('roles', function ($query) {
                     $query->whereIn('name', ['DSA', 'ASM', 'RSM']);
                 })
                 ->pluck('id');
+            // Also include the current user's ID
+            $userIds->push($user->id);
+
             $builder->whereIn('user_id', $userIds);
+
             return;
         }
         // Default: user can only see their own records
