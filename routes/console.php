@@ -10,7 +10,7 @@ Artisan::command('inspire', function () {
 
 Schedule::command('backup:clean')->dailyAt('02:30');
 
-Schedule::command('backup:run')->dailyAt('03:00'); 
-Schedule::command('backup:run')->dailyAt('09:00');  
-Schedule::command('backup:run')->dailyAt('15:00'); 
-Schedule::command('backup:run')->dailyAt('21:00'); 
+Schedule::command('backup:run')->dailyAt('03:00');
+// Schedule::command('backup:run')->dailyAt('09:00');
+// Schedule::command('backup:run')->dailyAt('15:00');
+// Schedule::command('backup:run')->dailyAt('21:00');
