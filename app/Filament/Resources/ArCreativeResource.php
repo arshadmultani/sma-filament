@@ -13,6 +13,7 @@ use Filament\Forms\Components\View;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Enums\ActionsPosition;
 use Filament\Tables\Table;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -165,7 +166,8 @@ class ArCreativeResource extends Resource
                     }),
 
                 Tables\Actions\EditAction::make(),
-            ])
+            ], position: ActionsPosition::BeforeColumns)
+            ->paginated(false)
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),

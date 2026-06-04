@@ -105,7 +105,13 @@ async function start() {
         scene.add(stage);
 
         // Lower = stickier/heavier smoothing (and slightly more lag). 0..1.
-        const SMOOTH = 0.18;
+        const SMOOTH = 0.12;
+        // Deadzone: if the freshly solved pose is within these thresholds of the
+        // current one, treat it as "no real movement" and hold the last pose. This
+        // is what kills the residual shake when camera + marker are both still —
+        // MindAR keeps emitting micro-jittered poses, and we refuse to chase them.
+        const POS_DEAD = 0.0025; // ~0.25% of marker width
+        const ROT_DEAD = 0.004; // radians (~0.23°)
 
         let visible = false;
         let primed = false; // snap to the first solved pose, smooth after that
@@ -139,9 +145,15 @@ async function start() {
                     scale.copy(tScale);
                     primed = true;
                 } else {
-                    pos.lerp(tPos, SMOOTH);
-                    quat.slerp(tQuat, SMOOTH);
-                    scale.lerp(tScale, SMOOTH);
+                    // Hold still inside the deadzone, otherwise ease toward the
+                    // new pose. Position and rotation are gated independently.
+                    if (pos.distanceTo(tPos) > POS_DEAD) {
+                        pos.lerp(tPos, SMOOTH);
+                        scale.lerp(tScale, SMOOTH);
+                    }
+                    if (quat.angleTo(tQuat) > ROT_DEAD) {
+                        quat.slerp(tQuat, SMOOTH);
+                    }
                 }
                 stage.matrix.compose(pos, quat, scale);
                 stage.visible = true;
