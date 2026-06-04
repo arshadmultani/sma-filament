@@ -16,7 +16,7 @@
         "bezhansalleh/filament-shield": "^3.3",
         "blade-ui-kit/blade-heroicons": "^2.6",
         "eightynine/filament-advanced-widgets": "^3.0",
-        "endroid/qr-code": "^6.0",
+        "endroid/qr-code": "^6.1",
         "filament/filament": "^3.3",
         "filament/spatie-laravel-settings-plugin": "^3.2",
         "icetalker/filament-table-repeatable-entry": "^1.1",
