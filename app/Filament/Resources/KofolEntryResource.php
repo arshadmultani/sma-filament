@@ -2,14 +2,12 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Actions\SendKofolCouponAction;
-use App\Filament\Actions\UpdateKofolStatusAction;
 use App\Filament\Resources\KofolEntryResource\Pages;
+use App\Models\Campaign;
 use App\Models\Chemist;
 use App\Models\Doctor;
 use App\Models\KofolEntry;
 use App\Models\Product;
-use App\Models\Campaign;
 use App\Settings\KofolEntrySettings;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Forms\Components\Actions\Action;
@@ -28,19 +26,13 @@ use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Filters\TernaryFilter;
+use Filament\Tables\Table;
 use Icetalker\FilamentTableRepeatableEntry\Infolists\Components\TableRepeatableEntry;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Njxqlus\Filament\Components\Infolists\LightboxImageEntry;
-use Filament\Tables\Columns\Column;
-use Illuminate\Support\Facades\View;
-
 
 class KofolEntryResource extends Resource implements HasShieldPermissions
 {
@@ -78,6 +70,13 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                             ->where('is_active', true)
                             ->pluck('name', 'id');
                     })
+                    ->default(function () {
+                        return Campaign::query()
+                            ->where('allowed_entry_type', 'kofol_entry')
+                            ->where('is_active', true)
+                            ->latest()
+                            ->first()?->id;
+                    })
                     ->required()
                     ->preload()
                     ->searchable()
@@ -88,10 +87,10 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ->types([
                         MorphToSelect\Type::make(Doctor::class)
                             ->titleAttribute('name')
-                            ->modifyOptionsQueryUsing(fn($query) => $query->where('status', 'Approved')),
+                            ->modifyOptionsQueryUsing(fn ($query) => $query->where('status', 'Approved')),
                         MorphToSelect\Type::make(Chemist::class)
                             ->titleAttribute('name')
-                            ->modifyOptionsQueryUsing(fn($query) => $query->where('status', 'Approved')),
+                            ->modifyOptionsQueryUsing(fn ($query) => $query->where('status', 'Approved')),
                     ])
                     ->native(false)
                     ->searchable()
@@ -106,10 +105,10 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ->addActionLabel('Add Product')
                     ->reorderable(false)
                     ->itemLabel(
-                        fn(array $state): string => Product::find($state['product_id'])?->name ?? ''
+                        fn (array $state): string => Product::find($state['product_id'])?->name ?? ''
                     )
                     ->minItems(1)
-                    ->deleteAction(fn(Action $action) => $action->requiresConfirmation())
+                    ->deleteAction(fn (Action $action) => $action->requiresConfirmation())
                     // ->afterStateUpdated(fn($state, callable $set) => static::updateInvoiceTotal($state, $set))
                     // ->afterStateHydrated(fn($state, callable $set) => static::updateInvoiceTotal($state, $set))
                     ->schema([
@@ -168,10 +167,9 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
     private static function getKofolProductOptions(): Collection
     {
         return Product::query()
-            ->whereHas('brand', fn($query) => $query->where('name', 'Kofol'))
+            ->whereHas('brand', fn ($query) => $query->where('name', 'Kofol'))
             ->pluck('name', 'id');
     }
-
 
     public static function table(Table $table): Table
     {
@@ -195,7 +193,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                 TextColumn::make(name: 'customer_type')
                     ->label('Cx. Type')
                     ->searchable()
-                    ->formatStateUsing(fn($state) => class_basename($state))
+                    ->formatStateUsing(fn ($state) => class_basename($state))
                     ->toggleable(),
                 TextColumn::make('user.name')->label('Submitted By')
                     ->searchable()
@@ -208,7 +206,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                 TextColumn::make('status')->label('Status')
                     ->badge()
                     ->sortable()
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         'Pending' => 'warning',
                         'Approved' => 'primary',
                         'Rejected' => 'danger',
@@ -224,12 +222,13 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ->sortable(query: function ($query, $direction) {
                         $query->orderBy('notification_status_sort', $direction);
                     })
-                    ->visible(fn($record) => Auth::user()->can('send_coupon_kofol::entry'))
+                    ->visible(fn ($record) => Auth::user()->can('send_coupon_kofol::entry'))
                     ->label('CustomerEmail')
                     ->state(function ($record) {
                         $customer = $record->customer;
-                        if (!$customer)
+                        if (! $customer) {
                             return 'No customer';
+                        }
 
                         return $customer->notifications()
                             ->where('type', \App\Notifications\KofolCouponNotification::class)
@@ -237,15 +236,15 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                             ->exists() ? 'Sent' : 'Not Sent';
                     })
                     ->badge()
-                    ->color(fn($state) => $state === 'Sent' ? 'info' : 'gray'),
+                    ->color(fn ($state) => $state === 'Sent' ? 'info' : 'gray'),
 
                 TextColumn::make('coupon_codes_list')
                     ->label('Coupon Codes')
-                    ->formatStateUsing(fn($state, $record) => ($record && isset($record->coupons) && $record->coupons ? $record->coupons->pluck('coupon_code')->implode(', ') : ''))
-                    ->visible(fn($record) => $record && isset($record->coupons) && $record->coupons && $record->coupons->isNotEmpty()),
+                    ->formatStateUsing(fn ($state, $record) => ($record && isset($record->coupons) && $record->coupons ? $record->coupons->pluck('coupon_code')->implode(', ') : ''))
+                    ->visible(fn ($record) => $record && isset($record->coupons) && $record->coupons && $record->coupons->isNotEmpty()),
                 TextColumn::make('coupon_count')
                     ->label('Coupons')
-                    ->state(fn($record) => $record && $record->coupons ? $record->coupons->count() : '0'),
+                    ->state(fn ($record) => $record && $record->coupons ? $record->coupons->count() : '0'),
                 TextColumn::make('created_at')->label('Submission')
                     ->since()
                     ->sortable()
@@ -288,7 +287,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                     ->columns(4)
                     ->schema([
                         TextEntry::make('customer.name'),
-                        TextEntry::make('customer_type')->formatStateUsing(fn($state) => class_basename($state)),
+                        TextEntry::make('customer_type')->formatStateUsing(fn ($state) => class_basename($state)),
                         TextEntry::make('customer.headquarter.name')
                             ->label('Headquarter'),
                         TextEntry::make('user.name')->label('Submitted By'),
@@ -302,36 +301,38 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                         TextEntry::make('created_at')->label(label: 'Submission')->dateTime('d-m-y @ H:i'),
                         TextEntry::make('status')->label('Status')
                             ->badge()
-                            ->color(fn(string $state): string => match ($state) {
+                            ->color(fn (string $state): string => match ($state) {
                                 'Pending' => 'warning',
                                 'Approved' => 'primary',
                                 'Rejected' => 'danger',
                                 default => 'secondary'
                             }),
                         TextEntry::make('notification_status')
-                            ->visible(fn($record) => $record->status === 'Approved' && (Auth::user()->can('send_coupon_kofol::entry')))
+                            ->visible(fn ($record) => $record->status === 'Approved' && (Auth::user()->can('send_coupon_kofol::entry')))
                             ->label('Notification')
                             ->state(function ($record) {
                                 $customer = $record->customer;
-                                if (!$customer)
+                                if (! $customer) {
                                     return 'No customer';
+                                }
+
                                 return $customer->notifications()
                                     ->where('type', \App\Notifications\KofolCouponNotification::class)
                                     ->where('data->kofol_entry_id', $record->id)
                                     ->exists() ? 'Sent' : 'Not Sent';
                             })
                             ->badge()
-                            ->color(fn($state) => $state === 'Sent' ? 'info' : 'gray'),
+                            ->color(fn ($state) => $state === 'Sent' ? 'info' : 'gray'),
                     ]),
                 Components\Section::make('Coupons')
                     ->collapsed()
                     ->compact()
-                    ->visible(fn($record) => $record && $record->coupons && $record->coupons->isNotEmpty())
+                    ->visible(fn ($record) => $record && $record->coupons && $record->coupons->isNotEmpty())
                     ->columns(2)
                     ->schema([
                         TextEntry::make('coupon_count')
                             ->label('Coupon Count')
-                            ->state(fn($record) => $record && $record->coupons ? $record->coupons->count() : '0'),
+                            ->state(fn ($record) => $record && $record->coupons ? $record->coupons->count() : '0'),
                         Components\RepeatableEntry::make('coupons')
                             ->label('Coupons')
                             ->contained(false)
@@ -339,7 +340,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                             ->schema([
                                 TextEntry::make('coupon_code')->badge()->label(''),
                             ])
-                            ->visible(fn($record) => $record && $record->coupons && $record->coupons->isNotEmpty()),
+                            ->visible(fn ($record) => $record && $record->coupons && $record->coupons->isNotEmpty()),
                     ]),
                 Components\Section::make('Products')
                     ->collapsible()
@@ -353,7 +354,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                                 TextEntry::make('product_id')
                                     ->columnSpan(2)
                                     ->label('Product')
-                                    ->formatStateUsing(fn($state) => Product::find($state)?->name ?? ''),
+                                    ->formatStateUsing(fn ($state) => Product::find($state)?->name ?? ''),
                                 TextEntry::make('quantity')->columnSpan(1),
                             ]),
                         RepeatableEntry::make('products')  // repeater for mobile
@@ -362,7 +363,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                                 TextEntry::make('product_id')
                                     ->columnSpan(2)
                                     ->label('Product')
-                                    ->formatStateUsing(fn($state) => Product::find($state)?->name ?? ''),
+                                    ->formatStateUsing(fn ($state) => Product::find($state)?->name ?? ''),
                                 TextEntry::make('quantity'),
                             ]),
                     ]),
@@ -372,7 +373,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                             ->label('Invoice')
                             ->disk('s3')
                             ->visibility('private')
-                            ->url(fn($record) => $record->invoice_image ? Storage::temporaryUrl($record->invoice_image, now()->addMinutes(5)) : '')
+                            ->url(fn ($record) => $record->invoice_image ? Storage::temporaryUrl($record->invoice_image, now()->addMinutes(5)) : '')
                             ->checkFileExistence(false)
                             ->extraAttributes(['style' => 'object-fit: contain; max-width: 100%; max-height: 80vh; width: auto; height: auto;'])
                             ->columnSpan(2),
@@ -418,7 +419,7 @@ class KofolEntryResource extends Resource implements HasShieldPermissions
                         \App\Models\Doctor::class => ['headquarter'],
                         \App\Models\Chemist::class => ['headquarter'],
                     ]);
-                }
+                },
             ])
             ->selectRaw('
             *,
