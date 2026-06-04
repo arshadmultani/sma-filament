@@ -2,7 +2,6 @@
 
 namespace App\Providers\Filament;
 
-use Agencetwogether\HooksHelper\HooksHelperPlugin;
 use App\Filament\Auth\CustomLogin;
 use App\Http\Middleware\RedirectToProperPanelMiddleware;
 use Asmit\ResizedColumn\ResizedColumnPlugin;
@@ -29,9 +28,6 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Rmsramos\Activitylog\ActivitylogPlugin;
 use ShuvroRoy\FilamentSpatieLaravelHealth\FilamentSpatieLaravelHealthPlugin;
-use SolutionForest\FilamentSimpleLightBox\SimpleLightBoxPlugin;
-use Saade\FilamentLaravelLog\FilamentLaravelLogPlugin;
-
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -60,8 +56,9 @@ class AdminPanelProvider extends PanelProvider
             ->brandName('StepUp')
             ->favicon(asset('images/icons/icon.png'))
             // ->sidebarCollapsibleOnDesktop()
-            // ->brandLogo(fn () => view('filament.admin.logo'))
-
+            ->brandLogo(fn () => view('filament.admin.logo'))
+            ->brandLogoHeight('10rem')
+            ->font('Poppins')
             ->colors([
                 'primary' => Color::Emerald,
             ])
@@ -86,16 +83,12 @@ class AdminPanelProvider extends PanelProvider
                     ->label('Settings'),
                 // ->icon('heroicon-o-cog'),
 
-
-
-
                 NavigationGroup::make()
                     ->label('Dr. Attributes')
                     ->icon('healthicons-o-doctor'),
                 NavigationGroup::make()
                     ->label('Territory')
                     ->icon('heroicon-o-map-pin'),
-
 
             ])
             ->sidebarWidth('15rem')
@@ -153,7 +146,7 @@ class AdminPanelProvider extends PanelProvider
 
                 \RickDBCN\FilamentEmail\FilamentEmail::make(),
                 ActivitylogPlugin::make()
-                    ->navigationItem(false)
+                    ->navigationItem(false),
 
             ])
             ->discoverClusters(in: app_path('Filament/Clusters'), for: 'App\\Filament\\Clusters')
@@ -199,7 +192,7 @@ class AdminPanelProvider extends PanelProvider
             'panels::body.end',
             function (): string {
                 // Show the mobile nav on all Filament admin pages except auth pages
-                if (!request()->routeIs('filament.admin.auth.*') && !auth()->user()->hasRole('doctor')) {
+                if (! request()->routeIs('filament.admin.auth.*') && ! auth()->user()->hasRole('doctor')) {
                     return Blade::render('filament.admin.mobile-bottom-nav');
                 }
 
@@ -209,7 +202,7 @@ class AdminPanelProvider extends PanelProvider
         // PWA HEAD HOOK
         FilamentView::registerRenderHook(
             'panels::head.end',
-            fn(): string => Blade::render('pwa-head')
+            fn (): string => Blade::render('pwa-head')
         );
     }
 }

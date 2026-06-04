@@ -153,6 +153,7 @@ class ArCreativeResource extends Resource
                     ->label('QR')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->color('gray')
+                    ->hidden(fn () => ! auth()->user()?->hasRole('super_admin'))
                     ->action(function (ArCreative $record): StreamedResponse {
                         $result = Qr::forCreative($record);
 

@@ -2,7 +2,16 @@
 // Self-hosted MindAR (image tracking) + three.js. No external services are called
 // (media is fetched from presigned S3 URLs supplied by the page).
 import { MindARThree } from 'mind-ar/dist/mindar-image-three.prod.js';
-import { Mesh, MeshBasicMaterial, PlaneGeometry, VideoTexture } from 'three';
+import {
+    Group,
+    Matrix4,
+    Mesh,
+    MeshBasicMaterial,
+    PlaneGeometry,
+    Quaternion,
+    Vector3,
+    VideoTexture,
+} from 'three';
 
 const root = document.getElementById('ar-root');
 const startScreen = document.getElementById('ar-start');
@@ -67,11 +76,11 @@ async function start() {
             uiScanning: 'no',
             uiLoading: 'no',
             uiError: 'no',
-            // Stabilise the overlay. MindAR's defaults (filterMinCF 0.001,
-            // filterBeta 1000) are tuned for responsiveness and let the pose
-            // jitter "shake". Heavier smoothing keeps a near-static video locked.
-            filterMinCF: 0.0001,
-            filterBeta: 1,
+            // Keep MindAR's own filter responsive (near defaults). We do the
+            // stabilising ourselves below, in the render loop, so the two filters
+            // don't fight (over-smoothing MindAR makes the video drift/float).
+            filterMinCF: 0.001,
+            filterBeta: 1000,
         });
 
         const { renderer, scene, camera } = mindarThree;
@@ -83,19 +92,64 @@ async function start() {
         const geometry = new PlaneGeometry(1, config.markerAspect);
         const material = new MeshBasicMaterial({ map: texture, transparent: true });
         const plane = new Mesh(geometry, material);
-        anchor.group.add(plane);
+
+        // The plane does NOT live on MindAR's anchor. Instead it lives on our own
+        // group, into which we copy the marker pose each frame with exponential
+        // smoothing. This adds "stickiness": the raw pose MindAR solves jitters
+        // frame-to-frame, so following it 1:1 makes the video shake. We chase the
+        // target pose a fraction per frame, killing the shake while staying locked.
+        const stage = new Group();
+        stage.matrixAutoUpdate = false;
+        stage.visible = false;
+        stage.add(plane);
+        scene.add(stage);
+
+        // Lower = stickier/heavier smoothing (and slightly more lag). 0..1.
+        const SMOOTH = 0.18;
+
+        let visible = false;
+        let primed = false; // snap to the first solved pose, smooth after that
+        const tPos = new Vector3();
+        const tQuat = new Quaternion();
+        const tScale = new Vector3();
+        const pos = new Vector3();
+        const quat = new Quaternion();
+        const scale = new Vector3();
+        const mat = new Matrix4();
 
         anchor.onTargetFound = () => {
             statusEl?.classList.add('hidden');
+            visible = true;
+            primed = false;
             video.play().catch(() => {});
         };
         anchor.onTargetLost = () => {
             statusEl?.classList.remove('hidden');
+            visible = false;
             video.pause();
         };
 
         await mindarThree.start();
-        renderer.setAnimationLoop(() => renderer.render(scene, camera));
+        renderer.setAnimationLoop(() => {
+            if (visible) {
+                anchor.group.matrix.decompose(tPos, tQuat, tScale);
+                if (!primed) {
+                    pos.copy(tPos);
+                    quat.copy(tQuat);
+                    scale.copy(tScale);
+                    primed = true;
+                } else {
+                    pos.lerp(tPos, SMOOTH);
+                    quat.slerp(tQuat, SMOOTH);
+                    scale.lerp(tScale, SMOOTH);
+                }
+                stage.matrix.compose(pos, quat, scale);
+                stage.visible = true;
+            } else {
+                stage.visible = false;
+            }
+            renderer.render(scene, camera);
+        });
         statusEl?.classList.remove('hidden');
 
         // Nudge MindAR's resize handler so the camera fills the viewport.
